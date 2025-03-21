@@ -4,13 +4,14 @@
 ####################
 # 프로젝트 기본 설정
 ####################
-project_name = "terraform-ecs"
+project_name = "search-recommand"
 aws_region   = "ap-northeast-2"
 availability_zones = [
   "ap-northeast-2a",
-  "ap-northeast-2b"
+  "ap-northeast-2b",
+  "ap-northeast-2c",
 ]
-aws_account = "863518443396"
+aws_account = "842675972665"
 env         = "stg"
 
 ####################
@@ -24,20 +25,22 @@ env         = "stg"
 vpc_id = ""
 
 # VPC CIDR 대역 지정 - VPC CIDR는 개발환경에 적합한 크기로 설정
-vpc_cidr = "172.22.0.0/16"
+vpc_cidr = "172.21.0.0/16"
 
 # 각 가용영역마다 하나의 public/private 서브넷 -> 가용 영역은 현재 2개
 # 퍼블릭 서브넷 지정 -> 서브넷 당 256개 IP 사용 가능(5개는 빼야함)
 # /24 -> 앞의 3개의 IP가 네트워크 주소, 나머지 8비트가 호스트 비트
 public_subnets_cidr = [
-  "172.22.10.0/24",
-  "172.22.11.0/24"
+  "172.21.10.0/24",
+  "172.21.20.0/24",
+  "172.21.30.0/24"
 ]
 
 # 프라이빗 서브넷 지정
 private_subnets_cidr = [
-  "172.22.20.0/24",
-  "172.22.21.0/24"
+  "172.21.50.0/24",
+  "172.21.60.0/24",
+  "172.21.70.0/24",
 ]
 
 # 퍼블릭 서브넷 ID 지정
@@ -61,8 +64,8 @@ enable_dns_hostnames = true
 # ALB 생성
 # -> ALB의 KEY 이름과, Target Group 변수의 KEY 이름을 일치시켜야 함
 alb = {
-  "terraform-ecs-alb" = {
-    alb_name                             = "terraform-ecs-alb"
+  "opensearch-api-alb" = {
+    alb_name                             = "opensearch-api-alb"
     alb_internal                         = false
     alb_load_balancer_type               = "application"
     alb_enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
@@ -73,18 +76,18 @@ alb = {
 }
 
 # ALB 보안그룹 생성
-alb_security_group = "terraform-ecs-alb-sg"
+alb_security_group = "opensearch-api-alb-sg"
 
 # ALB Listencer 생성
 alb_listener = {
-  "terraform-ecs-alb-http-listener" = {
-    name              = "terraform-ecs-alb-http-listener"
+  "opensearch-api-alb-http-listener" = {
+    name              = "opensearch-api-alb-http-listener"
     port              = 80
     protocol          = "HTTP"
-    load_balancer_arn = "terraform-ecs-alb" # 연결할 ALB 이름 지정
+    load_balancer_arn = "opensearch-api-alb" # 연결할 ALB 이름 지정
     default_action = {
       type             = "forward" # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
-      target_group_arn = "terraform-ecs-search-tg"
+      target_group_arn = "opensearch-api-alb-tg"
     }
     env = "stg"
   },
@@ -92,20 +95,20 @@ alb_listener = {
 
 # ALB Listener Rule 생성
 alb_listener_rule = {
-  "terraform-ecs-alb-http-listener-search-rule" = {
+  "opensearch-api-alb-http-listener-search-rule" = {
     type              = "forward"
     path              = ["/api/v1/*", "/search/*"]
-    alb_listener_name = "terraform-ecs-alb-http-listener"
-    target_group_name = "terraform-ecs-search-tg"
+    alb_listener_name = "opensearch-api-alb-http-listener"
+    target_group_name = "opensearch-api-alb-tg"
     priority          = 1
   },
 }
 
 # ALB Target Group 생성
 target_group = {
-  "terraform-ecs-search-tg" = {
-    target_group_name        = "terraform-ecs-search-tg"
-    target_group_port        = 8080
+  "opensearch-api-alb-tg" = {
+    target_group_name        = "opensearch-api-alb-tg"
+    target_group_port        = 10091
     target_group_elb_type    = "ALB"
     target_group_target_type = "ip" # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
     env                      = "stg"
@@ -113,7 +116,7 @@ target_group = {
       enabled             = true
       healthy_threshold   = 3
       interval            = 30
-      port                = 8080
+      port                = 10091
       protocol            = "HTTP"
       timeout             = 15
       unhealthy_threshold = 5
@@ -128,20 +131,13 @@ target_group = {
 ####################
 # ECR 리포지토리 생성
 ecr_repository = {
-  "core-search-api-server" = {
-    ecr_repository_name      = "core-search-api-server" # 리포지토리명
-    env                      = "stg"                    # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"              # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                    # PUSH Scan 여부
+  "opensearch-vector-api" = {
+    ecr_repository_name      = "opensearch-vector-api" # 리포지토리명
+    env                      = "stg"                   # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
-  },
-  "core-filebeat" = {
-    ecr_repository_name      = "core-filebeat" # 리포지토리명
-    env                      = "stg"           # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"     # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false           # PUSH Scan 여부
-    ecr_force_delete         = false
-  },
+  }
 }
 
 ####################
@@ -285,15 +281,15 @@ iam_policy_attachment = {
 ####################
 # ECS 클러스터 생성
 ecs_cluster = {
-  "core-search-cluster" = {
-    cluster_name = "core-search-cluster"
+  "opensearch-test-cluster" = {
+    cluster_name = "opensearch-test-cluster"
     env          = "stg"
   }
 }
 
 # ECS Security Group 
 # -> ecs_service 변수에 n개를 넣는건 이미 보안그룹이 존재하는 경우만 그렇게 사용 가능
-ecs_security_group = "core-search-ecs-sg"
+ecs_security_group = "opensearch-ecs-sg"
 
 # ECS IAM Role
 ecs_task_role               = "ecs_task_role"
@@ -309,8 +305,8 @@ ecs_container_image_version = "1.0.0"
 # ECS Task Definitions 생성
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
 ecs_task_definitions = {
-  "core-search-td" = {
-    name                                    = "core-search-td"
+  "opensearch-vector-api-td-stg" = {
+    name                                    = "opensearch-vector-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -319,19 +315,19 @@ ecs_task_definitions = {
     task_total_memory                       = 2048 # ECS Task Total Mem
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "core-search-td"
+    task_family                             = "opensearch-vector-api-td"
     cpu                                     = 1024
     memory                                  = 2048
     env                                     = "stg"
     ephemeral_storage                       = 21
     containers = [
       {
-        name      = "core-search-api-server"
-        image     = "863518443396.dkr.ecr.ap-northeast-2.amazonaws.com/core-search-api-server"
-        version   = "latest" # container image version은 ecs_container_image_version 변수 사용
-        cpu       = 512      # container cpu
-        memory    = 1024     # container mem
-        port      = 8080
+        name      = "opensearch-vector-api-server"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/opensearch-vector-api"
+        version   = "1.0.1" # container image version은 ecs_container_image_version 변수 사용
+        cpu       = 512     # container cpu
+        memory    = 1024    # container mem
+        port      = 10091
         essential = true
         env_variables = {
           "TZ"                     = "Asia/Seoul"
@@ -339,29 +335,11 @@ ecs_task_definitions = {
         }
         mount_points = []
         health_check = {
-          command  = "curl --fail http://127.0.0.1:8080/search/health || exit 1"
+          command  = "curl --fail http://127.0.0.1:10091/health-check || exit 1"
           interval = 30
           timeout  = 10
           retries  = 3
         }
-        env = "stg"
-      },
-      {
-        name          = "core-filebeat"
-        image         = "863518443396.dkr.ecr.ap-northeast-2.amazonaws.com/core-filebeat"
-        version       = "latest" # container image version은 ecs_container_image_version 변수 사용
-        cpu           = 256      # container cpu
-        memory        = 512      # container mem
-        port          = 0
-        essential     = true
-        env_variables = {}
-        mount_points  = []
-        health_check = {
-          command  = "ps aux | grep filebeat || exit 1"
-          interval = 30
-          timeout  = 10
-          retries  = 3
-        },
         env = "stg"
       }
     ]
@@ -370,34 +348,34 @@ ecs_task_definitions = {
 
 # ECS 서비스 생성
 ecs_service = {
-  "core-search-service" = {
+  "opensearch-test-service" = {
     launch_type                   = "FARGATE"
     service_role                  = "AWSServiceRoleForECS"
     deployment_controller         = "ECS"
-    cluster_name                  = "core-search-cluster"
-    service_name                  = "core-search-service"     # 서비스 이름
-    desired_count                 = 1                         # Task 개수
-    container_name                = "core-search-api-server"  # 컨테이너 이름
-    container_port                = 8080                      # 컨테이너 포트
-    task_definitions              = "core-search-td"          # 테스크 지정
-    env                           = "stg"                     # ECS Service 환경변수
-    health_check_grace_period_sec = 120                       # 헬스 체크 그레이스 기간
-    assign_public_ip              = true                      # 우선 public zone에 구성
-    target_group_arn              = "terraform-ecs-search-tg" # 연결되어야 하는 Target Group 지정
+    cluster_name                  = "opensearch-test-cluster"
+    service_name                  = "opensearch-test-service"      # 서비스 이름
+    desired_count                 = 1                              # Task 개수
+    container_name                = "opensearch-api-server"        # 컨테이너 이름
+    container_port                = 10091                          # 컨테이너 포트
+    task_definitions              = "opensearch-vector-api-td-stg" # 테스크 지정
+    env                           = "stg"                          # ECS Service 환경변수
+    health_check_grace_period_sec = 150                            # 헬스 체크 그레이스 기간
+    assign_public_ip              = true                           # 우선 public zone에 구성
+    target_group_arn              = "opensearch-api-alb-tg"        # 연결되어야 하는 Target Group 지정
   },
 }
 
 # ECS Autoscaling
 ecs_appautoscaling_target = {
-  "core-search-service" = {
-    min_capacity          = 2                                                         # 최소 Task 2개가 항상 실행되도록 설정
-    max_capacity          = 6                                                         # 최대 Task 6개까지 증가 할 수 있도록 설정
-    resource_id           = "service/core-search-cluster-stg/core-search-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
-    scalable_dimension    = "ecs:service:DesiredCount"                                # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
+  "opensearch-test-service" = {
+    min_capacity          = 2                                                                 # 최소 Task 2개가 항상 실행되도록 설정
+    max_capacity          = 6                                                                 # 최대 Task 6개까지 증가 할 수 있도록 설정
+    resource_id           = "service/opensearch-test-cluster-stg/opensearch-test-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
+    scalable_dimension    = "ecs:service:DesiredCount"                                        # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
     service_namespace     = "ecs"
     scale_out_policy_name = "core-search-service-scaleout-policy" # ScaleOut AG 정책 이름 명시
     scale_in_policy_name  = "core-search-service-scale-in-policy" # ScaleIn AG 정책 이름 명시
-    cluster_name          = "core-search-cluster"                 # ECS 클러스터명 지정
+    cluster_name          = "opensearch-test-cluster"             # ECS 클러스터명 지정
     service_name          = "core-search-service"                 # ECS 서비스명 지정
   },
 }
@@ -448,7 +426,7 @@ ecs_cpu_scale_out_alert = {
     statistic           = "Average"                       # 집계 방식은 평균으로
     threshold           = "30"                            # 30부터 스케일링 진행
     dimensions = {
-      cluster_name = "core-search-cluster"
+      cluster_name = "opensearch-test-cluster"
       service_name = "core-search-service"
     }
     env = "stg"
@@ -640,22 +618,14 @@ s3_bucket = {
 ################
 # CICD 설정
 ################
-code_commit = {
-  "core-search-repository" = {
-    repository_name = "core-search"
-    description     = "AWS Codecommit Repository for ecs core api server"
-    default_branch  = "master"
-    env             = "stg"
-  }
-}
 
 ################
 # 공통 태그 설정
 ################
 tags = {
   env       = "stg"
-  project   = "terraform-ecs"
+  project   = "search-recommand"
   teamTag   = "devops"
-  managedBy = "terraform"
+  managedBy = "terraform-admin"
   createdBy = "devops-admin@gmail.com"
 }
