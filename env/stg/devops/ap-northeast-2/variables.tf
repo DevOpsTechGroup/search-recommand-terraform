@@ -509,15 +509,6 @@ variable "s3_bucket" {
 ################
 # CICD 설정
 ################
-variable "code_commit" {
-  description = "Codecommit 관련 정보 기재"
-  type = map(object({
-    repository_name = string
-    description     = string
-    default_branch  = string
-    env             = string
-  }))
-}
 
 ####################
 # 공통 태그 설정
