@@ -1,8 +1,5 @@
-/*
-  TODO: EC2도 여러개 생성할 수 있기에 for - loop 사용하는 방향으로 변경 필요
-*/
-# EC2 AMI Amazon Linux 2
-data "aws_ami" "amazon-linux-2" {
+# Amazon Linux2 Base Image
+data "aws_ami" "amazon_linux_2" {
   most_recent = true # AMI 중에서 가장 최신 버전을 가져온다
 
   filter { # AMI를 제공하는 소유자 필터링
@@ -10,15 +7,37 @@ data "aws_ami" "amazon-linux-2" {
     values = ["amazon"] # AWS 공식 AMI만 가져온다
   }
 
+  filter {
+    name   = "architecture"
+    values = ["x86_64"] # << 반드시 아키텍처 필터 추가
+  }
+
   filter { # AMI 이름이 amzn2-ami-hvm* 시작하는것만 필터링
     name   = "name"
     values = ["amzn2-ami-hvm*"]
   }
+
+  owners = ["amazon"]
 }
 
-# Create EC2 Terraform Atlantis ssh private key(RSA)
+# Opensearch Vector EC2 AMI
+data "aws_ami" "vector_os_ami" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["vector_os_ami"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["arm64"]
+  }
+
+  owners = ["self"] # 내 계정에서 만든 AMI
+}
+
 # 암호화 방식 결정 + TLS(SSL) 개인키 생성
-# https://dev.classmethod.jp/articles/terraform-keypair-create/
 resource "tls_private_key" "ec2_key_pair_rsa" {
   for_each = {
     for key, value in var.ec2_instance : key => value if value.create
@@ -28,7 +47,7 @@ resource "tls_private_key" "ec2_key_pair_rsa" {
   rsa_bits  = each.value.rsa_bits           # RSA 키 길이를 4096 bit로 설정 (4096 => 보안성 높은 설정 값, default => 2048)
 }
 
-# EC2 key pair 생성 - Atlantis
+# EC2 key pair 생성
 resource "aws_key_pair" "ec2_key_pair" {
   for_each = {
     for key, value in var.ec2_instance : key => value if value.create
@@ -38,18 +57,18 @@ resource "aws_key_pair" "ec2_key_pair" {
   public_key = tls_private_key.ec2_key_pair_rsa[each.key].public_key_openssh # Terraform이 생성한 RSA키의 공개 키를 가져와 EC2 SSH 키 페어로 등록
 }
 
-# Local에 생성한 EC2 key pair 저장
+# EC2 key pair 생성 - 로컬 저장
 resource "local_file" "ec2_key_pair_local_file" {
   for_each = {
     for key, value in var.ec2_instance : key => value if value.create
   }
 
-  content         = tls_private_key.ec2_key_pair_rsa[each.key].private_key_pem # 어떤 파일을 대상으로 할지 지정
-  filename        = "${path.module}/${each.value.local_file_name}"             # key pair 이름+경로 지정
-  file_permission = each.value.local_file_permission                           # 0600 설정
+  content         = tls_private_key.ec2_key_pair_rsa[each.key].private_key_pem
+  filename        = "${path.module}/${each.value.local_file_name}"
+  file_permission = each.value.local_file_permission
 }
 
-# EC2 security group
+# EC2 보안 그룹 생성
 resource "aws_security_group" "ec2_security_group" {
   for_each = {
     for key, value in var.ec2_security_group : key => value if value.create
@@ -60,7 +79,7 @@ resource "aws_security_group" "ec2_security_group" {
   vpc_id      = var.vpc_id # module에서 넘겨 받아야함
 
   lifecycle {
-    create_before_destroy = true # 리소스 삭제 되기 전 생성 후 삭제 진행
+    create_before_destroy = true
   }
 
   tags = merge(var.tags, {
@@ -68,7 +87,7 @@ resource "aws_security_group" "ec2_security_group" {
   })
 }
 
-# EC2 security group rule ingress
+# EC2 보안그룹 생성 - 인바운드
 resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
     for rule in local.valid_ec2_security_group_ingress_rules :
@@ -86,7 +105,7 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
 }
 
-# EC2 security group rule egress
+# EC2 보안그룹 생성 - 아웃바운드
 resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
     for rule in local.valid_ec2_security_group_egress_rules :
@@ -104,14 +123,14 @@ resource "aws_security_group_rule" "ec2_egress_security_group" {
   source_security_group_id = try(each.value.source_security_group_id, null) # 아웃바운드로 보안그룹이 들어가야 하는 경우 사용
 }
 
-# EC2 Instance 생성
+# EC2 인스턴스 생성
 resource "aws_instance" "ec2" {
   for_each = {
     for key, value in var.ec2_instance : key => value if value.create
   }
 
-  ami           = data.aws_ami.amazon-linux-2.id # Amazon Linux2 AMI ID 지정
-  instance_type = each.value.instance_type       # EC2 인스턴스 타입 지정
+  ami           = each.value.ami_type == "custom" ? data.aws_ami.vector_os_ami.id : data.aws_ami.amazon_linux_2.id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
+  instance_type = each.value.instance_type                                                                         # EC2 인스턴스 타입 지정
 
   # EC2가 위치할 VPC Subnet 영역 지정(az-2a, az-2b)
   subnet_id = lookup(
@@ -134,7 +153,11 @@ resource "aws_instance" "ec2" {
   #iam_instance_profile = xxxx # EC2에 IAM 권한이 필요한 경우 활성화
 
   # lookup(map, key, default)
-  user_data = lookup(each.value, "script_file_name", null) != null ? file("${path.module}/script/${each.value.script_file_name}") : null
+  user_data = (
+    lookup(each.value, "script_file_name", null) != null &&
+    lookup(each.value, "script_file_name", "") != ""
+  ) ? file("${path.module}/script/${each.value.script_file_name}") : null
+
 
   tags = merge(var.tags, {
     Name = "${each.value.ec2_instance_name}-${each.value.env}"

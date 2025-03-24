@@ -100,6 +100,7 @@ variable "target_group" {
     target_group_target_type = string
     env                      = string
     health_check = object({
+      path                = string
       enabled             = bool
       healthy_threshold   = number
       interval            = number
