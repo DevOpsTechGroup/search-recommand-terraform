@@ -33,7 +33,7 @@ locals {
         type                         = "ingress"
       }
     }
-    egress_rules = {
+    egress_rules = { # TODO: 실제 ECS SG로 적용 안됨 확인 필요
       "all" = {
         cidr_ipv4   = "0.0.0.0/0"
         from_port   = 0

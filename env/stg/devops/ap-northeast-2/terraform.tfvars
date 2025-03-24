@@ -539,7 +539,7 @@ ec2_instance = {
 
     # EC2 Option
     ami_type                    = "custom"
-    instance_type               = "t4g.medium"
+    instance_type               = "t4g.large"
     subnet_type                 = "private"
     availability_zones          = "ap-northeast-2a"
     associate_public_ip_address = false
@@ -569,7 +569,7 @@ ec2_instance = {
     ec2_instance_name           = "search-recommand-bastion"
     ec2_security_group_name     = "search-recommand-bastion-sg"
     env                         = "stg"
-    script_file_name            = "" # 스크립트 파일명 지정
+    script_file_name            = "install_bastion.sh" # 스크립트 파일명 지정
   }
 }
 
