@@ -10,10 +10,6 @@ resource "aws_ecr_repository" "ecr_repository" {
     scan_on_push = each.value.ecr_scan_on_push # ECR 이미지 PUSH 스캔 여부
   }
 
-  # lifecycle {
-  #   prevent_destroy = true # 삭제 방지
-  # }
-
   tags = merge(var.tags, {
     Name = "${each.value.ecr_repository_name}-${each.value.env}"
   })
