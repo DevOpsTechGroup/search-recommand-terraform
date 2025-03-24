@@ -85,6 +85,7 @@ resource "aws_lb_target_group" "target_group" {
 
   # Target Group health checking
   health_check {
+    path                = each.value.health_check.path                # Health Check Path 지정
     enabled             = each.value.health_check.enabled             # Health Check 옵션 활성화 여부
     healthy_threshold   = each.value.health_check.healthy_threshold   # 타겟 정상 상태 간주 Health Check 횟수
     interval            = each.value.health_check.interval            # Health Check 반복 횟수
@@ -99,9 +100,9 @@ resource "aws_lb_target_group" "target_group" {
     Name = "${each.value.target_group_name}-${each.value.env}"
   })
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB 보안그룹 생성

@@ -158,6 +158,7 @@ variable "target_group" {
     target_group_target_type = string
     env                      = string
     health_check = object({
+      path                = string
       enabled             = bool
       healthy_threshold   = number
       interval            = number
@@ -365,15 +366,13 @@ variable "ecs_service" {
 variable "ecs_appautoscaling_target" {
   description = "ECS Auto Scaling Target 설정"
   type = map(object({
-    min_capacity          = number # 최소 Task 2개가 항상 실행되도록 설정
-    max_capacity          = number # 최대 Task 6개까지 증가 할 수 있도록 설정
-    resource_id           = string # AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
-    scalable_dimension    = string # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
-    service_namespace     = string
-    scale_out_policy_name = string
-    scale_in_policy_name  = string
-    cluster_name          = string # AG가 어떤 ecs cluster에 매핑되는지 ecs cluster의 이름 지정
-    service_name          = string # AG가 어떤 ecs service에 매핑되는지 ecs service의 이름 지정
+    min_capacity       = number # 최소 Task 2개가 항상 실행되도록 설정
+    max_capacity       = number # 최대 Task 6개까지 증가 할 수 있도록 설정
+    resource_id        = string # AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
+    scalable_dimension = string # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
+    service_namespace  = string
+    cluster_name       = string # AG가 어떤 ecs cluster에 매핑되는지 ecs cluster의 이름 지정
+    service_name       = string # AG가 어떤 ecs service에 매핑되는지 ecs service의 이름 지정
   }))
 }
 
@@ -480,6 +479,7 @@ variable "ec2_instance" {
     local_file_permission = string
 
     # ECS Option
+    ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
     availability_zones          = string
