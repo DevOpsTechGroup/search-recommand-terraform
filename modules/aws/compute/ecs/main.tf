@@ -219,14 +219,32 @@ resource "aws_security_group" "ecs_security_group" {
 resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = local.ecs_security_group_rules.ingress_rules
 
-  description       = "Allow ecs service to receive traffic from Public ALB"
-  security_group_id = aws_security_group.ecs_security_group.id
   type              = each.value.type
+  description       = each.value.description
   from_port         = each.value.from_port # 포트 시작 허용 범위
   to_port           = each.value.to_port   # 포트 종료 허용 범위
   protocol          = each.value.ip_protocol
+  security_group_id = aws_security_group.ecs_security_group.id
 
   # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
+  source_security_group_id = try(each.value.referenced_security_group_id, null)
+  cidr_blocks              = try([each.value.cidr_ipv4], null)
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_security_group_rule" "ecs_egress_security_group" {
+  for_each = local.ecs_security_group_rules.egress_rules
+
+  type              = each.value.type
+  description       = each.value.description
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.ip_protocol
+  security_group_id = aws_security_group.ecs_security_group.id
+
   source_security_group_id = try(each.value.referenced_security_group_id, null)
   cidr_blocks              = try([each.value.cidr_ipv4], null)
 

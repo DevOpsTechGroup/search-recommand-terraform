@@ -158,6 +158,9 @@ resource "aws_instance" "ec2" {
     lookup(each.value, "script_file_name", "") != ""
   ) ? file("${path.module}/script/${each.value.script_file_name}") : null
 
+  lifecycle {
+    create_before_destroy = true
+  }
 
   tags = merge(var.tags, {
     Name = "${each.value.ec2_instance_name}-${each.value.env}"

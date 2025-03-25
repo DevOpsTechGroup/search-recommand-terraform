@@ -16,9 +16,9 @@ resource "aws_lb" "alb" {
     Name = "${each.value.alb_name}-${each.value.env}"
   })
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB Listener 생성
@@ -40,9 +40,9 @@ resource "aws_lb_listener" "alb_listener" {
 
   depends_on = [aws_lb.alb]
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB Listener Rule 생성
@@ -68,9 +68,9 @@ resource "aws_lb_listener_rule" "alb_listener_rule" {
     aws_lb_listener.alb_listener
   ]
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB Target Group 생성
@@ -114,18 +114,36 @@ resource "aws_security_group" "alb_security_group" {
   tags = merge(var.tags, {
     Name = "${var.alb_security_group}-${var.env}"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# ALB 보안그룹 Rule 생성
-resource "aws_security_group_rule" "alb_security_group_rule" {
+# ALB 보안그룹 - Ingress
+resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = local.alb_security_group_rules.ingress_rules
 
-  description       = "Allow Public inbound traffic and outbound traffic"
-  security_group_id = aws_security_group.alb_security_group.id
   type              = each.value.type
+  description       = "Allow Public inbound traffic and outbound traffic"
   from_port         = each.value.from_port
   to_port           = each.value.to_port
   protocol          = each.value.ip_protocol
+  security_group_id = aws_security_group.alb_security_group.id
+
+  cidr_blocks = try([each.value.cidr_ipv4], null)
+}
+
+# ALB 보안그룹 - Egress
+resource "aws_security_group_rule" "alb_security_group_egress_rule" {
+  for_each = local.alb_security_group_rules.egress_rules
+
+  type              = each.value.type
+  description       = each.value.description
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.ip_protocol
+  security_group_id = aws_security_group.alb_security_group.id
 
   cidr_blocks = try([each.value.cidr_ipv4], null)
 }
