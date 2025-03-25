@@ -65,8 +65,8 @@ enable_dns_hostnames = true
 # ALB 생성
 # -> ALB의 KEY 이름과, Target Group 변수의 KEY 이름을 일치시켜야 함
 alb = {
-  "opensearch-api-alb" = {
-    alb_name                             = "opensearch-api-alb"
+  "opensearch-alb" = {
+    alb_name                             = "opensearch-alb"
     alb_internal                         = false
     alb_load_balancer_type               = "application"
     alb_enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
@@ -77,18 +77,18 @@ alb = {
 }
 
 # ALB 보안그룹 생성
-alb_security_group = "opensearch-api-alb-sg"
+alb_security_group = "opensearch-alb-sg"
 
 # ALB Listencer 생성
 alb_listener = {
-  "opensearch-api-alb-http-listener" = {
-    name              = "opensearch-api-alb-http-listener"
+  "opensearch-alb-http-listener" = {
+    name              = "opensearch-alb-http-listener"
     port              = 80
     protocol          = "HTTP"
-    load_balancer_arn = "opensearch-api-alb" # 연결할 ALB 이름 지정
+    load_balancer_arn = "opensearch-alb" # 연결할 ALB 이름 지정
     default_action = {
       type             = "forward" # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
-      target_group_arn = "opensearch-api-alb-tg"
+      target_group_arn = "opensearch-alb-tg"
     }
     env = "stg"
   },
@@ -96,19 +96,19 @@ alb_listener = {
 
 # ALB Listener Rule 생성
 alb_listener_rule = {
-  "opensearch-api-alb-http-listener-search-rule" = {
+  "opensearch-alb-http-listener-rule" = {
     type              = "forward"
     path              = ["/vectorPlaylistSearch"]
-    alb_listener_name = "opensearch-api-alb-http-listener"
-    target_group_name = "opensearch-api-alb-tg"
+    alb_listener_name = "opensearch-alb-http-listener"
+    target_group_name = "opensearch-alb-tg"
     priority          = 1
   },
 }
 
 # ALB Target Group 생성
 target_group = {
-  "opensearch-api-alb-tg" = {
-    target_group_name        = "opensearch-api-alb-tg"
+  "opensearch-alb-tg" = {
+    target_group_name        = "opensearch-alb-tg"
     target_group_port        = 10091
     target_group_elb_type    = "ALB"
     target_group_target_type = "ip" # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
@@ -363,7 +363,7 @@ ecs_service = {
     env                           = "stg"                      # ECS Service 환경변수
     health_check_grace_period_sec = 250                        # 헬스 체크 그레이스 기간
     assign_public_ip              = false                      # 우선 public zone에 구성
-    target_group_arn              = "opensearch-api-alb-tg"    # 연결되어야 하는 Target Group 지정
+    target_group_arn              = "opensearch-alb-tg"    # 연결되어야 하는 Target Group 지정
   },
 }
 
@@ -475,9 +475,23 @@ ec2_security_group_ingress_rules = {
       create                  = true
       ec2_security_group_name = "opensearch-es-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
-      description             = "opensearch es security group inbound"
+      description             = "opensearch ssh security group inbound"
       from_port               = 22
       to_port                 = 22
+      protocol                = "tcp"
+      cidr_ipv4 = [
+        "172.21.0.0/16"
+      ]
+      source_security_group_id = null
+      env                      = "stg"
+    },
+    {
+      create                  = true
+      ec2_security_group_name = "opensearch-es-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+      type                    = "ingress"
+      description             = "opensearch es security group inbound"
+      from_port               = 9200
+      to_port                 = 9200
       protocol                = "tcp"
       cidr_ipv4 = [
         "172.21.0.0/16"
