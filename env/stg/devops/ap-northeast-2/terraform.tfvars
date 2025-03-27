@@ -363,7 +363,7 @@ ecs_service = {
     env                           = "stg"                      # ECS Service 환경변수
     health_check_grace_period_sec = 250                        # 헬스 체크 그레이스 기간
     assign_public_ip              = false                      # 우선 public zone에 구성
-    target_group_arn              = "opensearch-alb-tg"    # 연결되어야 하는 Target Group 지정
+    target_group_arn              = "opensearch-alb-tg"        # 연결되어야 하는 Target Group 지정
   },
 }
 
@@ -444,7 +444,7 @@ ec2_security_group = {
     env                            = "stg"
   },
   "opensearch-es-sg" = {
-    create                         = true
+    create                         = false
     ec2_security_group_name        = "opensearch-es-sg"
     ec2_security_group_description = "search-recommand Vector Opensearch EC2"
     env                            = "stg"
@@ -472,7 +472,7 @@ ec2_security_group_ingress_rules = {
   ],
   "opensearch-es-sg-ingress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-es-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "opensearch ssh security group inbound"
@@ -486,7 +486,7 @@ ec2_security_group_ingress_rules = {
       env                      = "stg"
     },
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-es-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "opensearch es security group inbound"
@@ -522,7 +522,7 @@ ec2_security_group_egress_rules = {
   ],
   "opensearch-es-sg-egress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-es-sg"
       description             = "opensearch es security group outbound"
       type                    = "egress"
@@ -541,28 +541,6 @@ ec2_security_group_egress_rules = {
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
-  "opensearch-es" = {
-    create = true
-
-    # SSH key pair
-    key_pair_name         = "opensearch-ec2-key"
-    key_pair_algorithm    = "RSA"
-    rsa_bits              = 4096
-    local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
-    local_file_permission = "0600"                           # 6(read + writer)00
-
-    # EC2 Option
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
-    subnet_type                 = "private"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = false
-    disable_api_termination     = true
-    ec2_instance_name           = "opensearch-es"
-    ec2_security_group_name     = "opensearch-es-sg"
-    env                         = "stg"
-    script_file_name            = "" # 스크립트 파일명 지정
-  },
   "search-recommand-bastion" = {
     create = true
 
@@ -584,6 +562,28 @@ ec2_instance = {
     ec2_security_group_name     = "search-recommand-bastion-sg"
     env                         = "stg"
     script_file_name            = "install_bastion.sh" # 스크립트 파일명 지정
+  },
+  "opensearch-es" = {
+    create = false
+
+    # SSH key pair
+    key_pair_name         = "opensearch-ec2-key"
+    key_pair_algorithm    = "RSA"
+    rsa_bits              = 4096
+    local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+    local_file_permission = "0600"                           # 6(read + writer)00
+
+    # EC2 Option
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "private"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = false
+    disable_api_termination     = true
+    ec2_instance_name           = "opensearch-es"
+    ec2_security_group_name     = "opensearch-es-sg"
+    env                         = "stg"
+    script_file_name            = "" # 스크립트 파일명 지정
   }
 }
 

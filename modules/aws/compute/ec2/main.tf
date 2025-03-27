@@ -26,7 +26,7 @@ data "aws_ami" "vector_os_ami" {
 
   filter {
     name   = "name"
-    values = ["vector_os_ami"]
+    values = ["vector-os-250324"]
   }
 
   filter {
