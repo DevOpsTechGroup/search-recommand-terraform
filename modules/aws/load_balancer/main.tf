@@ -31,7 +31,7 @@ resource "aws_lb_listener" "alb_listener" {
 
   default_action {
     type             = each.value.default_action.type
-    target_group_arn = aws_lb_target_group.target_group[each.value.default_action.target_group_arn].arn
+    target_group_arn = aws_lb_target_group.target_group[each.value.default_action.target_group_arn].arn # TODO: 수정 필요
   }
 
   tags = merge(var.tags, {
