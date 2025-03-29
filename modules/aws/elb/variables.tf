@@ -70,8 +70,13 @@ variable "alb_listener" {
     protocol          = string
     load_balancer_arn = string
     default_action = object({
-      type             = string
-      target_group_arn = string
+      type             = string           # ALB Listener Rule 지정 -> forward, redirect,fixed-response
+      target_group_arn = optional(string) # target group forward 하는 경우 사용
+      fixed_response = optional(object({  # 고정 값을 응답해야 하는 경우 사용
+        content_type = optional(string)
+        message_body = optional(string)
+        status_code  = optional(string)
+      }))
     })
     env = string
   }))

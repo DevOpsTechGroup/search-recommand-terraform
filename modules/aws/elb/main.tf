@@ -29,9 +29,24 @@ resource "aws_lb_listener" "alb_listener" {
   port              = each.value.port
   protocol          = each.value.protocol
 
-  default_action {
-    type             = each.value.default_action.type
-    target_group_arn = aws_lb_target_group.target_group[each.value.default_action.target_group_arn].arn # TODO: 수정 필요
+  dynamic "default_action" {
+    for_each = each.value.default_action.type == "forward" ? [1] : []
+    content {
+      type             = each.value.default_action.type
+      target_group_arn = try(aws_lb_target_group.target_group[each.value.default_action.target_group_arn].arn, null)
+    }
+  }
+
+  dynamic "default_action" {
+    for_each = each.value.default_action.type == "fixed-response" ? [1] : []
+    content {
+      type = each.value.default_action.type
+      fixed_response {
+        content_type = each.value.default_action.fixed_response.content_type
+        message_body = each.value.default_action.fixed_response.message_body
+        status_code  = each.value.default_action.fixed_response.status_code
+      }
+    }
   }
 
   tags = merge(var.tags, {
