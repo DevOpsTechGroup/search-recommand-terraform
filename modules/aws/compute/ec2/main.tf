@@ -1,40 +1,17 @@
-# Amazon Linux2 Base Image
-data "aws_ami" "amazon_linux_2" {
-  most_recent = true # AMI 중에서 가장 최신 버전을 가져온다
+data "aws_ami" "amazon_ami" {
+  for_each = var.ec2_instance
 
-  filter { # AMI를 제공하는 소유자 필터링
-    name   = "owner-alias"
-    values = ["amazon"] # AWS 공식 AMI만 가져온다
+  most_recent = true                # AMI 중에서 가장 최신 버전 조회
+  owners      = [each.value.owners] # 소유자 지정('amazon', 'self')
+
+  dynamic "filter" {
+    for_each = each.value.filter
+
+    content {
+      name   = filter.value.name
+      values = filter.value.values
+    }
   }
-
-  filter {
-    name   = "architecture"
-    values = ["x86_64"] # << 반드시 아키텍처 필터 추가
-  }
-
-  filter { # AMI 이름이 amzn2-ami-hvm* 시작하는것만 필터링
-    name   = "name"
-    values = ["amzn2-ami-hvm*"]
-  }
-
-  owners = ["amazon"]
-}
-
-# Opensearch Vector EC2 AMI
-data "aws_ami" "vector_os_ami" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["vector-os-250324"]
-  }
-
-  filter {
-    name   = "architecture"
-    values = ["arm64"]
-  }
-
-  owners = ["self"] # 내 계정에서 만든 AMI
 }
 
 # 암호화 방식 결정 + TLS(SSL) 개인키 생성
@@ -123,14 +100,24 @@ resource "aws_security_group_rule" "ec2_egress_security_group" {
   source_security_group_id = try(each.value.source_security_group_id, null) # 아웃바운드로 보안그룹이 들어가야 하는 경우 사용
 }
 
+# EC2 인스턴스 상태(running, stopped) 설정
+resource "aws_ec2_instance_state" "ec2_state" {
+  for_each = {
+    for key, value in var.ec2_instance : key => value if value.create
+  }
+
+  instance_id = aws_instance.ec2[each.key].id
+  state       = each.value.state
+}
+
 # EC2 인스턴스 생성
 resource "aws_instance" "ec2" {
   for_each = {
     for key, value in var.ec2_instance : key => value if value.create
   }
 
-  ami           = each.value.ami_type == "custom" ? data.aws_ami.vector_os_ami.id : data.aws_ami.amazon_linux_2.id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
-  instance_type = each.value.instance_type                                                                         # EC2 인스턴스 타입 지정
+  ami           = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
+  instance_type = each.value.instance_type             # EC2 인스턴스 타입 지정
 
   # EC2가 위치할 VPC Subnet 영역 지정(az-2a, az-2b)
   subnet_id = lookup(
