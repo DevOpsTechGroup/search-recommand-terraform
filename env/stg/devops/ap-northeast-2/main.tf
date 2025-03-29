@@ -16,8 +16,8 @@ module "network" {
   tags         = var.tags         # 공통 태그
 }
 
-module "load_balancer" {
-  source = "../../../../modules/aws/load_balancer"
+module "elb" {
+  source = "../../../../modules/aws/elb"
 
   # 로드밸런서 관련 설정
   alb                = var.alb                # 생성을 원하는 ALB 관련 정보
@@ -95,9 +95,9 @@ module "ecs" {
   ecs_container_image_version = var.ecs_container_image_version                         # ECS Container Image 버전
 
   # ECS Service에서 ELB 연동 시 사용
-  alb_tg_arn            = module.load_balancer.alb_target_group_arn  # loadbalancer module의 output 변수 사용
-  alb_listener_arn      = module.load_balancer.alb_listener_arn      # loadbalancer module의 output 변수 사용
-  alb_security_group_id = module.load_balancer.alb_security_group_id # ECS에서 사용하는 ALB 보안 그룹 ID
+  alb_tg_arn            = module.elb.alb_target_group_arn  # loadbalancer module의 output 변수 사용
+  alb_listener_arn      = module.elb.alb_listener_arn      # loadbalancer module의 output 변수 사용
+  alb_security_group_id = module.elb.alb_security_group_id # ECS에서 사용하는 ALB 보안 그룹 ID
 
   # 프로젝트 기본 설정
   project_name       = var.project_name
@@ -109,9 +109,9 @@ module "ecs" {
 
   # 아래 모듈 리소스 생성 후, ecs 생성 가능
   depends_on = [
-    module.network,       # network 모듈 참조
-    module.load_balancer, # load balancer 모듈 참조
-    module.security       # security 모듈 참조
+    module.network, # network 모듈 참조
+    module.elb,     # load balancer 모듈 참조
+    module.security # security 모듈 참조
   ]
 }
 

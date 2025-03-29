@@ -62,8 +62,6 @@ enable_dns_hostnames = true
 ########################################
 # 로드밸런서 설정
 ########################################
-# ALB 생성
-# -> ALB의 KEY 이름과, Target Group 변수의 KEY 이름을 일치시켜야 함
 alb = {
   "search-recommand-alb" = {
     alb_name                             = "search-recommand-alb"
@@ -87,8 +85,13 @@ alb_listener = {
     protocol          = "HTTP"
     load_balancer_arn = "search-recommand-alb" # 연결할 ALB 이름 지정
     default_action = {                         # TODO: 고정 응답 값 반환하도록 수정
-      type             = "forward"             # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
-      target_group_arn = "opensearch-alb-tg"
+      type = "fixed-response"                  # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
+      # target_group_arn = "opensearch-alb-tg"
+      fixed_response = {
+        content_type = "text/plain"
+        message_body = "Fixed response content"
+        status_code  = "200"
+      }
     }
     env = "stg"
   }
@@ -103,13 +106,13 @@ alb_listener_rule = {
     target_group_name = "opensearch-alb-tg"
     priority          = 1
   },
-  # "opensearch-alb-http-listener-rule" = {
-  #   type              = "forward"
-  #   path              = ["/test2"]
-  #   alb_listener_name = "alb-http-listener"
-  #   target_group_name = "elasticsearch-alb-tg"
-  #   priority          = 2
-  # }
+  "elasticsearch-alb-http-listener-rule" = {
+    type              = "forward"
+    path              = ["/elasticsearchPlaylistSearch"]
+    alb_listener_name = "alb-http-listener"
+    target_group_name = "elasticsearch-alb-tg"
+    priority          = 2
+  }
 }
 
 # ALB Target Group 생성
@@ -159,11 +162,11 @@ target_group = {
 ########################################
 # ECR 리포지토리 생성
 ecr_repository = {
-  "opensearch-vector-api" = {
-    ecr_repository_name      = "opensearch-vector-api" # 리포지토리명
-    env                      = "stg"                   # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                   # PUSH Scan 여부
+  "opensearch-api" = {
+    ecr_repository_name      = "opensearch-api" # 리포지토리명
+    env                      = "stg"            # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"      # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false            # PUSH Scan 여부
     ecr_force_delete         = false
   },
   "elasticsearch-api" = {
@@ -342,8 +345,8 @@ ecs_container_image_version = "1.0.0"
 # ECS Task Definitions 생성
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
 ecs_task_definitions = {
-  "opensearch-vector-api-td" = {
-    name                                    = "opensearch-vector-api-td"
+  "opensearch-api-td" = {
+    name                                    = "opensearch-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -352,15 +355,15 @@ ecs_task_definitions = {
     task_total_memory                       = 2048 # ECS Task Total Mem
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "opensearch-vector-api-td"
+    task_family                             = "opensearch-api-td"
     cpu                                     = 1024
     memory                                  = 2048
     env                                     = "stg"
     ephemeral_storage                       = 21
     containers = [
       {
-        name      = "opensearch-vector-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/opensearch-vector-api"
+        name      = "opensearch-api"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/opensearch-api"
         version   = "1.0.1" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
@@ -425,34 +428,34 @@ ecs_task_definitions = {
 # ECS 서비스 생성
 ecs_service = {
   "opensearch-ecs-service" = {
-    launch_type                   = "FARGATE"
-    service_role                  = "AWSServiceRoleForECS"
-    deployment_controller         = "ECS"
-    cluster_name                  = "search-recommand-ecs-cluster"
-    service_name                  = "opensearch-ecs-service"   # 서비스 이름
-    desired_count                 = 1                          # Task 개수
-    container_name                = "opensearch-vector-api"    # 컨테이너 이름
-    container_port                = 10091                      # 컨테이너 포트
-    task_definitions              = "opensearch-vector-api-td" # 테스크 지정
-    env                           = "stg"                      # ECS Service 환경변수
-    health_check_grace_period_sec = 250                        # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                      # 우선 public zone에 구성
-    target_group_arn              = "opensearch-alb-tg"        # 연결되어야 하는 Target Group 지정
+    launch_type                   = "FARGATE"                      # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
+    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    cluster_name                  = "search-recommand-ecs-cluster" # ECS Cluster명
+    service_name                  = "opensearch-ecs-service"       # 서비스 이름
+    desired_count                 = 1                              # Task 개수
+    container_name                = "opensearch-api"               # 컨테이너 이름
+    container_port                = 10091                          # 컨테이너 포트
+    task_definitions              = "opensearch-api-td"            # 테스크 지정
+    env                           = "stg"                          # ECS Service 환경변수
+    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
+    assign_public_ip              = false                          # 우선 public zone에 구성
+    target_group_arn              = "opensearch-alb-tg"            # 연결되어야 하는 Target Group 지정
   },
   "elasticsearch-ecs-service" = {
-    launch_type                   = "FARGATE"
-    service_role                  = "AWSServiceRoleForECS"
-    deployment_controller         = "ECS"
-    cluster_name                  = "search-recommand-ecs-cluster"
-    service_name                  = "elasticsearch-ecs-service" # 서비스 이름
-    desired_count                 = 1                           # Task 개수
-    container_name                = "elasticsearch-api"         # 컨테이너 이름
-    container_port                = 10092                       # 컨테이너 포트
-    task_definitions              = "elasticsearch-api-td"      # 테스크 지정
-    env                           = "stg"                       # ECS Service 환경변수
-    health_check_grace_period_sec = 250                         # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                       # 우선 public zone에 구성
-    target_group_arn              = "elasticsearch-alb-tg"      # 연결되어야 하는 Target Group 지정
+    launch_type                   = "FARGATE"                      # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
+    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    cluster_name                  = "search-recommand-ecs-cluster" # ECS Cluster명
+    service_name                  = "elasticsearch-ecs-service"    # 서비스 이름
+    desired_count                 = 1                              # Task 개수
+    container_name                = "elasticsearch-api"            # 컨테이너 이름
+    container_port                = 10092                          # 컨테이너 포트
+    task_definitions              = "elasticsearch-api-td"         # 테스크 지정
+    env                           = "stg"                          # ECS Service 환경변수
+    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
+    assign_public_ip              = false                          # 우선 public zone에 구성
+    target_group_arn              = "elasticsearch-alb-tg"         # 연결되어야 하는 Target Group 지정
   },
 }
 
@@ -528,19 +531,19 @@ ecs_cpu_scale_out_alert = {
 # EC2 보안그룹 생성
 ec2_security_group = {
   "search-recommand-bastion-sg" = {
-    create                         = true
+    create                         = false
     ec2_security_group_name        = "search-recommand-bastion-sg"
     ec2_security_group_description = "search-recommand bastion host ec2"
     env                            = "stg"
   },
   "opensearch-sg" = {
-    create                         = true
+    create                         = false
     ec2_security_group_name        = "opensearch-sg"
     ec2_security_group_description = "search-recommand vector opensearch ec2"
     env                            = "stg"
   },
   "elasticsearch-sg" = {
-    create                         = true
+    create                         = false
     ec2_security_group_name        = "elasticsearch-sg"
     ec2_security_group_description = "search-recommand elasticsearch ec2"
     env                            = "stg"
@@ -551,7 +554,7 @@ ec2_security_group = {
 ec2_security_group_ingress_rules = {
   "search-recommand-bastion-sg-ingress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "search-recommand-bastion-sg"
       type                    = "ingress"
       description             = "bastion host security group inbound"
@@ -568,7 +571,7 @@ ec2_security_group_ingress_rules = {
   ],
   "opensearch-sg-ingress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "opensearch ssh security group inbound"
@@ -582,7 +585,7 @@ ec2_security_group_ingress_rules = {
       env                      = "stg"
     },
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "opensearch es security group inbound"
@@ -598,7 +601,7 @@ ec2_security_group_ingress_rules = {
   ],
   "elasticsearch-sg-ingress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "elasticsearch ssh security group inbound"
@@ -612,7 +615,7 @@ ec2_security_group_ingress_rules = {
       env                      = "stg"
     },
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                    = "ingress"
       description             = "elasticsearch es security group inbound"
@@ -632,7 +635,7 @@ ec2_security_group_ingress_rules = {
 ec2_security_group_egress_rules = {
   "search-recommand-bastion-sg-egress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "search-recommand-bastion-sg"
       description             = "bastion host to opensearch es"
       type                    = "egress"
@@ -648,7 +651,7 @@ ec2_security_group_egress_rules = {
   ],
   "opensearch-sg-egress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "opensearch-sg"
       description             = "Opensearch security group outbound"
       type                    = "egress"
@@ -664,7 +667,7 @@ ec2_security_group_egress_rules = {
   ],
   "elasticsearch-sg-egress-rule" = [
     {
-      create                  = true
+      create                  = false
       ec2_security_group_name = "elasticsearch-sg"
       description             = "Elasticsearch security group outbound"
       type                    = "egress"
@@ -684,7 +687,7 @@ ec2_security_group_egress_rules = {
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
   "search-recommand-bastion" = {
-    create = true # EC2 생성여부 지정
+    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "search-recommand-ec2-key"
@@ -724,7 +727,7 @@ ec2_instance = {
     ]
   },
   "opensearch" = {
-    create = true # EC2 생성여부 지정
+    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "opensearch-ec2-key"
@@ -760,7 +763,7 @@ ec2_instance = {
     ]
   },
   "elasticsearch" = {
-    create = true # EC2 생성여부 지정
+    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "elasticsearch-ec2-key"

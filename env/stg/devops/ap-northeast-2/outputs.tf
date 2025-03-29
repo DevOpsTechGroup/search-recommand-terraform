@@ -66,9 +66,9 @@ output "debug_compute_module" {
     ecs_security_group          = var.ecs_security_group
     ecs_container_image_version = var.ecs_container_image_version
 
-    alb_tg_arn            = module.load_balancer.alb_target_group_arn
-    alb_listener_arn      = module.load_balancer.alb_listener_arn
-    alb_security_group_id = module.load_balancer.alb_security_group_id
+    alb_tg_arn            = module.elb.alb_target_group_arn
+    alb_listener_arn      = module.elb.alb_listener_arn
+    alb_security_group_id = module.elb.alb_security_group_id
   }
   sensitive = true
 }
