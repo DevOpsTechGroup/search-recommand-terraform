@@ -6,7 +6,7 @@ data "aws_iam_policy" "managed_policy" {
   arn      = each.value.arn
 }
 
-# IAM Role 생성
+# IAM Role
 resource "aws_iam_role" "custom_role" {
   for_each = var.iam_custom_role
 
@@ -21,7 +21,7 @@ resource "aws_iam_role" "custom_role" {
   })
 }
 
-# IAM Policy 생성
+# IAM Policy
 resource "aws_iam_policy" "custom_policy" {
   for_each = var.iam_custom_policy
 
@@ -36,7 +36,7 @@ resource "aws_iam_policy" "custom_policy" {
   })
 }
 
-# Attachment IAM Policy to Role
+# Attachment iam role to policy
 resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
   for_each = var.iam_policy_attachment
 

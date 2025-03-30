@@ -1,10 +1,6 @@
-####################
-# Child 모듈 ECS Terraform 변수
-####################
-
-####################
+########################################
 # 프로젝트 기본 설정
-####################
+########################################
 # 프로젝트 이름
 variable "project_name" {
   description = "프로젝트 이름 설정"
@@ -42,9 +38,9 @@ variable "env" {
   default     = "stg"
 }
 
-####################
+########################################
 # 네트워크 설정
-####################
+########################################
 variable "vpc_id" {
   description = "VPC ID 설정"
   type        = string
@@ -81,9 +77,9 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
-################################
-# Modules - ECS                #
-################################
+########################################
+# Modules - ECS               
+########################################
 # ECS Clusters
 variable "ecs_cluster" {
   description = "ECS Cluster 설정"
@@ -95,8 +91,12 @@ variable "ecs_cluster" {
 
 # ECS Service 보안그룹
 variable "ecs_security_group" {
-  description = "ECS Service 보안그룹 설정"
-  type        = string
+  description = "ECS 보안그룹 설정"
+  type = map(object({
+    security_group_name = string
+    description         = string
+    env                 = string
+  }))
 }
 
 # ECS Task role arn
@@ -165,7 +165,9 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
+    deployment_controller         = string
     cluster_name                  = string
     service_name                  = string # ECS 서비스 도메인명
     desired_count                 = number # ECS 서비스 Task 개수
@@ -175,9 +177,8 @@ variable "ecs_service" {
     env                           = string
     health_check_grace_period_sec = number # 헬스 체크 그레이스 기간
     assign_public_ip              = bool   # 퍼블릭 IP 지정 여부
-    deployment_controller         = string
-    launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     target_group_arn              = string
+    security_group_name           = string
   }))
 }
 
@@ -236,10 +237,9 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
-####################
+########################################
 # 로드밸런서 설정
-####################
-
+########################################
 # ECS Service에서 사용하는 ALB TG ARN으로, loadbalancer module에서 리소스 생성 후 외부 변수로 받는다
 variable "alb_tg_arn" {
   description = "AWS ECS ALB TG ARN"
@@ -258,9 +258,9 @@ variable "alb_security_group_id" {
   type        = string
 }
 
-####################
+########################################
 # 공통 태그 설정
-####################
+########################################
 variable "tags" {
   description = "공통 태그 설정"
   type        = map(string)

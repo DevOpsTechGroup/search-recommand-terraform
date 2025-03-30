@@ -1,4 +1,4 @@
-# VPC 생성
+# VPC
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr             # IPv4 CIDR Block(172.22.0.0/16)
   enable_dns_hostnames = var.enable_dns_hostnames # DNS hostname을 만들건지 안 만들건지 지정하는 옵션
@@ -9,7 +9,7 @@ resource "aws_vpc" "main" {
   })
 }
 
-# 퍼블릭 서브넷 생성
+# Public subnets
 resource "aws_subnet" "public_subnet" {
   count = local.az_count
 
@@ -24,7 +24,7 @@ resource "aws_subnet" "public_subnet" {
   })
 }
 
-# 프라이빗 서브넷 생성
+# Private subnets
 resource "aws_subnet" "private_subnet" {
   count = local.az_count
 
@@ -40,7 +40,7 @@ resource "aws_subnet" "private_subnet" {
   })
 }
 
-# 인터넷 게이트웨이 생성(IGW)
+# Internet gateway
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
   tags = merge(var.tags, {
@@ -48,7 +48,7 @@ resource "aws_internet_gateway" "igw" {
   })
 }
 
-# NAT 게이트웨이 EIP 생성 -> public subnet 01 대역에 위치
+# NAT gateway eip
 resource "aws_eip" "ngw_eip" {
   domain = "vpc"
 
@@ -61,7 +61,7 @@ resource "aws_eip" "ngw_eip" {
   })
 }
 
-# NAT 게이트웨이 생성
+# NAT gateway
 resource "aws_nat_gateway" "ngw" {
   allocation_id = aws_eip.ngw_eip.id             # NAT가 사용할 EIP 지정
   subnet_id     = aws_subnet.public_subnet[0].id # NAT가 배치될 서브넷 지정
@@ -71,7 +71,7 @@ resource "aws_nat_gateway" "ngw" {
   })
 }
 
-# 퍼블릭 라우팅 테이블 생성 -> 2개의 zone(a, b)에 각각 생성
+# Public routing table
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.main.id
 
@@ -85,7 +85,7 @@ resource "aws_route_table" "public_route_table" {
   })
 }
 
-# 퍼블릭 라우팅 테이블 서브넷 연결
+# Public routing table association
 resource "aws_route_table_association" "public_route_table_association" {
   count = local.az_count
 
@@ -97,7 +97,7 @@ resource "aws_route_table_association" "public_route_table_association" {
   ]
 }
 
-# 프라이빗 라우팅 테이블 생성 -> 2개의 zone(a, b)에 각각 생성
+# Private routing table
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.main.id
 
@@ -111,7 +111,7 @@ resource "aws_route_table" "private_route_table" {
   })
 }
 
-# 프라이빗 라우팅 테이블 서브넷 연결
+# Private routing table association
 resource "aws_route_table_association" "private_route_table_association" {
   count = local.az_count
 

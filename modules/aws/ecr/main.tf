@@ -1,4 +1,4 @@
-# ECR 리포지토리 생성
+# ECR repositories
 resource "aws_ecr_repository" "ecr_repository" {
   for_each = var.ecr_repository
 
