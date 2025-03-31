@@ -567,8 +567,7 @@ ec2_security_group_ingress_rules = {
       to_port             = 22
       protocol            = "tcp"
       cidr_ipv4 = [
-        "183.111.245.0/24",
-        "0.0.0.0/0"
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -583,7 +582,8 @@ ec2_security_group_ingress_rules = {
       to_port             = 22
       protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -596,7 +596,8 @@ ec2_security_group_ingress_rules = {
       to_port             = 9200
       protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -611,7 +612,8 @@ ec2_security_group_ingress_rules = {
       to_port             = 22
       protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -624,7 +626,8 @@ ec2_security_group_ingress_rules = {
       to_port             = 9200
       protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -694,7 +697,6 @@ ec2_instance = {
     local_file_permission = "0600"                                 # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "managed"
     instance_type               = "t3.micro"
     subnet_type                 = "public"
@@ -733,12 +735,11 @@ ec2_instance = {
     local_file_permission = "0600"                           # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "custom"
     instance_type               = "t4g.large"
-    subnet_type                 = "private"         # TODO: 변경 필
-    availability_zones          = "ap-northeast-2a" # TODO: 변경 필
-    associate_public_ip_address = false             # TODO: 변경 필
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "opensearch-es"
     security_group_name         = "opensearch-sg"
@@ -754,7 +755,7 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["vector-os-250324"]
+        values = ["20250331-opensearch-es-stg"]
       }
     ]
   },
@@ -768,12 +769,11 @@ ec2_instance = {
     local_file_permission = "0600"                              # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "custom"
     instance_type               = "t4g.large"
-    subnet_type                 = "private"
+    subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = false
+    associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "elasticsearch"
     security_group_name         = "elasticsearch-sg"
@@ -781,19 +781,15 @@ ec2_instance = {
     script_file_name            = "install_es_opensearch.sh" # 스크립트 파일명 지정
 
     # AMI filter
-    owners = "amazon"
+    owners = "self"
     filter = [
-      {
-        name   = "owner-alias"
-        values = ["amazon"]
-      },
       {
         name   = "architecture"
         values = ["arm64"]
       },
       {
         name   = "name"
-        values = ["amzn2-ami-hvm*"]
+        values = ["20250331-elasticsearch-stg"]
       }
     ]
   }

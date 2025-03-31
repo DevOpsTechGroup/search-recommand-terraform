@@ -480,7 +480,6 @@ variable "ec2_instance" {
     local_file_permission = string
 
     # ECS Option
-    state                       = string
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string

@@ -48,29 +48,6 @@ resource "aws_internet_gateway" "igw" {
   })
 }
 
-# NAT gateway eip
-resource "aws_eip" "ngw_eip" {
-  domain = "vpc"
-
-  # IGW 생성 후 EIP가 생성될 수 있게 의존성 설정
-  depends_on = [
-    aws_internet_gateway.igw
-  ]
-  tags = merge(var.tags, {
-    Name = "${local.project_name}-ngw-eip-${local.env}"
-  })
-}
-
-# NAT gateway
-resource "aws_nat_gateway" "ngw" {
-  allocation_id = aws_eip.ngw_eip.id             # NAT가 사용할 EIP 지정
-  subnet_id     = aws_subnet.public_subnet[0].id # NAT가 배치될 서브넷 지정
-
-  tags = merge(var.tags, {
-    Name = "${local.project_name}-ngw-${local.env}"
-  })
-}
-
 # Public routing table
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.main.id
@@ -100,11 +77,6 @@ resource "aws_route_table_association" "public_route_table_association" {
 # Private routing table
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.main.id
-
-  route {
-    cidr_block     = "0.0.0.0/0"            # VPC Private Subnet 대역의 모든 요청을 NAT로 라우팅
-    nat_gateway_id = aws_nat_gateway.ngw.id # NAT Gateway 참조 설정
-  }
 
   tags = merge(var.tags, {
     Name = "${local.project_name}-rt-pri-${local.env}"

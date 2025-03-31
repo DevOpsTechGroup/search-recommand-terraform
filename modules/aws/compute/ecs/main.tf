@@ -223,10 +223,6 @@ resource "aws_security_group" "ecs_security_group" {
   description = each.value.description         # 보안그룹 내용
   vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
 
-  lifecycle {
-    create_before_destroy = true
-  }
-
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${var.env}"
   })
@@ -250,10 +246,6 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
   # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
   source_security_group_id = try(each.value.source_security_group_id, null) # 다른 보안 그룹 참조 시 지정
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # IP 범위 지정
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # ECS security group egress rule
@@ -273,8 +265,4 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
 
   source_security_group_id = try(each.value.referenced_security_group_id, null)
   cidr_blocks              = try(each.value.cidr_ipv4, null)
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
