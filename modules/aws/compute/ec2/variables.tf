@@ -40,10 +40,9 @@ variable "private_subnet_ids" {
 variable "ec2_security_group" {
   description = "EC2 보안그룹 생성"
   type = map(object({
-    create                         = optional(bool, true) # 기본값 true
-    ec2_security_group_name        = optional(string)
-    ec2_security_group_description = optional(string)
-    env                            = optional(string)
+    security_group_name = optional(string)
+    description         = optional(string)
+    env                 = optional(string)
   }))
 }
 
@@ -51,8 +50,7 @@ variable "ec2_security_group" {
 variable "ec2_security_group_ingress_rules" {
   description = "EC2 보안그룹 Ingress 규칙 생성"
   type = map(list(object({
-    create                   = optional(bool, true)
-    ec2_security_group_name  = optional(string)       # 참조하는 보안그룹 이름 지정
+    security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
     from_port                = optional(number)       # 포트 시작 범위
@@ -67,8 +65,7 @@ variable "ec2_security_group_ingress_rules" {
 variable "ec2_security_group_egress_rules" {
   description = "EC2 보안그룹 Egress 규칙 생성"
   type = map(list(object({
-    create                   = optional(bool, true)
-    ec2_security_group_name  = optional(string)       # 참조하는 보안그룹 이름 지정
+    security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
     from_port                = optional(number)       # 포트 시작 범위
@@ -84,8 +81,6 @@ variable "ec2_security_group_egress_rules" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
-    # Option
-    create = bool # EC2 인스턴스 생성 여부 지정
 
     # SSH key pair
     key_pair_name         = string
@@ -95,15 +90,14 @@ variable "ec2_instance" {
     local_file_permission = string
 
     # ECS Option
-    state                       = string
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
     availability_zones          = string
     associate_public_ip_address = bool
     disable_api_termination     = bool
-    ec2_instance_name           = string
-    ec2_security_group_name     = string
+    instance_name               = string
+    security_group_name         = string
     env                         = string
     script_file_name            = optional(string)
 

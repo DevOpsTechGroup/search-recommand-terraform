@@ -31,7 +31,6 @@ variable "env" {
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    create                 = bool
     bucket_name            = string
     versioning             = bool
     server_side_encryption = bool

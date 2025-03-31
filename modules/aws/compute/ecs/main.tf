@@ -1,4 +1,4 @@
-# ECS Task Definitions 템플릿 파일 생성
+# ECS task definition template file
 data "template_file" "container_definitions" {
   for_each = tomap(var.ecs_task_definitions) # for_each로 반복할 맵 정의
   template = file("${path.module}/task_definitions.tpl")
@@ -9,10 +9,13 @@ data "template_file" "container_definitions" {
   }
 }
 
-# ECS 클러스터
+# ECS cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
-  for_each = var.ecs_cluster
-  name     = "${each.value.cluster_name}-${each.value.env}" # core-search-cluster-stg
+  for_each = {
+    for key, value in var.ecs_cluster : key => value if local.create_ecs_cluster
+  }
+
+  name = "${each.value.cluster_name}-${each.value.env}" # core-search-cluster-stg
 
   lifecycle {
     # prevent_destroy = true
@@ -24,9 +27,11 @@ resource "aws_ecs_cluster" "ecs_cluster" {
   })
 }
 
-# ECS Task Definition
+# ECS task definition
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  for_each = var.ecs_task_definitions
+  for_each = {
+    for key, value in var.ecs_task_definitions : key => value
+  }
 
   family                   = "${each.value.task_family}-${each.value.env}"
   cpu                      = each.value.task_total_cpu
@@ -71,10 +76,11 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   })
 }
 
-# ECS 서비스
+# ECS service
 resource "aws_ecs_service" "ecs_service" {
-  # ECS 서비스의 경우.. 우선 기본적으로 생성하지 않는다
-  for_each = local.create_ecs_service ? var.ecs_service : {}
+  for_each = {
+    for key, value in var.ecs_service : key => value if local.create_ecs_service
+  }
 
   launch_type = each.value.launch_type
   # iam_role                          = each.value.service_role                                                      # IAM Role
@@ -87,7 +93,7 @@ resource "aws_ecs_service" "ecs_service" {
   # 네트워크 구성 (Private Subnet 사용)
   network_configuration {
     subnets          = var.private_subnet_ids # subnet-xxxx, subnet-xxxx, subnet-xxxx
-    security_groups  = [aws_security_group.ecs_security_group.id]
+    security_groups  = [aws_security_group.ecs_security_group[each.value.security_group_name].id]
     assign_public_ip = each.value.assign_public_ip
   }
 
@@ -126,12 +132,14 @@ resource "aws_ecs_service" "ecs_service" {
   })
 }
 
-# ECS Autoscaling을 위한 aws_appautoscaling_target 작성
+# ECS autoscaling appautoscaling target
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target.html
 # arn:aws:ecs:ap-northeast-2:7xxxxxxxxxx:service/search-xxxx-cluster-prod/search-xxxx-service-nlb-prod
 resource "aws_appautoscaling_target" "ecs_target" {
   # TODO: ECS Service는 기본적으로 생성하지 않음, 그리고 AG 관련 설정도 ECS Service 변수에서 받아와서 사용 필요
-  for_each = local.create_ecs_auto_scaling_policy ? var.ecs_appautoscaling_target : {}
+  for_each = {
+    for key, value in var.ecs_appautoscaling_target : key => value if local.create_ecs_appautoscaling_target
+  }
 
   min_capacity       = each.value.min_capacity       # 최소 Task 2개가 항상 실행되도록 설정
   max_capacity       = each.value.max_capacity       # 최대 Task 6개까지 증가 할 수 있도록 설정
@@ -144,9 +152,11 @@ resource "aws_appautoscaling_target" "ecs_target" {
   ]
 }
 
-# ECS AutoScaling Policy - Scale Out
+# ECS autoscaling scale out policy
 resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
-  for_each = local.create_ecs_auto_scaling_policy ? var.ecs_appautoscaling_target_policy : {}
+  for_each = {
+    for key, value in var.ecs_appautoscaling_target_policy : key => value if local.create_ecs_appautoscaling_target_policy
+  }
 
   name               = each.value.scale_out.name                                         # AutoScaling 정책 이름
   policy_type        = each.value.scale_out.policy_type                                  # AutoScaling 정책 타입(How to scale out?)
@@ -171,9 +181,11 @@ resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
   }
 }
 
-# ECS ScaleOut - CPU Base
+# ECS scaleout policy alarm
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
-  for_each = local.create_ecs_auto_scaling_alarm ? var.ecs_cpu_scale_out_alert : {}
+  for_each = {
+    for key, value in var.ecs_cpu_scale_out_alert : key => value if local.create_ecs_cpu_scale_out_alert
+  }
 
   // TODO: ECS ScaleOut CPU 알람 생성 및 설정
   alarm_name          = each.value.alarm_name          # Cloudwatch 알람 이름
@@ -201,54 +213,56 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
   })
 }
 
-# # ECS Service에 Attachment 되는 보안그룹 생성
+# ECS security group
 resource "aws_security_group" "ecs_security_group" {
-  name        = var.ecs_security_group
-  description = "Allow ECS Task inbound traffic and outbound traffic"
-  vpc_id      = var.vpc_id # 보안그룹을 생성할 VPC 위치 지정
-
-  lifecycle {
-    create_before_destroy = true # 리소스 삭제 되기 전 생성 후 삭제 진행
+  for_each = {
+    for key, value in var.ecs_security_group : key => value if local.create_ecs_security_group
   }
 
+  name        = each.value.security_group_name # 보안그룹명
+  description = each.value.description         # 보안그룹 내용
+  vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
+
   tags = merge(var.tags, {
-    Name = "${var.ecs_security_group}-${var.env}"
+    Name = "${each.value.security_group_name}-${var.env}"
   })
 }
 
+# ECS security group ingress rule
 resource "aws_security_group_rule" "ecs_ingress_security_group" {
-  for_each = local.ecs_security_group_rules.ingress_rules
+  for_each = {
+    for rule in flatten(values(local.ecs_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    if local.create_ecs_security_group_ingress_rule
+  }
 
-  type              = each.value.type
-  description       = each.value.description
-  from_port         = each.value.from_port # 포트 시작 허용 범위
-  to_port           = each.value.to_port   # 포트 종료 허용 범위
-  protocol          = each.value.ip_protocol
-  security_group_id = aws_security_group.ecs_security_group.id
+  type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
+  description       = each.value.description                                                   # 보안그룹 내용
+  from_port         = each.value.from_port                                                     # 포트 시작 허용 범위
+  to_port           = each.value.to_port                                                       # 포트 종료 허용 범위
+  protocol          = each.value.protocol                                                      # 보안그룹 프로토콜(TCP.. 등)
+  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id # 매핑되는 보안그룹명
 
   # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
-  source_security_group_id = try(each.value.referenced_security_group_id, null)
-  cidr_blocks              = try([each.value.cidr_ipv4], null)
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  source_security_group_id = try(each.value.source_security_group_id, null) # 다른 보안 그룹 참조 시 지정
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # IP 범위 지정
 }
 
+# ECS security group egress rule
 resource "aws_security_group_rule" "ecs_egress_security_group" {
-  for_each = local.ecs_security_group_rules.egress_rules
+  for_each = {
+    for rule in flatten(values(local.ecs_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    if local.create_ecs_security_group_egress_rule
+  }
 
   type              = each.value.type
   description       = each.value.description
   from_port         = each.value.from_port
   to_port           = each.value.to_port
-  protocol          = each.value.ip_protocol
-  security_group_id = aws_security_group.ecs_security_group.id
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id
 
   source_security_group_id = try(each.value.referenced_security_group_id, null)
-  cidr_blocks              = try([each.value.cidr_ipv4], null)
-
-  lifecycle {
-    create_before_destroy = true
-  }
+  cidr_blocks              = try(each.value.cidr_ipv4, null)
 }

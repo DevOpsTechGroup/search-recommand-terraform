@@ -19,11 +19,6 @@ output "private_subnet_ids" {
   value       = aws_subnet.private_subnet[*].id
 }
 
-output "nat_gateway_id" {
-  description = "NAT 게이트웨이 ID 목록"
-  value       = aws_nat_gateway.ngw.id
-}
-
 output "public_route_table_id" {
   description = "퍼블릭 라우트 테이블 ID"
   value       = aws_route_table.public_route_table[*].id

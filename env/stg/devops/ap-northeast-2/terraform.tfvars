@@ -1,6 +1,3 @@
-# export TF_VAR_ecs_container_image_version="1.0.0"
-# pluralith graph
-
 ########################################
 # 프로젝트 기본 설정
 ########################################
@@ -22,7 +19,7 @@ env         = "stg"
 # 10.0.0.0 - 10.255.255.255		-> 		16,777,216
 # 172.16.0.0 - 172.31.255.255		-> 		1,048,576
 # 192.168.0.0 - 192.168.255.255	->		65,536
-# VPC ID(외부 data 변수를 통해 받음, 초기에는 빈값으로 셋팅)
+# VPC ID - 외부 data 변수를 통해 받음, 초기에는 빈값으로 셋팅
 vpc_id = ""
 
 # VPC CIDR 대역 지정 - VPC CIDR는 개발환경에 적합한 크기로 설정
@@ -314,9 +311,9 @@ iam_policy_attachment = {
   }
 }
 
-####################
+########################################
 # ECS 클러스터 설정
-####################
+########################################
 # ECS 클러스터 생성
 ecs_cluster = {
   "search-recommand-ecs-cluster" = {
@@ -326,8 +323,18 @@ ecs_cluster = {
 }
 
 # ECS Security Group 
-# -> ecs_service 변수에 n개를 넣는건 이미 보안그룹이 존재하는 경우만 그렇게 사용 가능
-ecs_security_group = "search-recommand-ecs-sg"
+ecs_security_group = {
+  "opensearch-api-sg" = {
+    security_group_name = "opensearch-api-sg"
+    description         = "opensearch ecs security group"
+    env                 = "stg"
+  },
+  "elasticsearch-api-sg" = {
+    security_group_name = "elasticsearch-api-sg"
+    description         = "elasticsearch ecs security group"
+    env                 = "stg"
+  }
+}
 
 # ECS IAM Role
 ecs_task_role               = "ecs_task_role"
@@ -441,6 +448,7 @@ ecs_service = {
     health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
     assign_public_ip              = false                          # 우선 public zone에 구성
     target_group_arn              = "opensearch-alb-tg"            # 연결되어야 하는 Target Group 지정
+    security_group_name           = "opensearch-api-sg"            # 보안그룹 이름
   },
   "elasticsearch-ecs-service" = {
     launch_type                   = "FARGATE"                      # ECS Launch Type
@@ -456,6 +464,7 @@ ecs_service = {
     health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
     assign_public_ip              = false                          # 우선 public zone에 구성
     target_group_arn              = "elasticsearch-alb-tg"         # 연결되어야 하는 Target Group 지정
+    security_group_name           = "elasticsearch-api-sg"         # 보안그룹 이름
   },
 }
 
@@ -531,22 +540,19 @@ ecs_cpu_scale_out_alert = {
 # EC2 보안그룹 생성
 ec2_security_group = {
   "search-recommand-bastion-sg" = {
-    create                         = false
-    ec2_security_group_name        = "search-recommand-bastion-sg"
-    ec2_security_group_description = "search-recommand bastion host ec2"
-    env                            = "stg"
+    security_group_name = "search-recommand-bastion-sg"
+    description         = "search-recommand bastion host ec2"
+    env                 = "stg"
   },
   "opensearch-sg" = {
-    create                         = false
-    ec2_security_group_name        = "opensearch-sg"
-    ec2_security_group_description = "search-recommand vector opensearch ec2"
-    env                            = "stg"
+    security_group_name = "opensearch-sg"
+    description         = "search-recommand vector opensearch ec2"
+    env                 = "stg"
   },
   "elasticsearch-sg" = {
-    create                         = false
-    ec2_security_group_name        = "elasticsearch-sg"
-    ec2_security_group_description = "search-recommand elasticsearch ec2"
-    env                            = "stg"
+    security_group_name = "elasticsearch-sg"
+    description         = "search-recommand elasticsearch ec2"
+    env                 = "stg"
   }
 }
 
@@ -554,16 +560,14 @@ ec2_security_group = {
 ec2_security_group_ingress_rules = {
   "search-recommand-bastion-sg-ingress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "search-recommand-bastion-sg"
-      type                    = "ingress"
-      description             = "bastion host security group inbound"
-      from_port               = 22
-      to_port                 = 22
-      protocol                = "tcp"
+      security_group_name = "search-recommand-bastion-sg"
+      type                = "ingress"
+      description         = "bastion host security group inbound"
+      from_port           = 22
+      to_port             = 22
+      protocol            = "tcp"
       cidr_ipv4 = [
-        "183.111.245.0/24",
-        "0.0.0.0/0"
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -571,29 +575,29 @@ ec2_security_group_ingress_rules = {
   ],
   "opensearch-sg-ingress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-      type                    = "ingress"
-      description             = "opensearch ssh security group inbound"
-      from_port               = 22
-      to_port                 = 22
-      protocol                = "tcp"
+      security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+      type                = "ingress"
+      description         = "opensearch ssh security group inbound"
+      from_port           = 22
+      to_port             = 22
+      protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
     },
     {
-      create                  = false
-      ec2_security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-      type                    = "ingress"
-      description             = "opensearch es security group inbound"
-      from_port               = 9200
-      to_port                 = 9200
-      protocol                = "tcp"
+      security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+      type                = "ingress"
+      description         = "opensearch es security group inbound"
+      from_port           = 9200
+      to_port             = 9200
+      protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -601,29 +605,29 @@ ec2_security_group_ingress_rules = {
   ],
   "elasticsearch-sg-ingress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-      type                    = "ingress"
-      description             = "elasticsearch ssh security group inbound"
-      from_port               = 22
-      to_port                 = 22
-      protocol                = "tcp"
+      security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+      type                = "ingress"
+      description         = "elasticsearch ssh security group inbound"
+      from_port           = 22
+      to_port             = 22
+      protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
     },
     {
-      create                  = false
-      ec2_security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-      type                    = "ingress"
-      description             = "elasticsearch es security group inbound"
-      from_port               = 9200
-      to_port                 = 9200
-      protocol                = "tcp"
+      security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+      type                = "ingress"
+      description         = "elasticsearch es security group inbound"
+      from_port           = 9200
+      to_port             = 9200
+      protocol            = "tcp"
       cidr_ipv4 = [
-        "172.21.0.0/16"
+        "172.21.0.0/16",
+        "220.75.180.73/32"
       ]
       source_security_group_id = null
       env                      = "stg"
@@ -635,13 +639,12 @@ ec2_security_group_ingress_rules = {
 ec2_security_group_egress_rules = {
   "search-recommand-bastion-sg-egress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "search-recommand-bastion-sg"
-      description             = "bastion host to opensearch es"
-      type                    = "egress"
-      from_port               = 0
-      to_port                 = 0
-      protocol                = "-1" # 모든 프로토콜 허용
+      security_group_name = "search-recommand-bastion-sg"
+      description         = "bastion host to opensearch es"
+      type                = "egress"
+      from_port           = 0
+      to_port             = 0
+      protocol            = "-1" # 모든 프로토콜 허용
       cidr_ipv4 = [
         "0.0.0.0/0"
       ]
@@ -651,13 +654,12 @@ ec2_security_group_egress_rules = {
   ],
   "opensearch-sg-egress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "opensearch-sg"
-      description             = "Opensearch security group outbound"
-      type                    = "egress"
-      from_port               = 0
-      to_port                 = 0
-      protocol                = "-1" # 모든 프로토콜 허용
+      security_group_name = "opensearch-sg"
+      description         = "Opensearch security group outbound"
+      type                = "egress"
+      from_port           = 0
+      to_port             = 0
+      protocol            = "-1" # 모든 프로토콜 허용
       cidr_ipv4 = [
         "0.0.0.0/0"
       ]
@@ -667,13 +669,12 @@ ec2_security_group_egress_rules = {
   ],
   "elasticsearch-sg-egress-rule" = [
     {
-      create                  = false
-      ec2_security_group_name = "elasticsearch-sg"
-      description             = "Elasticsearch security group outbound"
-      type                    = "egress"
-      from_port               = 0
-      to_port                 = 0
-      protocol                = "-1" # 모든 프로토콜 허용
+      security_group_name = "elasticsearch-sg"
+      description         = "Elasticsearch security group outbound"
+      type                = "egress"
+      from_port           = 0
+      to_port             = 0
+      protocol            = "-1" # 모든 프로토콜 허용
       cidr_ipv4 = [
         "0.0.0.0/0"
       ]
@@ -687,7 +688,6 @@ ec2_security_group_egress_rules = {
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
   "search-recommand-bastion" = {
-    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "search-recommand-ec2-key"
@@ -697,15 +697,14 @@ ec2_instance = {
     local_file_permission = "0600"                                 # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "managed"
     instance_type               = "t3.micro"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
     associate_public_ip_address = true
     disable_api_termination     = true
-    ec2_instance_name           = "search-recommand-bastion"
-    ec2_security_group_name     = "search-recommand-bastion-sg"
+    instance_name               = "search-recommand-bastion"
+    security_group_name         = "search-recommand-bastion-sg"
     env                         = "stg"
     script_file_name            = "install_bastion.sh" # 스크립트 파일명 지정
 
@@ -727,7 +726,6 @@ ec2_instance = {
     ]
   },
   "opensearch" = {
-    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "opensearch-ec2-key"
@@ -737,15 +735,14 @@ ec2_instance = {
     local_file_permission = "0600"                           # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "custom"
     instance_type               = "t4g.large"
-    subnet_type                 = "private"         # TODO: 변경 필
-    availability_zones          = "ap-northeast-2a" # TODO: 변경 필
-    associate_public_ip_address = false             # TODO: 변경 필
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
     disable_api_termination     = true
-    ec2_instance_name           = "opensearch-es"
-    ec2_security_group_name     = "opensearch-sg"
+    instance_name               = "opensearch-es"
+    security_group_name         = "opensearch-sg"
     env                         = "stg"
     script_file_name            = "install_es_opensearch.sh" # 스크립트 파일명 지정
 
@@ -758,12 +755,11 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["vector-os-250324"]
+        values = ["20250331-opensearch-es-stg"]
       }
     ]
   },
   "elasticsearch" = {
-    create = false # EC2 생성여부 지정
 
     # SSH key pair
     key_pair_name         = "elasticsearch-ec2-key"
@@ -773,32 +769,27 @@ ec2_instance = {
     local_file_permission = "0600"                              # 6(read + writer)00
 
     # EC2 Option
-    state                       = "running"
     ami_type                    = "custom"
     instance_type               = "t4g.large"
-    subnet_type                 = "private"
+    subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = false
+    associate_public_ip_address = true
     disable_api_termination     = true
-    ec2_instance_name           = "elasticsearch"
-    ec2_security_group_name     = "elasticsearch-sg"
+    instance_name               = "elasticsearch"
+    security_group_name         = "elasticsearch-sg"
     env                         = "stg"
     script_file_name            = "install_es_opensearch.sh" # 스크립트 파일명 지정
 
     # AMI filter
-    owners = "amazon"
+    owners = "self"
     filter = [
-      {
-        name   = "owner-alias"
-        values = ["amazon"]
-      },
       {
         name   = "architecture"
         values = ["arm64"]
       },
       {
         name   = "name"
-        values = ["amzn2-ami-hvm*"]
+        values = ["20250331-elasticsearch-stg"]
       }
     ]
   }
@@ -809,7 +800,6 @@ ec2_instance = {
 ########################################
 s3_bucket = {
   terraform-funin-state = {
-    create                 = true                    # 생성 여부 지정
     bucket_name            = "terraform-funin-state" # S3 버킷명
     versioning             = true                    # S3 버저닝 여부
     server_side_encryption = true                    # S3 Object 암호화 여부

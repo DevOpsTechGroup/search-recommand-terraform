@@ -1,4 +1,4 @@
-# ALB 생성
+# ALB
 resource "aws_lb" "alb" {
   for_each = var.alb
 
@@ -21,7 +21,7 @@ resource "aws_lb" "alb" {
   }
 }
 
-# ALB Listener 생성
+# ALB Listener
 resource "aws_lb_listener" "alb_listener" {
   for_each = var.alb_listener
 
@@ -60,7 +60,7 @@ resource "aws_lb_listener" "alb_listener" {
   }
 }
 
-# ALB Listener Rule 생성
+# ALB Listener Rule
 resource "aws_lb_listener_rule" "alb_listener_rule" {
   for_each = var.alb_listener_rule
 
@@ -88,7 +88,7 @@ resource "aws_lb_listener_rule" "alb_listener_rule" {
   }
 }
 
-# ALB Target Group 생성
+# ALB Target Group
 resource "aws_lb_target_group" "target_group" {
   for_each = var.target_group
 
@@ -120,7 +120,7 @@ resource "aws_lb_target_group" "target_group" {
   }
 }
 
-# ALB 보안그룹 생성
+# ALB security group
 resource "aws_security_group" "alb_security_group" {
   name        = var.alb_security_group
   description = "Allow Public inbound traffic and outbound traffic"
@@ -135,7 +135,7 @@ resource "aws_security_group" "alb_security_group" {
   }
 }
 
-# ALB 보안그룹 - Ingress
+# ALB security group ingress rule
 resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = local.alb_security_group_rules.ingress_rules
 
@@ -149,7 +149,7 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   cidr_blocks = try([each.value.cidr_ipv4], null)
 }
 
-# ALB 보안그룹 - Egress
+# ALB security group egress rule
 resource "aws_security_group_rule" "alb_security_group_egress_rule" {
   for_each = local.alb_security_group_rules.egress_rules
 

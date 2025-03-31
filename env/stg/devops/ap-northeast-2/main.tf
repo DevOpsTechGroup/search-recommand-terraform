@@ -127,7 +127,7 @@ module "ec2" {
   ec2_security_group               = var.ec2_security_group               # 보안그룹 정보 전달
   ec2_security_group_ingress_rules = var.ec2_security_group_ingress_rules # 보안그룹 규칙 정보 전달
   ec2_security_group_egress_rules  = var.ec2_security_group_egress_rules  # 보안그룹 규칙 정보 전달
-  ec2_instance                     = var.ec2_instance                     # Atlantis EC2 정보 전달
+  ec2_instance                     = var.ec2_instance                     # EC2 정보 전달
 
   # 프로젝트 기본 설정
   env                = var.env
@@ -139,14 +139,14 @@ module "ec2" {
   ]
 }
 
-# module "storage" {
-#   source = "../../../../modules/aws/storage"
+module "storage" {
+  source = "../../../../modules/aws/storage"
 
-#   # S3 Bucket 관련 설정
-#   s3_bucket = var.s3_bucket
+  # S3 Bucket 관련 설정
+  s3_bucket = var.s3_bucket
 
-#   # 프로젝트 기본 설정
-#   project_name = var.project_name
-#   env          = var.env
-#   tags         = var.tags
-# }
+  # 프로젝트 기본 설정
+  project_name = var.project_name
+  env          = var.env
+  tags         = var.tags
+}

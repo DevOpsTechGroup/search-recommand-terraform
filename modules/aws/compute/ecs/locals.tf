@@ -3,48 +3,78 @@ locals {
   env          = var.env                        # 환경변수
   az_count     = length(var.availability_zones) # 가용영역 개수
 
-  # ECS Service 생성 여부(true: 생성, false: 생성 x)
-  create_ecs_service             = false
-  create_ecs_auto_scaling_policy = false
-  create_ecs_auto_scaling_alarm  = false
+  # 리소스 생성여부 지정
+  create_ecs_cluster                      = true
+  create_task_definition                  = true
+  create_ecs_service                      = false
+  create_ecs_appautoscaling_target        = false
+  create_ecs_appautoscaling_target_policy = false
+  create_ecs_cpu_scale_out_alert          = false
+  create_ecs_security_group               = true
+  create_ecs_security_group_ingress_rule  = true
+  create_ecs_security_group_egress_rule   = true
 
-  # ECS 보안그룹 관련 변수 지정
-  ecs_security_group_rules = {
-    ingress_rules = {
-      "http-alb" = {
-        type                         = "ingress"
-        description                  = "Allow inbound http traffic"
-        from_port                    = 80
-        to_port                      = 80
-        ip_protocol                  = "tcp"
-        referenced_security_group_id = var.alb_security_group_id # ALB 보안그룹 생성 후 module에서 받아와야함
+  # ECS security group ingress rule
+  ecs_security_group_ingress_rules = {
+    "opensearch-api-sg-ingress-rule" = [
+      {
+        security_group_name      = "opensearch-api-sg"
+        type                     = "ingress"
+        description              = "opensearch api security group ingress rule"
+        from_port                = 10091
+        to_port                  = 10091
+        protocol                 = "tcp"
+        cidr_ipv4                = null
+        source_security_group_id = var.alb_security_group_id
+        env                      = "stg"
       }
-      "https-alb" = {
-        type                         = "ingress"
-        description                  = "Allow inbound https traffic"
-        from_port                    = 443
-        to_port                      = 443
-        ip_protocol                  = "tcp"
-        referenced_security_group_id = var.alb_security_group_id
+    ],
+    "elasticsearch-api-sg-ingress-rule" = [
+      {
+        type                     = "ingress"
+        security_group_name      = "elasticsearch-api-sg"
+        description              = "elasticsearch api security group ingress rule"
+        from_port                = 10092
+        to_port                  = 10092
+        protocol                 = "tcp"
+        cidr_ipv4                = null
+        source_security_group_id = var.alb_security_group_id
+        env                      = "stg"
       }
-      "http-opensearch-api" = {
-        type                         = "ingress"
-        description                  = "Allow inbound api traffic"
-        from_port                    = 10091
-        to_port                      = 10091
-        ip_protocol                  = "tcp"
-        referenced_security_group_id = var.alb_security_group_id # ALB 보안그룹 생성 후 module에서 받아와야함
+    ]
+  }
+
+  # ECS security group egress rule
+  ecs_security_group_egress_rules = {
+    "opensearch-api-sg-ingress-rule" = [
+      {
+        security_group_name = "opensearch-api-sg"
+        type                = "egress"
+        description         = "opensearch api security group egress rule"
+        from_port           = 0
+        to_port             = 0
+        protocol            = "-1" # 모든 프로토콜 허용
+        cidr_ipv4 = [
+          "0.0.0.0/0"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
       }
-    }
-    egress_rules = { # TODO: 실제 ECS SG로 적용 안됨 확인 필요
-      "all" = {
-        type        = "egress"
-        description = "Allow all outbound Traffic"
-        from_port   = 0
-        to_port     = 0
-        ip_protocol = -1
-        cidr_ipv4   = "0.0.0.0/0"
+    ],
+    "elasticsearch-api-sg-ingress-rule" = [
+      {
+        security_group_name = "elasticsearch-api-sg"
+        type                = "egress"
+        description         = "elasticsearch api security group egress rule"
+        from_port           = 0
+        to_port             = 0
+        protocol            = "-1" # 모든 프로토콜 허용
+        cidr_ipv4 = [
+          "0.0.0.0/0"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
       }
-    }
+    ]
   }
 }

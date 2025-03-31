@@ -1,10 +1,6 @@
-####################
-# ROOT 모듈 전체 Terraform 변수
-####################
-
-####################
+########################################
 # 프로젝트 기본 설정
-####################
+########################################
 # 프로젝트 이름
 variable "project_name" {
   description = "프로젝트 이름 설정"
@@ -41,9 +37,9 @@ variable "env" {
   type        = string
 }
 
-####################
+########################################
 # 네트워크 설정
-####################
+########################################
 # VPC ID(이미 생성되어 있는 VPC ID를 data 통해 받아오거나, 아니면 생성된 VPC ID를 넣는다)
 variable "vpc_id" {
   description = "VPC ID 설정"
@@ -94,9 +90,9 @@ variable "enable_dns_hostnames" {
   type        = bool
 }
 
-####################
+########################################
 # 로드밸런서 설정
-####################
+########################################
 # Application Load Balancer
 # ALB의 KEY 이름과, Target Group 변수의 KEY 이름을 일치시켜야 함
 variable "alb" {
@@ -176,9 +172,9 @@ variable "target_group" {
   }))
 }
 
-####################
+########################################
 # ECR 설정
-####################
+########################################
 # ECR 리포지토리 생성
 variable "ecr_repository" {
   description = "ECR Private Image Repository 설정"
@@ -191,9 +187,9 @@ variable "ecr_repository" {
   }))
 }
 
-####################
+########################################
 # IAM 설정
-####################
+########################################
 variable "iam_custom_role" {
   description = "IAM Role 생성"
   type = map(object({
@@ -248,9 +244,9 @@ variable "iam_policy_attachment" {
   }))
 }
 
-####################
+########################################
 # ECS 클러스터 설정
-####################
+########################################
 # ECS 클러스터 생성
 variable "ecs_cluster" {
   description = "ECS Cluster 설정"
@@ -262,8 +258,12 @@ variable "ecs_cluster" {
 
 # ECS Service 보안그룹
 variable "ecs_security_group" {
-  description = "ECS Service 보안그룹 설정"
-  type        = string
+  description = "ECS 보안그룹 설정"
+  type = map(object({
+    security_group_name = string
+    description         = string
+    env                 = string
+  }))
 }
 
 # ECS Role
@@ -351,7 +351,9 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
+    deployment_controller         = string
     cluster_name                  = string
     service_name                  = string # ECS 서비스 도메인명
     desired_count                 = number # ECS 서비스 Task 개수
@@ -361,9 +363,8 @@ variable "ecs_service" {
     env                           = string
     health_check_grace_period_sec = number # 헬스 체크 그레이스 기간
     assign_public_ip              = bool   # 퍼블릭 IP 지정 여부
-    deployment_controller         = string
-    launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     target_group_arn              = string
+    security_group_name           = string
   }))
 }
 
@@ -422,17 +423,16 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
-################
+########################################
 # EC2 설정
-################
+########################################
 # EC2 보안그룹 설정
 variable "ec2_security_group" {
   description = "EC2 보안그룹 생성"
   type = map(object({
-    create                         = optional(bool, true) # 기본값 true
-    ec2_security_group_name        = optional(string)
-    ec2_security_group_description = optional(string)
-    env                            = optional(string)
+    security_group_name = optional(string)
+    description         = optional(string)
+    env                 = optional(string)
   }))
 }
 
@@ -440,8 +440,7 @@ variable "ec2_security_group" {
 variable "ec2_security_group_ingress_rules" {
   description = "EC2 보안그룹 Ingress 규칙 생성"
   type = map(list(object({
-    create                   = optional(bool, true)
-    ec2_security_group_name  = optional(string)       # 참조하는 보안그룹 이름 지정
+    security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
     from_port                = optional(number)       # 포트 시작 범위
@@ -456,8 +455,7 @@ variable "ec2_security_group_ingress_rules" {
 variable "ec2_security_group_egress_rules" {
   description = "EC2 보안그룹 Egress 규칙 생성"
   type = map(list(object({
-    create                   = optional(bool, true)
-    ec2_security_group_name  = optional(string)       # 참조하는 보안그룹 이름 지정
+    security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
     from_port                = optional(number)       # 포트 시작 범위
@@ -473,8 +471,6 @@ variable "ec2_security_group_egress_rules" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
-    # Option
-    create = bool # EC2 인스턴스 생성 여부 지정
 
     # SSH key pair
     key_pair_name         = string
@@ -484,15 +480,14 @@ variable "ec2_instance" {
     local_file_permission = string
 
     # ECS Option
-    state                       = string
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
     availability_zones          = string
     associate_public_ip_address = bool
     disable_api_termination     = bool
-    ec2_instance_name           = string
-    ec2_security_group_name     = string
+    instance_name               = string
+    security_group_name         = string
     env                         = string
     script_file_name            = optional(string)
 
@@ -505,13 +500,12 @@ variable "ec2_instance" {
   }))
 }
 
-################
+########################################
 # S3 설정
-################
+########################################
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    create                 = bool
     bucket_name            = string
     versioning             = bool
     server_side_encryption = bool
@@ -519,13 +513,13 @@ variable "s3_bucket" {
   }))
 }
 
-################
+########################################
 # CICD 설정
-################
+########################################
 
-####################
+########################################
 # 공통 태그 설정
-####################
+########################################
 variable "tags" {
   description = "공통 태그 설정"
   type        = map(string)

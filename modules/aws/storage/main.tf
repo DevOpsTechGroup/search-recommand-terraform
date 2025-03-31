@@ -1,7 +1,7 @@
-# terraform state 파일 S3 버킷 생성
+# S3 bucket
 resource "aws_s3_bucket" "s3" {
   for_each = {
-    for key, value in var.s3_bucket : key => value if value.create
+    for key, value in var.s3_bucket : key => value if local.create_s3_bucket
   }
 
   #   region = var.aws_region
@@ -17,11 +17,11 @@ resource "aws_s3_bucket" "s3" {
   })
 }
 
-# terraform state 파일 s3 버전 관리 생성
+# S3 bucket versioning
 resource "aws_s3_bucket_versioning" "versioning" {
   for_each = {
     for key, value in var.s3_bucket : key => value
-    if value.versioning
+    if value.versioning && local.create_s3_bucket_versioning
   }
 
   bucket = aws_s3_bucket.s3[each.key].id
@@ -30,11 +30,11 @@ resource "aws_s3_bucket_versioning" "versioning" {
   }
 }
 
-# terraform state 파일 s3 obj 암호화 수행
+# S3 object encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "server_side_encrypt" {
   for_each = {
     for key, value in var.s3_bucket : key => value
-    if value.server_side_encryption
+    if value.server_side_encryption && local.create_s3_bucket_server_side_encryption
   }
 
   bucket = aws_s3_bucket.s3[each.key].id
@@ -45,11 +45,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "server_side_encry
   }
 }
 
-# terraform state file s3 퍼블릭 access 제한
+# S3 bucket access configuration
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
   for_each = {
     for key, value in var.s3_bucket : key => value
-    if value.public_access_block
+    if value.public_access_block && local.create_aws_s3_bucket_public_access_block
   }
 
   bucket                  = aws_s3_bucket.s3[each.key].id
@@ -60,7 +60,6 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
 }
 
 # DynamoDB for terraform state locking
-# TODO: dynamo DB 테이블도 환경별로 분리
 resource "aws_dynamodb_table" "terraform_state_lock" {
   name         = "tfstate-lock"    # DynamoDB Table 이름 지정
   hash_key     = "LockID"          # DynamoDB 테이블의 파티션 키(Partition Key, Hash Key) 이름
