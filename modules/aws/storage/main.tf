@@ -61,6 +61,8 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
 
 # DynamoDB for terraform state locking
 resource "aws_dynamodb_table" "terraform_state_lock" {
+  count = local.create_aws_dynamodb_table ? 1 : 0
+
   name         = "tfstate-lock"    # DynamoDB Table 이름 지정
   hash_key     = "LockID"          # DynamoDB 테이블의 파티션 키(Partition Key, Hash Key) 이름
   billing_mode = "PAY_PER_REQUEST" # 비용 관련 설정(사용한 만큼만 과금)
