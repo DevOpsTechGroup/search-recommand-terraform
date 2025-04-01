@@ -7,4 +7,5 @@ locals {
   create_s3_bucket_versioning              = false
   create_s3_bucket_server_side_encryption  = false
   create_aws_s3_bucket_public_access_block = false
+  create_aws_dynamodb_table                = false
 }

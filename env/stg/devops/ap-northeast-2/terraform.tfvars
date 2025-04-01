@@ -539,11 +539,6 @@ ecs_cpu_scale_out_alert = {
 ########################################
 # EC2 보안그룹 생성
 ec2_security_group = {
-  "search-recommand-bastion-sg" = {
-    security_group_name = "search-recommand-bastion-sg"
-    description         = "search-recommand bastion host ec2"
-    env                 = "stg"
-  },
   "opensearch-sg" = {
     security_group_name = "opensearch-sg"
     description         = "search-recommand vector opensearch ec2"
@@ -558,21 +553,6 @@ ec2_security_group = {
 
 # EC2 보안그룹 인바운드 설정
 ec2_security_group_ingress_rules = {
-  "search-recommand-bastion-sg-ingress-rule" = [
-    {
-      security_group_name = "search-recommand-bastion-sg"
-      type                = "ingress"
-      description         = "bastion host security group inbound"
-      from_port           = 22
-      to_port             = 22
-      protocol            = "tcp"
-      cidr_ipv4 = [
-        "220.75.180.73/32"
-      ]
-      source_security_group_id = null
-      env                      = "stg"
-    }
-  ],
   "opensearch-sg-ingress-rule" = [
     {
       security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
@@ -637,21 +617,6 @@ ec2_security_group_ingress_rules = {
 
 # EC2 보안그룹 아웃바운드 설정
 ec2_security_group_egress_rules = {
-  "search-recommand-bastion-sg-egress-rule" = [
-    {
-      security_group_name = "search-recommand-bastion-sg"
-      description         = "bastion host to opensearch es"
-      type                = "egress"
-      from_port           = 0
-      to_port             = 0
-      protocol            = "-1" # 모든 프로토콜 허용
-      cidr_ipv4 = [
-        "0.0.0.0/0"
-      ]
-      source_security_group_id = null
-      env                      = "stg"
-    }
-  ],
   "opensearch-sg-egress-rule" = [
     {
       security_group_name = "opensearch-sg"
@@ -687,44 +652,6 @@ ec2_security_group_egress_rules = {
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
-  "search-recommand-bastion" = {
-
-    # SSH key pair
-    key_pair_name         = "search-recommand-ec2-key"
-    key_pair_algorithm    = "RSA"
-    rsa_bits              = 4096
-    local_file_name       = "keypair/search-recommand-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
-    local_file_permission = "0600"                                 # 6(read + writer)00
-
-    # EC2 Option
-    ami_type                    = "managed"
-    instance_type               = "t3.micro"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-recommand-bastion"
-    security_group_name         = "search-recommand-bastion-sg"
-    env                         = "stg"
-    script_file_name            = "install_bastion.sh" # 스크립트 파일명 지정
-
-    # AMI filter
-    owners = "amazon"
-    filter = [
-      {
-        name   = "owner-alias"
-        values = ["amazon"]
-      },
-      {
-        name   = "architecture"
-        values = ["x86_64"]
-      },
-      {
-        name   = "name"
-        values = ["amzn2-ami-hvm*"]
-      }
-    ]
-  },
   "opensearch" = {
 
     # SSH key pair
