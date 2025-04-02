@@ -4,7 +4,7 @@
 output "alb_arns" {
   description = "생성된 N개의 ALB의 ARN 반환"
   value = {
-    for key, alb in aws_lb.alb : key => alb.arn
+    for key, value in aws_lb.alb : key => value.arn
   }
 }
 
@@ -12,7 +12,7 @@ output "alb_arns" {
 output "alb_dns_names" {
   description = "생성된 N개의 ALB의 DNS 반환"
   value = {
-    for key, alb in aws_lb.alb : key => alb.dns_name
+    for key, value in aws_lb.alb : key => value.dns_name
   }
 }
 
@@ -20,7 +20,7 @@ output "alb_dns_names" {
 output "alb_target_group_arn" {
   description = "생성된 N개의 TG의 ARN 반환"
   value = {
-    for key, target_group in aws_lb_target_group.target_group : key => target_group.arn
+    for key, value in aws_lb_target_group.target_group : key => value.arn
   }
 }
 
@@ -28,7 +28,7 @@ output "alb_target_group_arn" {
 output "alb_listener_arn" {
   description = "생성된 N개의 ALB의 listener ARN 반환"
   value = {
-    for key, listener in aws_lb_listener.alb_listener : key => listener.arn
+    for key, value in aws_lb_listener.alb_listener : key => value.arn
   }
 }
 

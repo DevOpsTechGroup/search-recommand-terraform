@@ -3,35 +3,67 @@ locals {
   env          = var.env                        # 환경변수
   az_count     = length(var.availability_zones) # 가용영역 개수
 
-  # ALB 보안그룹 관련 변수 지정
-  alb_security_group_rules = {
-    ingress_rules = {
-      "http-ingress" = {
-        type        = "ingress"
-        description = "Allow HTTP traffic from anywhere"
-        from_port   = 80
-        to_port     = 80
-        ip_protocol = "tcp"
-        cidr_ipv4   = "0.0.0.0/0"
+  # ALB security group ingress rule
+  alb_security_group_ingress_rules = {
+    search-recommand-alb-sg-ingress-rule = [
+      {
+        create_yn           = true
+        security_group_name = "search-recommand-alb-sg"
+        type                = "ingress"
+        description         = "search-recommand alb http security group ingress rule"
+        from_port           = 80
+        to_port             = 80
+        protocol            = "http"
+        cidr_ipv4 = [
+          "220.75.180.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      },
+      {
+        create_yn           = true
+        security_group_name = "search-recommand-alb-sg-ingress-rule"
+        type                = "ingress"
+        description         = "search-recommand alb https security group ingress rule"
+        from_port           = 443
+        to_port             = 443
+        protocol            = "https"
+        cidr_ipv4 = [
+          "220.75.180.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
       }
-      "https-ingress" = {
-        type        = "ingress"
-        description = "Allow HTTPS traffic from anywhere"
-        from_port   = 443
-        to_port     = 443
-        ip_protocol = "tcp"
-        cidr_ipv4   = "0.0.0.0/0"
+    ]
+  }
+
+  # ALB security group egress rule
+  alb_security_group_egress_rules = {
+    search-recommand-alb-sg-egress-rule = [
+      {
+        create_yn                = true
+        security_group_name      = "search-recommand-alb-sg"
+        type                     = "egress"
+        description              = "search-recommand alb all traffic security group egress rule"
+        from_port                = 0
+        to_port                  = 0
+        protocol                 = "-1"
+        cidr_ipv4                = null
+        source_security_group_id = var.ecs_security_group_id["opensearch-api-sg"] # INFO: ECS API 보안 그룹을 받아야함
+        env                      = "stg"
+      },
+      {
+        create_yn                = true
+        security_group_name      = "search-recommand-alb-sg"
+        type                     = "egress"
+        description              = "search-recommand alb all traffic security group egress rule"
+        from_port                = 0
+        to_port                  = 0
+        protocol                 = "-1"
+        cidr_ipv4                = null
+        source_security_group_id = var.ecs_security_group_id["elasticsearch-api-sg"] # INFO: ECS API 보안 그룹을 받아야함
+        env                      = "stg"
       }
-    }
-    egress_rules = {
-      "all" = {
-        type        = "egress"
-        description = "Allow all outbound traffic"
-        from_port   = 0
-        to_port     = 0
-        ip_protocol = -1
-        cidr_ipv4   = "0.0.0.0/0"
-      }
-    }
+    ]
   }
 }

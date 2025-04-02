@@ -18,7 +18,7 @@ data "aws_ami" "amazon_ami" {
 # EC2 instance
 resource "aws_instance" "ec2" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_ec2_instance
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   ami           = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
@@ -62,7 +62,7 @@ resource "aws_instance" "ec2" {
 # EC2 key pair Decide encryption method + generate a TLS/SSL private key
 resource "tls_private_key" "ec2_key_pair_rsa" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_tls_private_key
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   algorithm = each.value.key_pair_algorithm # RSA 알고리즘 설정
@@ -72,7 +72,7 @@ resource "tls_private_key" "ec2_key_pair_rsa" {
 # EC2 key pair
 resource "aws_key_pair" "ec2_key_pair" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_key_pair
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   key_name   = each.value.key_pair_name
@@ -82,7 +82,7 @@ resource "aws_key_pair" "ec2_key_pair" {
 # EC2 key pair to save local file
 resource "local_file" "ec2_key_pair_local_file" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_local_file
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   content         = tls_private_key.ec2_key_pair_rsa[each.key].private_key_pem
@@ -93,7 +93,7 @@ resource "local_file" "ec2_key_pair_local_file" {
 # EC2 security group
 resource "aws_security_group" "ec2_security_group" {
   for_each = {
-    for key, value in var.ec2_security_group : key => value if local.create_ec2_security_group
+    for key, value in var.ec2_security_group : key => value if value.create_yn
   }
 
   name        = each.value.security_group_name # 보안그룹명
@@ -108,9 +108,9 @@ resource "aws_security_group" "ec2_security_group" {
 # EC2 security group ingress rule
 resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
-    for rule in local.valid_ec2_security_group_ingress_rules :
+    for rule in flatten(values(local.var.ec2_security_group_ingress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ec2_security_group_ingress_rule
+    if rule.create_yn
   }
 
   description       = each.value.description                                                   # 보안그룹 DESC
@@ -127,9 +127,9 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
 # EC2 security group egress rule
 resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
-    for rule in local.valid_ec2_security_group_egress_rules :
+    for rule in flatten(values(local.ec2_security_group_egress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ec2_security_group_egress_rule
+    if rule.create_yn
   }
 
   description       = each.value.description

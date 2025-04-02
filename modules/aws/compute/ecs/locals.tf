@@ -3,21 +3,11 @@ locals {
   env          = var.env                        # 환경변수
   az_count     = length(var.availability_zones) # 가용영역 개수
 
-  # 리소스 생성여부 지정
-  create_ecs_cluster                      = true
-  create_task_definition                  = true
-  create_ecs_service                      = false
-  create_ecs_appautoscaling_target        = false
-  create_ecs_appautoscaling_target_policy = false
-  create_ecs_cpu_scale_out_alert          = false
-  create_ecs_security_group               = true
-  create_ecs_security_group_ingress_rule  = true
-  create_ecs_security_group_egress_rule   = true
-
   # ECS security group ingress rule
   ecs_security_group_ingress_rules = {
-    "opensearch-api-sg-ingress-rule" = [
+    opensearch-api-sg-ingress-rule = [
       {
+        create_yn                = true
         security_group_name      = "opensearch-api-sg"
         type                     = "ingress"
         description              = "opensearch api security group ingress rule"
@@ -29,8 +19,9 @@ locals {
         env                      = "stg"
       }
     ],
-    "elasticsearch-api-sg-ingress-rule" = [
+    elasticsearch-api-sg-ingress-rule = [
       {
+        create_yn                = true
         type                     = "ingress"
         security_group_name      = "elasticsearch-api-sg"
         description              = "elasticsearch api security group ingress rule"
@@ -46,8 +37,9 @@ locals {
 
   # ECS security group egress rule
   ecs_security_group_egress_rules = {
-    "opensearch-api-sg-ingress-rule" = [
+    opensearch-api-sg-ingress-rule = [
       {
+        create_yn           = true
         security_group_name = "opensearch-api-sg"
         type                = "egress"
         description         = "opensearch api security group egress rule"
@@ -61,8 +53,9 @@ locals {
         env                      = "stg"
       }
     ],
-    "elasticsearch-api-sg-ingress-rule" = [
+    elasticsearch-api-sg-ingress-rule = [
       {
+        create_yn           = true
         security_group_name = "elasticsearch-api-sg"
         type                = "egress"
         description         = "elasticsearch api security group egress rule"

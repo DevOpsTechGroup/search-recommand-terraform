@@ -3,7 +3,7 @@
 # 기본 셋팅
 ################################
 # hostname 셋팅
-sudo hostnamectl set-hostname opensearch-vector-es
+sudo hostnamectl set-hostname opensearch
 
 ################################
 # 필수 패키지 설치

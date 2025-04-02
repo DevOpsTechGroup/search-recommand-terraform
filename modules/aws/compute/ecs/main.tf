@@ -12,13 +12,12 @@ data "template_file" "container_definitions" {
 # ECS cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
   for_each = {
-    for key, value in var.ecs_cluster : key => value if local.create_ecs_cluster
+    for key, value in var.ecs_cluster : key => value if value.create_yn
   }
 
   name = "${each.value.cluster_name}-${each.value.env}" # core-search-cluster-stg
 
   lifecycle {
-    # prevent_destroy = true
     create_before_destroy = true
   }
 
@@ -30,7 +29,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 # ECS task definition
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   for_each = {
-    for key, value in var.ecs_task_definitions : key => value
+    for key, value in var.ecs_task_definitions : key => value if value.create_yn
   }
 
   family                   = "${each.value.task_family}-${each.value.env}"
@@ -79,7 +78,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 # ECS service
 resource "aws_ecs_service" "ecs_service" {
   for_each = {
-    for key, value in var.ecs_service : key => value if local.create_ecs_service
+    for key, value in var.ecs_service : key => value if value.create_yn
   }
 
   launch_type = each.value.launch_type
@@ -138,7 +137,7 @@ resource "aws_ecs_service" "ecs_service" {
 resource "aws_appautoscaling_target" "ecs_target" {
   # TODO: ECS Service는 기본적으로 생성하지 않음, 그리고 AG 관련 설정도 ECS Service 변수에서 받아와서 사용 필요
   for_each = {
-    for key, value in var.ecs_appautoscaling_target : key => value if local.create_ecs_appautoscaling_target
+    for key, value in var.ecs_appautoscaling_target : key => value if value.create_yn
   }
 
   min_capacity       = each.value.min_capacity       # 최소 Task 2개가 항상 실행되도록 설정
@@ -155,7 +154,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 # ECS autoscaling scale out policy
 resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
   for_each = {
-    for key, value in var.ecs_appautoscaling_target_policy : key => value if local.create_ecs_appautoscaling_target_policy
+    for key, value in var.ecs_appautoscaling_target_policy : key => value if value.create_yn
   }
 
   name               = each.value.scale_out.name                                         # AutoScaling 정책 이름
@@ -184,7 +183,7 @@ resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
 # ECS scaleout policy alarm
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
   for_each = {
-    for key, value in var.ecs_cpu_scale_out_alert : key => value if local.create_ecs_cpu_scale_out_alert
+    for key, value in var.ecs_cpu_scale_out_alert : key => value if value.create_yn
   }
 
   // TODO: ECS ScaleOut CPU 알람 생성 및 설정
@@ -216,7 +215,7 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
 # ECS security group
 resource "aws_security_group" "ecs_security_group" {
   for_each = {
-    for key, value in var.ecs_security_group : key => value if local.create_ecs_security_group
+    for key, value in var.ecs_security_group : key => value if value.create_yn
   }
 
   name        = each.value.security_group_name # 보안그룹명
@@ -233,7 +232,7 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = {
     for rule in flatten(values(local.ecs_security_group_ingress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ecs_security_group_ingress_rule
+    if rule.create_yn
   }
 
   type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
@@ -253,7 +252,7 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
   for_each = {
     for rule in flatten(values(local.ecs_security_group_egress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ecs_security_group_egress_rule
+    if rule.create_yn
   }
 
   type              = each.value.type

@@ -57,8 +57,12 @@ variable "alb" {
 # ALB 보안그룹 이름
 variable "alb_security_group" {
   description = "ALB 보안그룹 이름"
-  type        = string
-  default     = "search-alb-sg"
+  type = map(object({
+    create_yn           = bool
+    security_group_name = string
+    description         = string
+    env                 = string
+  }))
 }
 
 # ALB Listencer
@@ -119,6 +123,12 @@ variable "target_group" {
       internal            = bool
     })
   }))
+}
+
+# ECS 보안그룹 ID
+variable "ecs_security_group_id" {
+  description = "ECS 보안그룹 ID"
+  type        = list(string)
 }
 
 ########################################

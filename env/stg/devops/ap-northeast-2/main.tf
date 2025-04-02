@@ -27,6 +27,9 @@ module "elb" {
   alb_security_group = var.alb_security_group # ALB 보안그룹 이름
   public_subnet_ids  = module.network.public_subnet_ids
 
+  # ECS 관련 설정
+  ecs_security_group_id = module.ecs.ecs_security_group
+
   # 프로젝트 기본 설정
   project_name       = var.project_name
   env                = var.env
@@ -95,8 +98,10 @@ module "ecs" {
   ecs_container_image_version = var.ecs_container_image_version                         # ECS Container Image 버전
 
   # ECS Service에서 ELB 연동 시 사용
-  alb_tg_arn            = module.elb.alb_target_group_arn  # loadbalancer module의 output 변수 사용
-  alb_listener_arn      = module.elb.alb_listener_arn      # loadbalancer module의 output 변수 사용
+  alb_tg_arn       = module.elb.alb_target_group_arn # loadbalancer module의 output 변수 사용
+  alb_listener_arn = module.elb.alb_listener_arn     # loadbalancer module의 output 변수 사용
+
+  # TODO: 현재는 ALB 보안그룹을 1개만 받고 있는데, N개의 ALB 보안그룹 받을 수 있게 수정 필요
   alb_security_group_id = module.elb.alb_security_group_id # ECS에서 사용하는 ALB 보안 그룹 ID
 
   # 프로젝트 기본 설정
@@ -144,6 +149,9 @@ module "storage" {
 
   # S3 Bucket 관련 설정
   s3_bucket = var.s3_bucket
+
+  # Dynamo DB Table 관련 설정
+  dynamodb_table = var.dynamodb_table
 
   # 프로젝트 기본 설정
   project_name = var.project_name

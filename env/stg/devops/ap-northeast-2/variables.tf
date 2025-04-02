@@ -112,8 +112,12 @@ variable "alb" {
 # ALB 보안그룹 이름
 variable "alb_security_group" {
   description = "ALB 보안그룹 이름"
-  type        = string
-  default     = "search-alb-sg"
+  type = map(object({
+    create_yn           = bool
+    security_group_name = string
+    description         = string
+    env                 = string
+  }))
 }
 
 # ALB Listencer
@@ -531,6 +535,23 @@ variable "s3_bucket" {
     versioning             = bool
     server_side_encryption = bool
     public_access_block    = bool
+  }))
+}
+
+########################################
+# DynamoDB Table 설정
+########################################
+variable "dynamodb_table" {
+  description = "DynamoDB Table"
+  type = map(object({
+    create_yn    = bool
+    name         = string
+    hash_key     = string
+    billing_mode = string
+    attribute = object({
+      name = string
+      type = string
+    })
   }))
 }
 
