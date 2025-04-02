@@ -61,6 +61,7 @@ enable_dns_hostnames = true
 ########################################
 alb = {
   "search-recommand-alb" = {
+    create_yn                            = true
     alb_name                             = "search-recommand-alb"
     alb_internal                         = false
     alb_load_balancer_type               = "application"
@@ -77,6 +78,7 @@ alb_security_group = "search-recommand-alb-sg"
 # ALB Listencer 생성
 alb_listener = {
   "alb-http-listener" = {
+    create_yn         = true
     name              = "alb-http-listener"
     port              = 80
     protocol          = "HTTP"
@@ -97,6 +99,7 @@ alb_listener = {
 # ALB Listener Rule 생성
 alb_listener_rule = {
   "opensearch-alb-http-listener-rule" = {
+    create_yn         = true
     type              = "forward"
     path              = ["/vectorPlaylistSearch"]
     alb_listener_name = "alb-http-listener"
@@ -104,6 +107,7 @@ alb_listener_rule = {
     priority          = 1
   },
   "elasticsearch-alb-http-listener-rule" = {
+    create_yn         = true
     type              = "forward"
     path              = ["/elasticsearchPlaylistSearch"]
     alb_listener_name = "alb-http-listener"
@@ -115,6 +119,7 @@ alb_listener_rule = {
 # ALB Target Group 생성
 target_group = {
   "opensearch-alb-tg" = {
+    create_yn                = true
     target_group_name        = "opensearch-alb-tg"
     target_group_port        = 10091
     target_group_elb_type    = "ALB"
@@ -134,6 +139,7 @@ target_group = {
     enabled = true # health_check 바깥에 위치해야 함
   },
   "elasticsearch-alb-tg" = {
+    create_yn                = true
     target_group_name        = "elasticsearch-alb-tg"
     target_group_port        = 10092
     target_group_elb_type    = "ALB"
@@ -160,6 +166,7 @@ target_group = {
 # ECR 리포지토리 생성
 ecr_repository = {
   "opensearch-api" = {
+    create_yn                = true
     ecr_repository_name      = "opensearch-api" # 리포지토리명
     env                      = "stg"            # ECR 개발환경
     ecr_image_tag_mutability = "IMMUTABLE"      # image 버전 고유하게 관리할지 여부
@@ -167,6 +174,7 @@ ecr_repository = {
     ecr_force_delete         = false
   },
   "elasticsearch-api" = {
+    create_yn                = true
     ecr_repository_name      = "elasticsearch-api" # 리포지토리명
     env                      = "stg"               # ECR 개발환경
     ecr_image_tag_mutability = "IMMUTABLE"         # image 버전 고유하게 관리할지 여부
@@ -181,9 +189,10 @@ ecr_repository = {
 # 사용자가 생성하는 역할(Role)
 iam_custom_role = {
   "ecs-task-role" = {
-    name    = "ecs-task-role"
-    version = "2012-10-17"
-    arn     = ""
+    create_yn = false
+    name      = "ecs-task-role"
+    version   = "2012-10-17"
+    arn       = ""
     statement = {
       Sid    = "ECSTaskRole"
       Action = "sts:AssumeRole"
@@ -195,9 +204,10 @@ iam_custom_role = {
     env = "stg"
   },
   "ecs-task-exec-role" = {
-    name    = "ecs-task-exec-role"
-    version = "2012-10-17"
-    arn     = ""
+    create_yn = false
+    name      = "ecs-task-exec-role"
+    version   = "2012-10-17"
+    arn       = ""
     statement = {
       Sid    = "ECSTaskExecRole"
       Action = "sts:AssumeRole"
@@ -209,9 +219,10 @@ iam_custom_role = {
     env = "stg"
   },
   "ecs-auto-scaling-role" = {
-    name    = "ecs-auto-scaling-role"
-    version = "2012-10-17"
-    arn     = ""
+    create_yn = false
+    name      = "ecs-auto-scaling-role"
+    version   = "2012-10-17"
+    arn       = ""
     statement = {
       Sid    = "ECSAutoScalingRole"
       Action = "sts:AssumeRole"
@@ -227,6 +238,7 @@ iam_custom_role = {
 # 사용자가 생성하는 정책(Policy)
 iam_custom_policy = {
   "ecs-task-role-policy" = {
+    create_yn   = false
     name        = "ecs-task-role-policy"
     description = "Policy For ECS Task Role"
     version     = "2012-10-17"
@@ -245,6 +257,7 @@ iam_custom_policy = {
     env = "stg"
   },
   "ecs-task-exec-role-policy" = {
+    create_yn   = false
     name        = "ecs-task-exec-role-policy"
     description = "Policy For ECS Task Execution Role"
     version     = "2012-10-17"
@@ -277,9 +290,10 @@ iam_custom_policy = {
 */
 iam_managed_policy = {
   "ecs-auto-scaling-role-policy" = {
-    name = "AmazonEC2ContainerServiceAutoscaleRole"
-    arn  = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
-    env  = "stg"
+    create_yn = false
+    name      = "AmazonEC2ContainerServiceAutoscaleRole"
+    arn       = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
+    env       = "stg"
   }
 }
 
@@ -295,16 +309,19 @@ iam_managed_policy = {
 */
 iam_policy_attachment = {
   "ecs-task-role-attachment" = {
+    create_yn   = false
     role_name   = "ecs-task-role"
     policy_name = "ecs-task-role-policy"
     policy_type = "custom"
   },
   "ecs-task-exec-role" = {
+    create_yn   = false
     role_name   = "ecs-task-exec-role"
     policy_name = "ecs-task-exec-role-policy"
     policy_type = "custom"
   },
   "ecs-auto-scaling-role" = {
+    create_yn   = false
     role_name   = "ecs-auto-scaling-role"
     policy_name = "ecs-auto-scaling-role-policy"
     policy_type = "managed"
@@ -317,6 +334,7 @@ iam_policy_attachment = {
 # ECS 클러스터 생성
 ecs_cluster = {
   "search-recommand-ecs-cluster" = {
+    create_yn    = false
     cluster_name = "search-recommand-ecs-cluster"
     env          = "stg"
   }
@@ -325,11 +343,13 @@ ecs_cluster = {
 # ECS Security Group 
 ecs_security_group = {
   "opensearch-api-sg" = {
+    create_yn           = false
     security_group_name = "opensearch-api-sg"
     description         = "opensearch ecs security group"
     env                 = "stg"
   },
   "elasticsearch-api-sg" = {
+    create_yn           = false
     security_group_name = "elasticsearch-api-sg"
     description         = "elasticsearch ecs security group"
     env                 = "stg"
@@ -353,6 +373,7 @@ ecs_container_image_version = "1.0.0"
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
 ecs_task_definitions = {
   "opensearch-api-td" = {
+    create_yn                               = false
     name                                    = "opensearch-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
@@ -392,6 +413,7 @@ ecs_task_definitions = {
     ]
   },
   "elasticsearch-api-td" = {
+    create_yn                               = false
     name                                    = "elasticsearch-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
@@ -435,6 +457,7 @@ ecs_task_definitions = {
 # ECS 서비스 생성
 ecs_service = {
   "opensearch-ecs-service" = {
+    create_yn                     = false
     launch_type                   = "FARGATE"                      # ECS Launch Type
     service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
     deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
@@ -451,6 +474,7 @@ ecs_service = {
     security_group_name           = "opensearch-api-sg"            # 보안그룹 이름
   },
   "elasticsearch-ecs-service" = {
+    create_yn                     = false
     launch_type                   = "FARGATE"                      # ECS Launch Type
     service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
     deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
@@ -471,6 +495,7 @@ ecs_service = {
 # ECS Autoscaling
 ecs_appautoscaling_target = {
   "opensearch-service" = {
+    create_yn          = false
     min_capacity       = 2                                                                 # 최소 Task 2개가 항상 실행되도록 설정
     max_capacity       = 6                                                                 # 최대 Task 6개까지 증가 할 수 있도록 설정
     resource_id        = "service/search-recommand-ecs-cluster-stg/opensearch-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
@@ -484,6 +509,7 @@ ecs_appautoscaling_target = {
 # ECS Autoscaling 정책
 ecs_appautoscaling_target_policy = {
   "opensearch-ecs-service" = {
+    create_yn = false
     scale_out = {
       name        = "ECSOpenSearchScaleOutPolicy" # 스케일 아웃 정책명
       policy_type = "StepScaling"                 # 정책 타입
@@ -518,6 +544,7 @@ ecs_appautoscaling_target_policy = {
 # ECS Autoscaling Cloudwatch policy
 ecs_cpu_scale_out_alert = {
   "opensearch-ecs-service" = {
+    create_yn           = false
     alarm_name          = "ECSOpenSearchScaleOutAlarm"
     comparison_operator = "GreaterThanOrEqualToThreshold" # 메트릭이 임계값보다 크거나 같으면 발동
     evaluation_periods  = "1"                             # 평가 주기는 1번 -> 1번만 조건에 맞아도 이벤트 발생
@@ -540,11 +567,13 @@ ecs_cpu_scale_out_alert = {
 # EC2 보안그룹 생성
 ec2_security_group = {
   "opensearch-sg" = {
+    create_yn           = true
     security_group_name = "opensearch-sg"
     description         = "search-recommand vector opensearch ec2"
     env                 = "stg"
   },
   "elasticsearch-sg" = {
+    create_yn           = false
     security_group_name = "elasticsearch-sg"
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
@@ -555,6 +584,7 @@ ec2_security_group = {
 ec2_security_group_ingress_rules = {
   "opensearch-sg-ingress-rule" = [
     {
+      create_yn           = true
       security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                = "ingress"
       description         = "opensearch ssh security group inbound"
@@ -569,6 +599,7 @@ ec2_security_group_ingress_rules = {
       env                      = "stg"
     },
     {
+      create_yn           = true
       security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                = "ingress"
       description         = "opensearch es security group inbound"
@@ -585,6 +616,7 @@ ec2_security_group_ingress_rules = {
   ],
   "elasticsearch-sg-ingress-rule" = [
     {
+      create_yn           = false
       security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                = "ingress"
       description         = "elasticsearch ssh security group inbound"
@@ -599,6 +631,7 @@ ec2_security_group_ingress_rules = {
       env                      = "stg"
     },
     {
+      create_yn           = false
       security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
       type                = "ingress"
       description         = "elasticsearch es security group inbound"
@@ -619,6 +652,7 @@ ec2_security_group_ingress_rules = {
 ec2_security_group_egress_rules = {
   "opensearch-sg-egress-rule" = [
     {
+      create_yn           = true
       security_group_name = "opensearch-sg"
       description         = "Opensearch security group outbound"
       type                = "egress"
@@ -634,6 +668,7 @@ ec2_security_group_egress_rules = {
   ],
   "elasticsearch-sg-egress-rule" = [
     {
+      create_yn           = false
       security_group_name = "elasticsearch-sg"
       description         = "Elasticsearch security group outbound"
       type                = "egress"
@@ -653,6 +688,7 @@ ec2_security_group_egress_rules = {
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
   "opensearch" = {
+    create_yn = true
 
     # SSH key pair
     key_pair_name         = "opensearch-ec2-key"
@@ -682,11 +718,12 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["20250331-opensearch-es-stg"]
+        values = ["*-opensearch-es-stg"]
       }
     ]
   },
   "elasticsearch" = {
+    create_yn = false
 
     # SSH key pair
     key_pair_name         = "elasticsearch-ec2-key"
@@ -716,7 +753,7 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["20250331-elasticsearch-stg"]
+        values = ["*-elasticsearch-stg"]
       }
     ]
   }
@@ -727,6 +764,7 @@ ec2_instance = {
 ########################################
 s3_bucket = {
   terraform-funin-state = {
+    create_yn              = false
     bucket_name            = "terraform-funin-state" # S3 버킷명
     versioning             = true                    # S3 버저닝 여부
     server_side_encryption = true                    # S3 Object 암호화 여부

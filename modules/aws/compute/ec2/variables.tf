@@ -1,6 +1,6 @@
-####################
+########################################
 # 프로젝트 기본 설정
-####################
+########################################
 variable "env" {
   description = "Environment (e.g., dev, staging, prod)"
   type        = string
@@ -13,9 +13,9 @@ variable "availability_zones" {
   type        = list(string)
 }
 
-####################
+########################################
 # 네트워크 설정
-####################
+########################################
 variable "vpc_id" {
   description = "VPC ID where the security groups will be created"
   type        = string
@@ -33,13 +33,14 @@ variable "private_subnet_ids" {
   type        = list(string)
 }
 
-################
+########################################
 # EC2 설정
-################
+########################################
 # EC2 보안그룹 설정
 variable "ec2_security_group" {
   description = "EC2 보안그룹 생성"
   type = map(object({
+    create_yn           = bool
     security_group_name = optional(string)
     description         = optional(string)
     env                 = optional(string)
@@ -50,6 +51,7 @@ variable "ec2_security_group" {
 variable "ec2_security_group_ingress_rules" {
   description = "EC2 보안그룹 Ingress 규칙 생성"
   type = map(list(object({
+    create_yn                = bool
     security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
@@ -65,6 +67,7 @@ variable "ec2_security_group_ingress_rules" {
 variable "ec2_security_group_egress_rules" {
   description = "EC2 보안그룹 Egress 규칙 생성"
   type = map(list(object({
+    create_yn                = bool
     security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
@@ -81,6 +84,7 @@ variable "ec2_security_group_egress_rules" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
+    create_yn = bool
 
     # SSH key pair
     key_pair_name         = string
@@ -110,9 +114,9 @@ variable "ec2_instance" {
   }))
 }
 
-####################
+########################################
 # 공통 태그 설정
-####################
+########################################
 variable "tags" {
   description = "공통 태그 설정"
   type        = map(string)

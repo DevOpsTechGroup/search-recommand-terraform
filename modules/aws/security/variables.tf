@@ -1,9 +1,10 @@
-####################
+########################################
 # IAM 설정
-####################
+########################################
 variable "iam_custom_role" {
   description = "IAM Role 생성"
   type = map(object({
+    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -23,6 +24,7 @@ variable "iam_custom_role" {
 variable "iam_custom_policy" {
   description = "IAM 사용자 생성 정책"
   type = map(object({
+    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -40,25 +42,26 @@ variable "iam_custom_policy" {
 variable "iam_managed_policy" {
   description = "IAM 관리형 정책"
   type = map(object({
-    name = string
-    arn  = string
-    env  = string
+    create_yn = bool
+    name      = string
+    arn       = string
+    env       = string
   }))
 }
 
 variable "iam_policy_attachment" {
   description = "IAM Policy를 Role에 연결"
   type = map(object({
+    create_yn   = bool
     role_name   = optional(string)
     policy_name = optional(string)
     policy_type = optional(string)
   }))
 }
 
-####################
+########################################
 # ECS 클러스터 설정
-####################
-# ECS Role
+########################################
 variable "ecs_task_role" {
   description = "ECS Task Role 설정"
   type        = string
