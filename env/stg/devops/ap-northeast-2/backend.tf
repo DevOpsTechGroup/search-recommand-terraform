@@ -17,12 +17,12 @@
   - !important
     - dynamodb_table은 미리 생성되어 있어야함
 */
-# terraform {
-#   backend "s3" {
-#     bucket         = "terraform-s3-ymkim-state" # s3 버킷명
-#     key            = "dev/terraform.tfstate"    # state 파일 s3 저장 경로
-#     region         = "ap-northeast-2"           # s3 리전
-#     encrypt        = true                       # terraform.state 파일 암호화 지정 여부
-#     dynamodb_table = "tfstate-lock"             # DynamoDB 테이블명, DynamoDB 테이블을 사용한 잠금 기능(동시성 제어)
-#   }
-# }
+terraform {
+  backend "s3" {
+    bucket         = "search-recommand-tfstate-stg"                       # s3 버킷명
+    key            = "stg/devops/ap-northeast-2/search-recommand.tfstate" # state 파일 s3 저장 경로
+    region         = "ap-northeast-2"                                     # s3 리전
+    encrypt        = true                                                 # terraform.state 파일 암호화 지정 여부
+    dynamodb_table = "search-recommand-tfstate-lock-stg"                  # DynamoDB 테이블명, DynamoDB 테이블을 사용한 잠금 기능(동시성 제어)
+  }
+}

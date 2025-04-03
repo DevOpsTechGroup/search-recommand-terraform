@@ -570,6 +570,7 @@ variable "s3_bucket" {
       ignore_public_acls      = bool
       restrict_public_buckets = bool
     })
+    env = string
   }))
 }
 
@@ -587,6 +588,7 @@ variable "dynamodb_table" {
       name = string
       type = string
     })
+    env = string
   }))
 }
 

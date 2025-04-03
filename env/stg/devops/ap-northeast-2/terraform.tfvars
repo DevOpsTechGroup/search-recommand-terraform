@@ -798,6 +798,7 @@ s3_bucket = {
       ignore_public_acls      = true
       restrict_public_buckets = true
     }
+    env = "stg"
   }
 }
 
@@ -814,6 +815,7 @@ dynamodb_table = {
       name = "LockID"
       type = "S"
     }
+    env = "stg"
   }
 }
 

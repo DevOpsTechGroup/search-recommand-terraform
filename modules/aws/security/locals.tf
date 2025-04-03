@@ -10,7 +10,7 @@ locals {
         description         = "search-recommand alb http security group ingress rule"
         from_port           = 80
         to_port             = 80
-        protocol            = "http"
+        protocol            = "tcp"
         cidr_ipv4 = [
           "220.75.180.0/24"
         ]
@@ -24,7 +24,7 @@ locals {
         description         = "search-recommand alb https security group ingress rule"
         from_port           = 443
         to_port             = 443
-        protocol            = "https"
+        protocol            = "tcp"
         cidr_ipv4 = [
           "220.75.180.0/24"
         ]
