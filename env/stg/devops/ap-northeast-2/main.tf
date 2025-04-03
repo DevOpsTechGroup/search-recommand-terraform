@@ -1,5 +1,26 @@
 # env/stg/devops/ap-northeast-2/main.tf
 
+module "security" {
+  # INFO: 보안그룹의 경우 1개의 모듈에서 모두 생성 후 ID만 넘기는 방식으로 사용
+  # 추가적으로, 보안 그룹의 ingress/egress rule은 생성되는 resource의 locals.tf에서 처리
+  source = "../../../../modules/aws/security"
+
+  # 보안그룹
+  alb_security_group = var.alb_security_group
+  ecs_security_group = var.ecs_security_group
+  ec2_security_group = var.ec2_security_group
+
+  # 네트워크 관련 설정
+  vpc_id = module.network.vpc_id
+
+  # 프로젝트 기본 설정
+  tags = var.tags # 공통 태그
+
+  depends_on = [
+    module.network
+  ]
+}
+
 module "network" {
   source = "../../../../modules/aws/network"
 
@@ -20,25 +41,27 @@ module "elb" {
   source = "../../../../modules/aws/elb"
 
   # 로드밸런서 관련 설정
-  alb                = var.alb                # 생성을 원하는 ALB 관련 정보
-  alb_listener       = var.alb_listener       # 위에서 생성한 ALB Listener 관련 정보
-  alb_listener_rule  = var.alb_listener_rule  # ALB Listener Rule
-  target_group       = var.target_group       # ALB의 Target Group
-  alb_security_group = var.alb_security_group # ALB 보안그룹 이름
-  public_subnet_ids  = module.network.public_subnet_ids
+  alb                   = var.alb                                       # 생성을 원하는 ALB 관련 정보
+  alb_listener          = var.alb_listener                              # 위에서 생성한 ALB Listener 관련 정보
+  alb_listener_rule     = var.alb_listener_rule                         # ALB Listener Rule
+  target_group          = var.target_group                              # ALB의 Target Group
+  alb_security_group    = var.alb_security_group                        # ALB 보안그룹 이름
+  alb_security_group_id = values(module.security.alb_security_group_id) # ALB 보안그룹 ID
+  public_subnet_ids     = module.network.public_subnet_ids
 
-  # ECS 관련 설정
-  ecs_security_group_id = module.ecs.ecs_security_group
+  # 네트워크 관련 설정
+  vpc_id = module.network.vpc_id
 
   # 프로젝트 기본 설정
   project_name       = var.project_name
   env                = var.env
   availability_zones = var.availability_zones
   tags               = var.tags
-  vpc_id             = module.network.vpc_id
 
   depends_on = [
-    module.network
+    module.network,
+    module.iam,
+    module.security
   ]
 }
 
@@ -52,8 +75,8 @@ module "ecr" {
   tags = var.tags
 }
 
-module "security" {
-  source = "../../../../modules/aws/security"
+module "iam" {
+  source = "../../../../modules/aws/iam"
 
   # IAM 관련 설정
   iam_custom_role       = var.iam_custom_role
@@ -92,17 +115,17 @@ module "ecs" {
   ecs_cpu_scale_out_alert          = var.ecs_cpu_scale_out_alert          # ECS AutoScaling Alert
 
   # ECS IAM 권한 설정
-  ecs_task_role_arn           = module.security.iam_resources["ecs-task-role-arn"]      # security module의 output 변수 사용
-  ecs_task_exec_role_arn      = module.security.iam_resources["ecs-task-exec-role-arn"] # security module의 output 변수 사용
-  ecs_security_group          = var.ecs_security_group                                  # ECS Service 보안그룹 지정
-  ecs_container_image_version = var.ecs_container_image_version                         # ECS Container Image 버전
+  ecs_task_role_arn           = module.iam.iam_resources["ecs-task-role-arn"]      # security module의 output 변수 사용
+  ecs_task_exec_role_arn      = module.iam.iam_resources["ecs-task-exec-role-arn"] # security module의 output 변수 사용
+  ecs_security_group          = var.ecs_security_group                             # ECS Service 보안그룹 지정
+  ecs_container_image_version = var.ecs_container_image_version                    # ECS Container Image 버전
 
   # ECS Service에서 ELB 연동 시 사용
   alb_tg_arn       = module.elb.alb_target_group_arn # loadbalancer module의 output 변수 사용
   alb_listener_arn = module.elb.alb_listener_arn     # loadbalancer module의 output 변수 사용
 
   # TODO: 현재는 ALB 보안그룹을 1개만 받고 있는데, N개의 ALB 보안그룹 받을 수 있게 수정 필요
-  alb_security_group_id = module.elb.alb_security_group_id # ECS에서 사용하는 ALB 보안 그룹 ID
+  alb_security_group_id = module.security.alb_security_group_id # ECS에서 사용하는 ALB 보안 그룹 ID
 
   # 프로젝트 기본 설정
   project_name       = var.project_name
@@ -116,7 +139,8 @@ module "ecs" {
   depends_on = [
     module.network, # network 모듈 참조
     module.elb,     # load balancer 모듈 참조
-    module.security # security 모듈 참조
+    module.iam,     # IAM 모듈 참조
+    module.security # security 보안그룹 모듈 참조
   ]
 }
 
@@ -140,7 +164,9 @@ module "ec2" {
   availability_zones = var.availability_zones
 
   depends_on = [
-    module.network # network 모듈 참조
+    module.network, # network 모듈 참조
+    module.iam,
+    module.security
   ]
 }
 

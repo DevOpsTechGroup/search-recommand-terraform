@@ -5,10 +5,3 @@ output "container_definitions" {
     for key, value in data.template_file.container_definitions : key => value.rendered
   }
 }
-
-output "ecs_security_group" {
-  description = "ECS 보안 그룹 정보"
-  value = {
-    for key, value in aws_security_group.ecs_security_group : key => value.id
-  }
-}

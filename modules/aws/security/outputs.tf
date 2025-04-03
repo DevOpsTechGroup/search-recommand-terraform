@@ -1,40 +1,47 @@
 # modules/aws/security/outputs.tf
 
-output "iam_resources" {
-  description = "Dynamically generated map of IAM roles and policies"
-  value = merge(
-    {
-      for key, role in merge(
-        try(aws_iam_role.custom_role, {}),
-      ) : "${key}-id" => role.id
-    },
-    {
-      for key, role in merge(
-        try(aws_iam_role.custom_role, {}),
-      ) : "${key}-name" => role.name
-    },
-    {
-      for key, role in merge(
-        try(aws_iam_role.custom_role, {}),
-      ) : "${key}-arn" => role.arn
-    },
-    {
-      for key, policy in merge(
-        try(aws_iam_policy.custom_policy, {}),
-        try(data.aws_iam_policy.managed_policy, {})
-      ) : "${key}-id" => policy.id
-    },
-    {
-      for key, policy in merge(
-        try(aws_iam_policy.custom_policy, {}),
-        try(data.aws_iam_policy.managed_policy, {})
-      ) : "${key}-name" => policy.name
-    },
-    {
-      for key, policy in merge(
-        try(aws_iam_policy.custom_policy, {}),
-        try(data.aws_iam_policy.managed_policy, {})
-      ) : "${key}-arn" => policy.arn
-    }
-  )
+# TODO: ALB는 N개의 보안그룹을 저장할 수 있도록 수정 필요
+
+# 생성된 ALB 보안 그룹의 ARN 반환
+output "alb_security_group_arn" {
+  description = "생성된 ALB 보안 그룹의 ARN 반환"
+  value       = aws_security_group.alb_security_group.arn
+}
+
+# 생성된 ALB 보안 그룹의 ID 반환
+output "alb_security_group_id" {
+  description = "생성된 ALB 보안 그룹의 ID 반환"
+  value       = aws_security_group.alb_security_group.id
+}
+
+# 생성된 ECS 보안 그룹의 ARN 반환
+output "ecs_security_group_arn" {
+  description = "생성된 ECS 보안 그룹의 ARN 반환"
+  value = {
+    for key, value in aws_security_group.ecs_security_group : key => value.arn
+  }
+}
+
+# 생성된 ECS 보안 그룹의 ID 반환
+output "ecs_security_group_id" {
+  description = "생성된 ECS 보안 그룹의 ID 반환"
+  value = {
+    for key, value in aws_security_group.ecs_security_group : key => value.id
+  }
+}
+
+# 생성된 EC2 보안 그룹의 ARN 반환
+output "ec2_security_group_arn" {
+  description = "생성된 EC2 보안 그룹의 ARN 반환"
+  value = {
+    for key, value in aws_security_group.ec2_security_group : key => value.arn
+  }
+}
+
+# 생성된 EC2 보안 그룹의 ID 반환
+output "ec2_security_group_id" {
+  description = "생성된 EC2 보안 그룹의 ID 반환"
+  value = {
+    for key, value in aws_security_group.ec2_security_group : key => value.id
+  }
 }

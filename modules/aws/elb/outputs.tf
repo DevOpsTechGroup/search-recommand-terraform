@@ -31,15 +31,3 @@ output "alb_listener_arn" {
     for key, value in aws_lb_listener.alb_listener : key => value.arn
   }
 }
-
-# 생성된 ALB 보안 그룹의 ARN 반환
-output "alb_security_group_arn" {
-  description = "생성된 ALB 보안 그룹의 ARN 반환"
-  value       = aws_security_group.alb_security_group.arn
-}
-
-# 생성된 ALB 보안 그룹의 ID 반환
-output "alb_security_group_id" {
-  description = "생성된 ALB 보안 그룹의 ID 반환"
-  value       = aws_security_group.alb_security_group.id
-}
