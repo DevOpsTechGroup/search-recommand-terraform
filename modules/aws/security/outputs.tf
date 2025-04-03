@@ -5,13 +5,17 @@
 # 생성된 ALB 보안 그룹의 ARN 반환
 output "alb_security_group_arn" {
   description = "생성된 ALB 보안 그룹의 ARN 반환"
-  value       = aws_security_group.alb_security_group.arn
+  value = {
+    for key, sg in aws_security_group.alb_security_group : key => sg.arn
+  }
 }
 
 # 생성된 ALB 보안 그룹의 ID 반환
 output "alb_security_group_id" {
   description = "생성된 ALB 보안 그룹의 ID 반환"
-  value       = aws_security_group.alb_security_group.id
+  value = {
+    for key, sg in aws_security_group.alb_security_group : key => sg.id
+  }
 }
 
 # 생성된 ECS 보안 그룹의 ARN 반환

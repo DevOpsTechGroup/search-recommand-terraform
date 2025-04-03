@@ -19,7 +19,7 @@ locals {
       },
       {
         create_yn           = true
-        security_group_name = "search-recommand-alb-sg-ingress-rule"
+        security_group_name = "search-recommand-alb-sg"
         type                = "ingress"
         description         = "search-recommand alb https security group ingress rule"
         from_port           = 443

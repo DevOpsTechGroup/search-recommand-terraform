@@ -40,7 +40,7 @@ resource "aws_instance" "ec2" {
   key_name = aws_key_pair.ec2_key_pair[each.key].key_name # SSH key pair 지정
 
   vpc_security_group_ids = [ # 인스턴스에 지정될 보안그룹 ID 지정
-    aws_security_group.ec2_security_group[each.value.security_group_name].id
+    var.ec2_security_group_id[each.value.security_group_name]
   ]
   #iam_instance_profile = xxxx # EC2에 IAM 권한이 필요한 경우 활성화
 

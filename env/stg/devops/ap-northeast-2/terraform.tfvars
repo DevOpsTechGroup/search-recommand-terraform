@@ -61,14 +61,15 @@ enable_dns_hostnames = true
 ########################################
 alb = {
   search-recommand-alb = {
-    create_yn                            = true
-    alb_name                             = "search-recommand-alb"
-    alb_internal                         = false
-    alb_load_balancer_type               = "application"
-    alb_enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
-    alb_enable_cross_zone_load_balancing = true
-    alb_idle_timeout                     = 300
-    env                                  = "stg"
+    create_yn                        = true
+    name                             = "search-recommand-alb"
+    internal                         = false
+    load_balancer_type               = "application"
+    enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
+    enable_cross_zone_load_balancing = true
+    idle_timeout                     = 300
+    security_group_name              = "search-recommand-alb-sg"
+    env                              = "stg"
   }
 }
 
@@ -126,12 +127,13 @@ alb_listener_rule = {
 # ALB Target Group 생성
 target_group = {
   opensearch-alb-tg = {
-    create_yn                = true
-    target_group_name        = "opensearch-alb-tg"
-    target_group_port        = 10091
-    target_group_elb_type    = "ALB"
-    target_group_target_type = "ip" # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
-    env                      = "stg"
+    create_yn   = true
+    name        = "opensearch-alb-tg"
+    port        = 10091
+    elb_type    = "ALB"
+    protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
+    target_type = "ip"   # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
+    env         = "stg"
     health_check = {
       path                = "/health-check"
       enabled             = true
@@ -143,15 +145,15 @@ target_group = {
       unhealthy_threshold = 5
       internal            = false
     }
-    enabled = true # health_check 바깥에 위치해야 함
   },
   elasticsearch-alb-tg = {
-    create_yn                = true
-    target_group_name        = "elasticsearch-alb-tg"
-    target_group_port        = 10092
-    target_group_elb_type    = "ALB"
-    target_group_target_type = "ip" # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
-    env                      = "stg"
+    create_yn   = true
+    name        = "elasticsearch-alb-tg"
+    port        = 10092
+    elb_type    = "ALB"
+    protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
+    target_type = "ip"   # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
+    env         = "stg"
     health_check = {
       path                = "/health-check"
       enabled             = true
@@ -163,9 +165,10 @@ target_group = {
       unhealthy_threshold = 5
       internal            = false
     }
-    enabled = true # health_check 바깥에 위치해야 함
   }
 }
+
+alb_security_group_id = {}
 
 ########################################
 # ECR 설정
@@ -551,7 +554,7 @@ ecs_appautoscaling_target_policy = {
 # ECS Autoscaling Cloudwatch policy
 ecs_cpu_scale_out_alert = {
   opensearch-ecs-service = {
-    create_yn           = true
+    create_yn           = false
     alarm_name          = "ECSOpenSearchScaleOutAlarm"
     comparison_operator = "GreaterThanOrEqualToThreshold" # 메트릭이 임계값보다 크거나 같으면 발동
     evaluation_periods  = "1"                             # 평가 주기는 1번 -> 1번만 조건에 맞아도 이벤트 발생
@@ -567,6 +570,8 @@ ecs_cpu_scale_out_alert = {
     env = "stg"
   }
 }
+
+ecs_security_group_id = {}
 
 ########################################
 # EC2 설정
@@ -765,6 +770,8 @@ ec2_instance = {
     ]
   }
 }
+
+ec2_security_group_id = {}
 
 ########################################
 # S3 설정

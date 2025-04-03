@@ -4,7 +4,7 @@ resource "aws_security_group" "alb_security_group" {
     for key, value in var.alb_security_group : key => value if value.create_yn
   }
 
-  name        = each.value.name
+  name        = each.value.security_group_name
   description = each.value.description
   vpc_id      = var.vpc_id
 
@@ -20,15 +20,17 @@ resource "aws_security_group" "alb_security_group" {
 # ALB security group ingress rule
 resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = {
-    for key, value in local.alb_security_group_rules.ingress_rules : key => value if value.create_yn
+    for idx, rule in flatten(values(local.alb_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
   }
 
   type              = each.value.type
   description       = each.value.description
   from_port         = each.value.from_port
   to_port           = each.value.to_port
-  protocol          = each.value.ip_protocol
-  security_group_id = aws_security_group.alb_security_group.id
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.alb_security_group[each.value.security_group_name].id
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
@@ -36,14 +38,18 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
 
 # ALB security group egress rule
 resource "aws_security_group_rule" "alb_security_group_egress_rule" {
-  for_each = local.alb_security_group_rules.egress_rules
+  for_each = {
+    for idx, rule in flatten(values(local.alb_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
 
   type              = each.value.type
   description       = each.value.description
   from_port         = each.value.from_port
   to_port           = each.value.to_port
-  protocol          = each.value.ip_protocol
-  security_group_id = aws_security_group.alb_security_group.id
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.alb_security_group[each.value.security_group_name].id
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
@@ -67,8 +73,8 @@ resource "aws_security_group" "ecs_security_group" {
 # ECS security group ingress rule
 resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = {
-    for rule in flatten(values(local.ecs_security_group_ingress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    for idx, rule in flatten(values(local.ecs_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
     if rule.create_yn
   }
 
@@ -87,8 +93,8 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
 # ECS security group egress rule
 resource "aws_security_group_rule" "ecs_egress_security_group" {
   for_each = {
-    for rule in flatten(values(local.ecs_security_group_egress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    for idx, rule in flatten(values(local.ecs_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
     if rule.create_yn
   }
 
@@ -121,8 +127,8 @@ resource "aws_security_group" "ec2_security_group" {
 # EC2 security group ingress rule
 resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
-    for rule in flatten(values(local.var.ec2_security_group_ingress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    for idx, rule in flatten(values(local.ec2_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
     if rule.create_yn
   }
 
@@ -140,8 +146,8 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
 # EC2 security group egress rule
 resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
-    for rule in flatten(values(local.ec2_security_group_egress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
+    for idx, rule in flatten(values(local.ec2_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
     if rule.create_yn
   }
 

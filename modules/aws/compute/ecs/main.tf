@@ -92,7 +92,7 @@ resource "aws_ecs_service" "ecs_service" {
   # 네트워크 구성 (Private Subnet 사용)
   network_configuration {
     subnets          = var.private_subnet_ids # subnet-xxxx, subnet-xxxx, subnet-xxxx
-    security_groups  = [aws_security_group.ecs_security_group[each.value.security_group_name].id]
+    security_groups  = [var.ecs_security_group_id[each.value.security_group_name]]
     assign_public_ip = each.value.assign_public_ip
   }
 
@@ -122,8 +122,7 @@ resource "aws_ecs_service" "ecs_service" {
   # ECS Service는 Cluster, TD, 보안그룹이 생성된 이후에 생성 되어야 함
   depends_on = [
     aws_ecs_cluster.ecs_cluster,
-    aws_ecs_task_definition.ecs_task_definition,
-    aws_security_group.ecs_security_group
+    aws_ecs_task_definition.ecs_task_definition
   ]
 
   tags = merge(var.tags, {

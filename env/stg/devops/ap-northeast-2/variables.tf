@@ -98,14 +98,15 @@ variable "enable_dns_hostnames" {
 variable "alb" {
   description = "ALB 설정"
   type = map(object({
-    create_yn                            = bool
-    alb_name                             = string
-    alb_internal                         = bool
-    alb_load_balancer_type               = string
-    alb_enable_deletion_protection       = bool
-    alb_enable_cross_zone_load_balancing = bool
-    alb_idle_timeout                     = number
-    env                                  = string
+    create_yn                        = bool
+    name                             = string
+    internal                         = bool
+    load_balancer_type               = string
+    enable_deletion_protection       = bool
+    enable_cross_zone_load_balancing = bool
+    idle_timeout                     = number
+    security_group_name              = string
+    env                              = string
   }))
 }
 
@@ -160,12 +161,13 @@ variable "alb_listener_rule" {
 variable "target_group" {
   description = "ALB Target Group 설정"
   type = map(object({
-    create_yn                = bool
-    target_group_name        = string
-    target_group_port        = number
-    target_group_elb_type    = string
-    target_group_target_type = string
-    env                      = string
+    create_yn   = bool
+    name        = string
+    port        = number
+    elb_type    = string
+    protocol    = string
+    target_type = string
+    env         = string
     health_check = object({
       path                = string
       enabled             = bool
@@ -178,6 +180,12 @@ variable "target_group" {
       internal            = bool
     })
   }))
+}
+
+# ALB 보안그룹 ID
+variable "alb_security_group_id" {
+  description = "ALB 보안그룹 ID"
+  type        = map(string)
 }
 
 ########################################
@@ -443,6 +451,12 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
+# ECS 보안그룹 ID
+variable "ecs_security_group_id" {
+  description = "ECS 보안그룹 ID"
+  type        = map(string)
+}
+
 ########################################
 # EC2 설정
 ########################################
@@ -524,17 +538,38 @@ variable "ec2_instance" {
   }))
 }
 
+# EC2 보안그룹 ID
+variable "ec2_security_group_id" {
+  description = "EC2 보안그룹 ID"
+  type        = map(string)
+}
+
 ########################################
 # S3 설정
 ########################################
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    create_yn              = bool
-    bucket_name            = string
-    versioning             = bool
-    server_side_encryption = bool
-    public_access_block    = bool
+    create_yn   = bool
+    bucket_name = string
+    bucket_versioning = object({
+      versioning_configuration = object({
+        status = string
+      })
+    })
+    server_side_encryption = object({
+      rule = object({
+        apply_server_side_encryption_by_default = object({
+          sse_algorithm = string
+        })
+      })
+    })
+    public_access_block = object({
+      block_public_acls       = bool
+      block_public_policy     = bool
+      ignore_public_acls      = bool
+      restrict_public_buckets = bool
+    })
   }))
 }
 

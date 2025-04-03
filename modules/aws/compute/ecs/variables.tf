@@ -244,6 +244,18 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
+# ECS 보안그룹 ID
+variable "ecs_security_group_id" {
+  description = "ECS 보안그룹 ID"
+  type        = map(string)
+}
+
+# ECS 보안그룹 ARN
+variable "ecs_security_group_arn" {
+  description = "ECS 보안그룹 ARN"
+  type        = map(string)
+}
+
 ########################################
 # 로드밸런서 설정
 ########################################
@@ -257,12 +269,6 @@ variable "alb_tg_arn" {
 variable "alb_listener_arn" {
   description = "AWS ECS ALB LISTENER ARN"
   type        = map(string)
-}
-
-# ECS에서 사용하는 ALB 보안 그룹 ID
-variable "alb_security_group_id" {
-  description = "ECS에서 사용하는 ALB 보안 그룹 ID"
-  type        = string
 }
 
 ########################################

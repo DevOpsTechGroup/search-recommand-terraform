@@ -41,16 +41,17 @@ variable "public_subnet_ids" {
 # Application Load Balancer
 # ALB의 KEY 이름과, Target Group 변수의 KEY 이름을 일치시켜야 함
 variable "alb" {
-  description = "Application Load Balancer configuration"
+  description = "ALB 설정"
   type = map(object({
-    create_yn                            = bool
-    alb_name                             = string
-    alb_internal                         = bool
-    alb_load_balancer_type               = string
-    alb_enable_deletion_protection       = bool
-    alb_enable_cross_zone_load_balancing = bool
-    alb_idle_timeout                     = number
-    env                                  = string
+    create_yn                        = bool
+    name                             = string
+    internal                         = bool
+    load_balancer_type               = string
+    enable_deletion_protection       = bool
+    enable_cross_zone_load_balancing = bool
+    idle_timeout                     = number
+    security_group_name              = string
+    env                              = string
   }))
 }
 
@@ -105,12 +106,13 @@ variable "alb_listener_rule" {
 variable "target_group" {
   description = "Target group configuration"
   type = map(object({
-    create_yn                = bool
-    target_group_name        = string
-    target_group_port        = number
-    target_group_elb_type    = string
-    target_group_target_type = string
-    env                      = string
+    create_yn   = bool
+    name        = string
+    port        = number
+    elb_type    = string
+    protocol    = string
+    target_type = string
+    env         = string
     health_check = object({
       path                = string
       enabled             = bool
@@ -128,7 +130,7 @@ variable "target_group" {
 # ECS 보안그룹 ID
 variable "alb_security_group_id" {
   description = "ECS 보안그룹 ID"
-  type        = list(string)
+  type        = map(string)
 }
 
 ########################################
