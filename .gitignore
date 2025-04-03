@@ -134,9 +134,7 @@ dist
 *.tfstate 
 *.tfstate.backup 
 # *.tfvars
-terraform-dev.tfvars
-terraform-stage.tfvars
-terraform-prod.tfvars
+terraform.tfvars
 .terraform.tfstate.lock.info
 .apikey.txt
 
