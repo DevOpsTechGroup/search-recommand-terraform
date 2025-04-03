@@ -5,7 +5,7 @@ resource "aws_s3_bucket" "s3" {
   }
 
   #   region = var.aws_region
-  bucket = each.value.bucket_name
+  bucket = "${each.value.bucket_name}-${each.value.env}"
 
   tags = merge(var.tags, {
     Name = "${each.value.bucket_name}-${local.env}"
@@ -59,12 +59,16 @@ resource "aws_dynamodb_table" "terraform_state_lock" {
     for key, value in var.dynamodb_table : key => value if value.create_yn
   }
 
-  name         = each.value.name         # DynamoDB Table 이름 지정
-  hash_key     = each.value.hash_key     # DynamoDB 테이블의 파티션 키(Partition Key, Hash Key) 이름
-  billing_mode = each.value.billing_mode # 비용 관련 설정(사용한 만큼만 과금)
+  name         = "${each.value.name}-${each.value.env}" # DynamoDB Table 이름 지정
+  hash_key     = each.value.hash_key                    # DynamoDB 테이블의 파티션 키(Partition Key, Hash Key) 이름
+  billing_mode = each.value.billing_mode                # 비용 관련 설정(사용한 만큼만 과금)
 
   attribute {
     name = each.value.attribute.name # 해시 키(Primary Key)로 사용할 컬럼 지정
     type = each.value.attribute.type # 데이터 타입을 'S'(String)로 지정
   }
+
+  tags = merge(var.tags, {
+    Name = "${each.value.name}-${each.value.env}"
+  })
 }
