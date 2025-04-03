@@ -1,97 +1,57 @@
-####################
-# IAM 설정
-####################
-variable "iam_custom_role" {
-  description = "IAM Role 생성"
+########################################
+# 네트워크 설정
+########################################
+# VPC ID(이미 생성되어 있는 VPC ID를 data 통해 받아오거나, 아니면 생성된 VPC ID를 넣는다)
+variable "vpc_id" {
+  description = "VPC ID 설정"
+  type        = string
+}
+
+########################################
+# 로드밸런서 설정
+########################################
+# ALB 보안그룹 이름
+variable "alb_security_group" {
+  description = "ALB 보안그룹 이름"
   type = map(object({
-    name        = optional(string)
-    description = optional(string)
-    version     = optional(string)
-    statement = object({
-      Sid    = optional(string)
-      Action = string
-      Effect = string
-      Principal = object({
-        Service = string
-      })
-    })
-    env = string
+    create_yn           = bool
+    security_group_name = string
+    description         = string
+    env                 = string
   }))
 }
 
-# 사용자가 생성하는 정책
-variable "iam_custom_policy" {
-  description = "IAM 사용자 생성 정책"
+########################################
+# ECS 설정
+########################################
+# ECS Service 보안그룹
+variable "ecs_security_group" {
+  description = "ECS 보안그룹 설정"
   type = map(object({
-    name        = optional(string)
-    description = optional(string)
-    version     = optional(string)
-    statement = optional(object({
-      Sid      = optional(string)
-      Action   = optional(list(string))
-      Effect   = optional(string)
-      Resource = optional(list(string))
-    }))
-    env = string
+    create_yn           = bool
+    security_group_name = string
+    description         = string
+    env                 = string
   }))
 }
 
-# 관리형 정책
-variable "iam_managed_policy" {
-  description = "IAM 관리형 정책"
+########################################
+# EC2 설정
+########################################
+# EC2 보안그룹 설정
+variable "ec2_security_group" {
+  description = "EC2 보안그룹 생성"
   type = map(object({
-    name = string
-    arn  = string
-    env  = string
+    create_yn           = bool
+    security_group_name = optional(string)
+    description         = optional(string)
+    env                 = optional(string)
   }))
 }
 
-variable "iam_policy_attachment" {
-  description = "IAM Policy를 Role에 연결"
-  type = map(object({
-    role_name   = optional(string)
-    policy_name = optional(string)
-    policy_type = optional(string)
-  }))
-}
-
-####################
-# ECS 클러스터 설정
-####################
-# ECS Role
-variable "ecs_task_role" {
-  description = "ECS Task Role 설정"
-  type        = string
-}
-
-variable "ecs_task_role_policy" {
-  description = "ECS Task Policy 설정"
-  type        = string
-}
-
-variable "ecs_task_exec_role" {
-  description = "ECS Task Exec Role 설정"
-  type        = string
-}
-
-variable "ecs_task_exec_role_policy" {
-  description = "ECS Task Exec Policy 설정"
-  type        = string
-}
-
-variable "ecs_auto_scaling_role" {
-  description = "ECS Auto Scaling Role 설정"
-  type        = string
-}
-
-variable "ecs_auto_scaling_policy_arn" {
-  description = "ECS Auto Scaling Policy 설정"
-  type        = string
-}
-
-####################
+########################################
 # 공통 태그 설정
-####################
+########################################
 variable "tags" {
   description = "공통 태그 설정"
   type        = map(string)

@@ -12,13 +12,12 @@ data "template_file" "container_definitions" {
 # ECS cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
   for_each = {
-    for key, value in var.ecs_cluster : key => value if local.create_ecs_cluster
+    for key, value in var.ecs_cluster : key => value if value.create_yn
   }
 
   name = "${each.value.cluster_name}-${each.value.env}" # core-search-cluster-stg
 
   lifecycle {
-    # prevent_destroy = true
     create_before_destroy = true
   }
 
@@ -30,7 +29,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 # ECS task definition
 resource "aws_ecs_task_definition" "ecs_task_definition" {
   for_each = {
-    for key, value in var.ecs_task_definitions : key => value
+    for key, value in var.ecs_task_definitions : key => value if value.create_yn
   }
 
   family                   = "${each.value.task_family}-${each.value.env}"
@@ -79,7 +78,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 # ECS service
 resource "aws_ecs_service" "ecs_service" {
   for_each = {
-    for key, value in var.ecs_service : key => value if local.create_ecs_service
+    for key, value in var.ecs_service : key => value if value.create_yn
   }
 
   launch_type = each.value.launch_type
@@ -93,7 +92,7 @@ resource "aws_ecs_service" "ecs_service" {
   # 네트워크 구성 (Private Subnet 사용)
   network_configuration {
     subnets          = var.private_subnet_ids # subnet-xxxx, subnet-xxxx, subnet-xxxx
-    security_groups  = [aws_security_group.ecs_security_group[each.value.security_group_name].id]
+    security_groups  = [var.ecs_security_group_id[each.value.security_group_name]]
     assign_public_ip = each.value.assign_public_ip
   }
 
@@ -123,8 +122,7 @@ resource "aws_ecs_service" "ecs_service" {
   # ECS Service는 Cluster, TD, 보안그룹이 생성된 이후에 생성 되어야 함
   depends_on = [
     aws_ecs_cluster.ecs_cluster,
-    aws_ecs_task_definition.ecs_task_definition,
-    aws_security_group.ecs_security_group
+    aws_ecs_task_definition.ecs_task_definition
   ]
 
   tags = merge(var.tags, {
@@ -138,7 +136,7 @@ resource "aws_ecs_service" "ecs_service" {
 resource "aws_appautoscaling_target" "ecs_target" {
   # TODO: ECS Service는 기본적으로 생성하지 않음, 그리고 AG 관련 설정도 ECS Service 변수에서 받아와서 사용 필요
   for_each = {
-    for key, value in var.ecs_appautoscaling_target : key => value if local.create_ecs_appautoscaling_target
+    for key, value in var.ecs_appautoscaling_target : key => value if value.create_yn
   }
 
   min_capacity       = each.value.min_capacity       # 최소 Task 2개가 항상 실행되도록 설정
@@ -155,7 +153,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 # ECS autoscaling scale out policy
 resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
   for_each = {
-    for key, value in var.ecs_appautoscaling_target_policy : key => value if local.create_ecs_appautoscaling_target_policy
+    for key, value in var.ecs_appautoscaling_target_policy : key => value if value.create_yn
   }
 
   name               = each.value.scale_out.name                                         # AutoScaling 정책 이름
@@ -184,7 +182,7 @@ resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
 # ECS scaleout policy alarm
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
   for_each = {
-    for key, value in var.ecs_cpu_scale_out_alert : key => value if local.create_ecs_cpu_scale_out_alert
+    for key, value in var.ecs_cpu_scale_out_alert : key => value if value.create_yn
   }
 
   // TODO: ECS ScaleOut CPU 알람 생성 및 설정
@@ -211,58 +209,4 @@ resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
   tags = merge(var.tags, {
     Name = "${each.value.alarm_name}-${each.value.env}"
   })
-}
-
-# ECS security group
-resource "aws_security_group" "ecs_security_group" {
-  for_each = {
-    for key, value in var.ecs_security_group : key => value if local.create_ecs_security_group
-  }
-
-  name        = each.value.security_group_name # 보안그룹명
-  description = each.value.description         # 보안그룹 내용
-  vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
-
-  tags = merge(var.tags, {
-    Name = "${each.value.security_group_name}-${var.env}"
-  })
-}
-
-# ECS security group ingress rule
-resource "aws_security_group_rule" "ecs_ingress_security_group" {
-  for_each = {
-    for rule in flatten(values(local.ecs_security_group_ingress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ecs_security_group_ingress_rule
-  }
-
-  type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
-  description       = each.value.description                                                   # 보안그룹 내용
-  from_port         = each.value.from_port                                                     # 포트 시작 허용 범위
-  to_port           = each.value.to_port                                                       # 포트 종료 허용 범위
-  protocol          = each.value.protocol                                                      # 보안그룹 프로토콜(TCP.. 등)
-  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id # 매핑되는 보안그룹명
-
-  # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
-  source_security_group_id = try(each.value.source_security_group_id, null) # 다른 보안 그룹 참조 시 지정
-  cidr_blocks              = try(each.value.cidr_ipv4, null)                # IP 범위 지정
-}
-
-# ECS security group egress rule
-resource "aws_security_group_rule" "ecs_egress_security_group" {
-  for_each = {
-    for rule in flatten(values(local.ecs_security_group_egress_rules)) :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ecs_security_group_egress_rule
-  }
-
-  type              = each.value.type
-  description       = each.value.description
-  from_port         = each.value.from_port
-  to_port           = each.value.to_port
-  protocol          = each.value.protocol
-  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id
-
-  source_security_group_id = try(each.value.referenced_security_group_id, null)
-  cidr_blocks              = try(each.value.cidr_ipv4, null)
 }

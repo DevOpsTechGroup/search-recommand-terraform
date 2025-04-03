@@ -18,7 +18,7 @@ data "aws_ami" "amazon_ami" {
 # EC2 instance
 resource "aws_instance" "ec2" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_ec2_instance
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   ami           = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
@@ -40,7 +40,7 @@ resource "aws_instance" "ec2" {
   key_name = aws_key_pair.ec2_key_pair[each.key].key_name # SSH key pair 지정
 
   vpc_security_group_ids = [ # 인스턴스에 지정될 보안그룹 ID 지정
-    aws_security_group.ec2_security_group[each.value.security_group_name].id
+    var.ec2_security_group_id[each.value.security_group_name]
   ]
   #iam_instance_profile = xxxx # EC2에 IAM 권한이 필요한 경우 활성화
 
@@ -62,7 +62,7 @@ resource "aws_instance" "ec2" {
 # EC2 key pair Decide encryption method + generate a TLS/SSL private key
 resource "tls_private_key" "ec2_key_pair_rsa" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_tls_private_key
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   algorithm = each.value.key_pair_algorithm # RSA 알고리즘 설정
@@ -72,7 +72,7 @@ resource "tls_private_key" "ec2_key_pair_rsa" {
 # EC2 key pair
 resource "aws_key_pair" "ec2_key_pair" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_key_pair
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   key_name   = each.value.key_pair_name
@@ -82,63 +82,10 @@ resource "aws_key_pair" "ec2_key_pair" {
 # EC2 key pair to save local file
 resource "local_file" "ec2_key_pair_local_file" {
   for_each = {
-    for key, value in var.ec2_instance : key => value if local.create_local_file
+    for key, value in var.ec2_instance : key => value if value.create_yn
   }
 
   content         = tls_private_key.ec2_key_pair_rsa[each.key].private_key_pem
   filename        = "${path.module}/${each.value.local_file_name}"
   file_permission = each.value.local_file_permission
-}
-
-# EC2 security group
-resource "aws_security_group" "ec2_security_group" {
-  for_each = {
-    for key, value in var.ec2_security_group : key => value if local.create_ec2_security_group
-  }
-
-  name        = each.value.security_group_name # 보안그룹명
-  description = each.value.description         # 보안그룹 내용
-  vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
-
-  tags = merge(var.tags, {
-    Name = "${each.value.security_group_name}-${var.env}"
-  })
-}
-
-# EC2 security group ingress rule
-resource "aws_security_group_rule" "ec2_ingress_security_group" {
-  for_each = {
-    for rule in local.valid_ec2_security_group_ingress_rules :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ec2_security_group_ingress_rule
-  }
-
-  description       = each.value.description                                                   # 보안그룹 DESC
-  security_group_id = aws_security_group.ec2_security_group[each.value.security_group_name].id # 참조하는 보안그룹 ID
-  type              = each.value.type                                                          # 타입 지정(ingress, egress)
-  from_port         = each.value.from_port                                                     # 포트 시작 허용 범위
-  to_port           = each.value.to_port                                                       # 포트 종료 허용 범위
-  protocol          = each.value.protocol
-
-  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
-  source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
-}
-
-# EC2 security group egress rule
-resource "aws_security_group_rule" "ec2_egress_security_group" {
-  for_each = {
-    for rule in local.valid_ec2_security_group_egress_rules :
-    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}" => rule
-    if local.create_ec2_security_group_egress_rule
-  }
-
-  description       = each.value.description
-  security_group_id = aws_security_group.ec2_security_group[each.value.security_group_name].id # 참조하는 보안그룹 ID
-  type              = each.value.type
-  from_port         = each.value.from_port
-  to_port           = each.value.to_port
-  protocol          = each.value.protocol
-
-  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
-  source_security_group_id = try(each.value.source_security_group_id, null) # 아웃바운드로 보안그룹이 들어가야 하는 경우 사용
 }

@@ -84,6 +84,7 @@ variable "private_subnet_ids" {
 variable "ecs_cluster" {
   description = "ECS Cluster 설정"
   type = map(object({
+    create_yn    = bool
     cluster_name = string
     env          = string
   }))
@@ -93,6 +94,7 @@ variable "ecs_cluster" {
 variable "ecs_security_group" {
   description = "ECS 보안그룹 설정"
   type = map(object({
+    create_yn           = bool
     security_group_name = string
     description         = string
     env                 = string
@@ -122,6 +124,7 @@ variable "ecs_container_image_version" {
 variable "ecs_task_definitions" {
   description = "ECS Task Definition 설정"
   type = map(object({
+    create_yn                               = bool
     name                                    = string
     task_role                               = string
     task_exec_role                          = string
@@ -165,6 +168,7 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    create_yn                     = bool
     launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
     deployment_controller         = string
@@ -186,6 +190,7 @@ variable "ecs_service" {
 variable "ecs_appautoscaling_target" {
   description = "ECS Auto Scaling Target 설정"
   type = map(object({
+    create_yn          = bool
     min_capacity       = number # 최소 Task 2개가 항상 실행되도록 설정
     max_capacity       = number # 최대 Task 6개까지 증가 할 수 있도록 설정
     resource_id        = string # AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
@@ -200,6 +205,7 @@ variable "ecs_appautoscaling_target" {
 variable "ecs_appautoscaling_target_policy" {
   description = "ECS Auto Scaling Target Policy 설정"
   type = map(object({
+    create_yn = bool
     scale_out = object({
       name        = string
       policy_type = string
@@ -221,6 +227,7 @@ variable "ecs_appautoscaling_target_policy" {
 variable "ecs_cpu_scale_out_alert" {
   description = "ECS CPU Scale Out Alert Policy"
   type = map(object({
+    create_yn           = bool
     alarm_name          = string
     comparison_operator = string
     evaluation_periods  = string
@@ -237,6 +244,18 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
+# ECS 보안그룹 ID
+variable "ecs_security_group_id" {
+  description = "ECS 보안그룹 ID"
+  type        = map(string)
+}
+
+# ECS 보안그룹 ARN
+variable "ecs_security_group_arn" {
+  description = "ECS 보안그룹 ARN"
+  type        = map(string)
+}
+
 ########################################
 # 로드밸런서 설정
 ########################################
@@ -250,12 +269,6 @@ variable "alb_tg_arn" {
 variable "alb_listener_arn" {
   description = "AWS ECS ALB LISTENER ARN"
   type        = map(string)
-}
-
-# ECS에서 사용하는 ALB 보안 그룹 ID
-variable "alb_security_group_id" {
-  description = "ECS에서 사용하는 ALB 보안 그룹 ID"
-  type        = string
 }
 
 ########################################
