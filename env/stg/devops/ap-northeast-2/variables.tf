@@ -98,27 +98,34 @@ variable "enable_dns_hostnames" {
 variable "alb" {
   description = "ALB 설정"
   type = map(object({
-    alb_name                             = string
-    alb_internal                         = bool
-    alb_load_balancer_type               = string
-    alb_enable_deletion_protection       = bool
-    alb_enable_cross_zone_load_balancing = bool
-    alb_idle_timeout                     = number
-    env                                  = string
+    create_yn                        = bool
+    name                             = string
+    internal                         = bool
+    load_balancer_type               = string
+    enable_deletion_protection       = bool
+    enable_cross_zone_load_balancing = bool
+    idle_timeout                     = number
+    security_group_name              = string
+    env                              = string
   }))
 }
 
 # ALB 보안그룹 이름
 variable "alb_security_group" {
   description = "ALB 보안그룹 이름"
-  type        = string
-  default     = "search-alb-sg"
+  type = map(object({
+    create_yn           = bool
+    security_group_name = string
+    description         = string
+    env                 = string
+  }))
 }
 
 # ALB Listencer
 variable "alb_listener" {
   description = "ALB Listener 설정"
   type = map(object({
+    create_yn         = bool
     name              = string
     port              = number
     protocol          = string
@@ -140,6 +147,7 @@ variable "alb_listener" {
 variable "alb_listener_rule" {
   description = "ALB Listener rule 설정"
   type = map(object({
+    create_yn         = bool
     type              = string
     path              = list(string)
     alb_listener_name = string
@@ -153,11 +161,13 @@ variable "alb_listener_rule" {
 variable "target_group" {
   description = "ALB Target Group 설정"
   type = map(object({
-    target_group_name        = string
-    target_group_port        = number
-    target_group_elb_type    = string
-    target_group_target_type = string
-    env                      = string
+    create_yn   = bool
+    name        = string
+    port        = number
+    elb_type    = string
+    protocol    = string
+    target_type = string
+    env         = string
     health_check = object({
       path                = string
       enabled             = bool
@@ -172,6 +182,12 @@ variable "target_group" {
   }))
 }
 
+# ALB 보안그룹 ID
+variable "alb_security_group_id" {
+  description = "ALB 보안그룹 ID"
+  type        = map(string)
+}
+
 ########################################
 # ECR 설정
 ########################################
@@ -179,6 +195,7 @@ variable "target_group" {
 variable "ecr_repository" {
   description = "ECR Private Image Repository 설정"
   type = map(object({
+    create_yn                = bool
     ecr_repository_name      = string
     ecr_image_tag_mutability = string
     ecr_scan_on_push         = bool
@@ -193,6 +210,7 @@ variable "ecr_repository" {
 variable "iam_custom_role" {
   description = "IAM Role 생성"
   type = map(object({
+    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -212,6 +230,7 @@ variable "iam_custom_role" {
 variable "iam_custom_policy" {
   description = "IAM 사용자 생성 정책"
   type = map(object({
+    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -229,15 +248,17 @@ variable "iam_custom_policy" {
 variable "iam_managed_policy" {
   description = "IAM 관리형 정책"
   type = map(object({
-    name = string
-    arn  = string
-    env  = string
+    create_yn = bool
+    name      = string
+    arn       = string
+    env       = string
   }))
 }
 
 variable "iam_policy_attachment" {
   description = "IAM Policy를 Role에 연결"
   type = map(object({
+    create_yn   = bool
     role_name   = optional(string)
     policy_name = optional(string)
     policy_type = optional(string)
@@ -251,6 +272,7 @@ variable "iam_policy_attachment" {
 variable "ecs_cluster" {
   description = "ECS Cluster 설정"
   type = map(object({
+    create_yn    = bool
     cluster_name = string
     env          = string
   }))
@@ -260,6 +282,7 @@ variable "ecs_cluster" {
 variable "ecs_security_group" {
   description = "ECS 보안그룹 설정"
   type = map(object({
+    create_yn           = bool
     security_group_name = string
     description         = string
     env                 = string
@@ -308,6 +331,7 @@ variable "ecs_container_image_version" {
 variable "ecs_task_definitions" {
   description = "ECS Task Definition 설정"
   type = map(object({
+    create_yn                               = bool
     name                                    = string
     task_role                               = string
     task_exec_role                          = string
@@ -351,6 +375,7 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    create_yn                     = bool
     launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
     deployment_controller         = string
@@ -372,6 +397,7 @@ variable "ecs_service" {
 variable "ecs_appautoscaling_target" {
   description = "ECS Auto Scaling Target 설정"
   type = map(object({
+    create_yn          = bool
     min_capacity       = number # 최소 Task 2개가 항상 실행되도록 설정
     max_capacity       = number # 최대 Task 6개까지 증가 할 수 있도록 설정
     resource_id        = string # AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
@@ -386,6 +412,7 @@ variable "ecs_appautoscaling_target" {
 variable "ecs_appautoscaling_target_policy" {
   description = "ECS Auto Scaling Target Policy 설정"
   type = map(object({
+    create_yn = bool
     scale_out = object({
       name        = string
       policy_type = string
@@ -407,6 +434,7 @@ variable "ecs_appautoscaling_target_policy" {
 variable "ecs_cpu_scale_out_alert" {
   description = "ECS CPU Scale Out Alert Policy"
   type = map(object({
+    create_yn           = bool
     alarm_name          = string
     comparison_operator = string
     evaluation_periods  = string
@@ -423,6 +451,12 @@ variable "ecs_cpu_scale_out_alert" {
   }))
 }
 
+# ECS 보안그룹 ID
+variable "ecs_security_group_id" {
+  description = "ECS 보안그룹 ID"
+  type        = map(string)
+}
+
 ########################################
 # EC2 설정
 ########################################
@@ -430,6 +464,7 @@ variable "ecs_cpu_scale_out_alert" {
 variable "ec2_security_group" {
   description = "EC2 보안그룹 생성"
   type = map(object({
+    create_yn           = bool
     security_group_name = optional(string)
     description         = optional(string)
     env                 = optional(string)
@@ -440,6 +475,7 @@ variable "ec2_security_group" {
 variable "ec2_security_group_ingress_rules" {
   description = "EC2 보안그룹 Ingress 규칙 생성"
   type = map(list(object({
+    create_yn                = bool
     security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
@@ -455,6 +491,7 @@ variable "ec2_security_group_ingress_rules" {
 variable "ec2_security_group_egress_rules" {
   description = "EC2 보안그룹 Egress 규칙 생성"
   type = map(list(object({
+    create_yn                = bool
     security_group_name      = optional(string)       # 참조하는 보안그룹 이름 지정
     description              = optional(string)       # 보안그룹 규칙 설명
     type                     = optional(string)       # ingress, egress
@@ -471,6 +508,7 @@ variable "ec2_security_group_egress_rules" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
+    create_yn = bool
 
     # SSH key pair
     key_pair_name         = string
@@ -500,16 +538,57 @@ variable "ec2_instance" {
   }))
 }
 
+# EC2 보안그룹 ID
+variable "ec2_security_group_id" {
+  description = "EC2 보안그룹 ID"
+  type        = map(string)
+}
+
 ########################################
 # S3 설정
 ########################################
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    bucket_name            = string
-    versioning             = bool
-    server_side_encryption = bool
-    public_access_block    = bool
+    create_yn   = bool
+    bucket_name = string
+    bucket_versioning = object({
+      versioning_configuration = object({
+        status = string
+      })
+    })
+    server_side_encryption = object({
+      rule = object({
+        apply_server_side_encryption_by_default = object({
+          sse_algorithm = string
+        })
+      })
+    })
+    public_access_block = object({
+      block_public_acls       = bool
+      block_public_policy     = bool
+      ignore_public_acls      = bool
+      restrict_public_buckets = bool
+    })
+    env = string
+  }))
+}
+
+########################################
+# DynamoDB Table 설정
+########################################
+variable "dynamodb_table" {
+  description = "DynamoDB Table"
+  type = map(object({
+    create_yn    = bool
+    name         = string
+    hash_key     = string
+    billing_mode = string
+    attribute = object({
+      name = string
+      type = string
+    })
+    env = string
   }))
 }
 

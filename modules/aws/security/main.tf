@@ -1,57 +1,163 @@
-# FIXME: IAM Role도 FOR - LOOP로 처리하는게 맞을지 모르겠음..
-# IAM은 아무래도 수정이 계속 발생할 것 같기도 하고..
+# ALB security group
+resource "aws_security_group" "alb_security_group" {
+  for_each = {
+    for key, value in var.alb_security_group : key => value if value.create_yn
+  }
 
-data "aws_iam_policy" "managed_policy" {
-  for_each = var.iam_managed_policy
-  arn      = each.value.arn
-}
-
-# IAM Role
-resource "aws_iam_role" "custom_role" {
-  for_each = var.iam_custom_role
-
-  name = each.value.name
-  assume_role_policy = jsonencode({
-    Version   = each.value.version
-    Statement = each.value.statement
-  })
+  name        = each.value.security_group_name
+  description = each.value.description
+  vpc_id      = var.vpc_id
 
   tags = merge(var.tags, {
-    Name = "${each.value.name}-${each.value.env}"
+    Name = "${each.value.security_group_name}-${each.value.env}"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-# IAM Policy
-resource "aws_iam_policy" "custom_policy" {
-  for_each = var.iam_custom_policy
+# ALB security group ingress rule
+resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
+  for_each = {
+    for idx, rule in flatten(values(local.alb_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
 
-  name = each.value.name
-  policy = jsonencode({
-    Version   = each.value.version
-    Statement = [each.value.statement]
-  })
+  type              = each.value.type
+  description       = each.value.description
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.alb_security_group[each.value.security_group_name].id
+
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
+  source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+}
+
+# ALB security group egress rule
+resource "aws_security_group_rule" "alb_security_group_egress_rule" {
+  for_each = {
+    for idx, rule in flatten(values(local.alb_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
+
+  type              = each.value.type
+  description       = each.value.description
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.alb_security_group[each.value.security_group_name].id
+
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
+  source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+}
+
+# ECS security group
+resource "aws_security_group" "ecs_security_group" {
+  for_each = {
+    for key, value in var.ecs_security_group : key => value if value.create_yn
+  }
+
+  name        = each.value.security_group_name # 보안그룹명
+  description = each.value.description         # 보안그룹 내용
+  vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
 
   tags = merge(var.tags, {
-    Name = "${each.value.name}-${each.value.env}"
+    Name = "${each.value.security_group_name}-${each.value.env}"
   })
 }
 
-# Attachment iam role to policy
-resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
-  for_each = var.iam_policy_attachment
+# ECS security group ingress rule
+resource "aws_security_group_rule" "ecs_ingress_security_group" {
+  for_each = {
+    for idx, rule in flatten(values(local.ecs_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
 
-  # coalesce(collection function) : null 또는 빈 문자열이 아닌 첫 번째 인수를 반환
-  role = aws_iam_role.custom_role[each.value.role_name].name
+  type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
+  description       = each.value.description                                                   # 보안그룹 내용
+  from_port         = each.value.from_port                                                     # 포트 시작 허용 범위
+  to_port           = each.value.to_port                                                       # 포트 종료 허용 범위
+  protocol          = each.value.protocol                                                      # 보안그룹 프로토콜(TCP.. 등)
+  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id # 매핑되는 보안그룹명
 
-  # custom인 경우 신규 생성한 policy를 attachment 하고
-  # managed policy인 경우 data source의 arn을 attachment 한다
-  policy_arn = try(
-    aws_iam_policy.custom_policy[each.value.policy_name].arn,
-    data.aws_iam_policy.managed_policy[each.value.policy_name].arn
-  )
+  # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
+  source_security_group_id = try(each.value.source_security_group_id, null) # 다른 보안 그룹 참조 시 지정
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # IP 범위 지정
+}
 
-  depends_on = [
-    aws_iam_policy.custom_policy,
-    data.aws_iam_policy.managed_policy
-  ]
+# ECS security group egress rule
+resource "aws_security_group_rule" "ecs_egress_security_group" {
+  for_each = {
+    for idx, rule in flatten(values(local.ecs_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
+
+  type              = each.value.type
+  description       = each.value.description
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+  security_group_id = aws_security_group.ecs_security_group[each.value.security_group_name].id
+
+  source_security_group_id = try(each.value.referenced_security_group_id, null)
+  cidr_blocks              = try(each.value.cidr_ipv4, null)
+}
+
+# EC2 security group
+resource "aws_security_group" "ec2_security_group" {
+  for_each = {
+    for key, value in var.ec2_security_group : key => value if value.create_yn
+  }
+
+  name        = each.value.security_group_name # 보안그룹명
+  description = each.value.description         # 보안그룹 내용
+  vpc_id      = var.vpc_id                     # module에서 넘겨 받아야함
+
+  tags = merge(var.tags, {
+    Name = "${each.value.security_group_name}-${each.value.env}"
+  })
+}
+
+# EC2 security group ingress rule
+resource "aws_security_group_rule" "ec2_ingress_security_group" {
+  for_each = {
+    for idx, rule in flatten(values(local.ec2_security_group_ingress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
+
+  description       = each.value.description                                                   # 보안그룹 DESC
+  security_group_id = aws_security_group.ec2_security_group[each.value.security_group_name].id # 참조하는 보안그룹 ID
+  type              = each.value.type                                                          # 타입 지정(ingress, egress)
+  from_port         = each.value.from_port                                                     # 포트 시작 허용 범위
+  to_port           = each.value.to_port                                                       # 포트 종료 허용 범위
+  protocol          = each.value.protocol
+
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
+  source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+}
+
+# EC2 security group egress rule
+resource "aws_security_group_rule" "ec2_egress_security_group" {
+  for_each = {
+    for idx, rule in flatten(values(local.ec2_security_group_egress_rules)) :
+    "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    if rule.create_yn
+  }
+
+  description       = each.value.description
+  security_group_id = aws_security_group.ec2_security_group[each.value.security_group_name].id # 참조하는 보안그룹 ID
+  type              = each.value.type
+  from_port         = each.value.from_port
+  to_port           = each.value.to_port
+  protocol          = each.value.protocol
+
+  cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
+  source_security_group_id = try(each.value.source_security_group_id, null) # 아웃바운드로 보안그룹이 들어가야 하는 경우 사용
 }

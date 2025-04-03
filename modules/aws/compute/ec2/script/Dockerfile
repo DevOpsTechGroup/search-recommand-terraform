@@ -12,14 +12,3 @@ RUN mkdir /home/atlantis/.aws
 RUN touch /home/atlantis/.aws/credentials
 
 # RUN chown atlantis.atlantis /home/atlantis/ -R
-
-################################################
-# https://www.easydeploy.io/blog/install-atlantis-docker-container-in-amazon-linux-integrate/#
-# exec docker command
-################################################
-# $ sudo usermod -a -G docker $USER
-# $ docker build -t atlantis .
-# $ docker run -itd -p 4141:4141 --name atlantis atlantis server --automerge --autoplan-modules --gh-user=<github-account-username> --gh-token=<github-usr-access-token> --repo-allowlist=<list of allowed repos
-# $ docker ps
-# $ docker exec -it atlantis /bin/sh
-################################################

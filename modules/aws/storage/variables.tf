@@ -1,6 +1,6 @@
-####################
+########################################
 # 프로젝트 기본 설정
-####################
+########################################
 # 프로젝트 이름
 variable "project_name" {
   description = "프로젝트 이름 설정"
@@ -25,22 +25,57 @@ variable "env" {
   type        = string
 }
 
-################
+########################################
 # S3 설정
-################
+########################################
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    bucket_name            = string
-    versioning             = bool
-    server_side_encryption = bool
-    public_access_block    = bool
+    create_yn   = bool
+    bucket_name = string
+    bucket_versioning = object({
+      versioning_configuration = object({
+        status = string
+      })
+    })
+    server_side_encryption = object({
+      rule = object({
+        apply_server_side_encryption_by_default = object({
+          sse_algorithm = string
+        })
+      })
+    })
+    public_access_block = object({
+      block_public_acls       = bool
+      block_public_policy     = bool
+      ignore_public_acls      = bool
+      restrict_public_buckets = bool
+    })
+    env = string
   }))
 }
 
-####################
+########################################
+# DynamoDB Table 설정
+########################################
+variable "dynamodb_table" {
+  description = "DynamoDB Table"
+  type = map(object({
+    create_yn    = bool
+    name         = string
+    hash_key     = string
+    billing_mode = string
+    attribute = object({
+      name = string
+      type = string
+    })
+    env = string
+  }))
+}
+
+########################################
 # 공통 태그 설정
-####################
+########################################
 variable "tags" {
   description = "공통 태그 설정"
   type        = map(string)
