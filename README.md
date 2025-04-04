@@ -6,30 +6,9 @@
 
 ## Tech Spec
 
-> 최신 버전은 [Terraform Downloads](https://www.terraform.io/downloads.html)에서 받을 수 있습니다.
-
 | Component                     | Version |
 | ----------------------------- | ------- |
 | Terraform                     | v1.9.7  |
 | Provider (hashicorp/aws)      | v5.90.0 |
 | Provider (hashicorp/random)   | v3.7.1  |
 | Provider (hashicorp/template) | v2.2.0  |
-
-## Usage
-
-```shell
-# move to working directory
-cd env/dev/search-recommand/<region>
-```
-
-```shell
-# exec terraform
-# terraform init
-# terraform refresh
-# terraform fmt -check
-# terraform validate
-# terraform plan
-
-chmod +x run_terraform.sh
-./run_terraform.sh
-```
