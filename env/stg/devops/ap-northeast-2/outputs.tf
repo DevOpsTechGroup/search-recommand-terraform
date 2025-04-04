@@ -98,10 +98,8 @@ output "debug_ec2" {
     vpc_id            = module.network.vpc_id
     public_subnet_ids = module.network.public_subnet_ids
 
-    ec2_security_group               = var.ec2_security_group
-    ec2_security_group_ingress_rules = var.ec2_security_group_ingress_rules
-    ec2_security_group_egress_rules  = var.ec2_security_group_egress_rules
-    ec2_instance                     = var.ec2_instance
+    ec2_security_group = var.ec2_security_group
+    ec2_instance       = var.ec2_instance
 
     env  = var.env
     tags = var.tags

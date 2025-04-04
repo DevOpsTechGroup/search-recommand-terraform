@@ -212,6 +212,40 @@ locals {
         source_security_group_id = null
         env                      = "stg"
       }
+    ],
+    atlantis-sg-ingress-rule = [
+      {
+        create_yn           = true
+        security_group_name = "atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "atlantis ssh security group inbound"
+        from_port           = 22
+        to_port             = 22
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.28/32"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      },
+      {
+        create_yn           = true
+        security_group_name = "atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "atlantis server security group inbound"
+        from_port           = 4141
+        to_port             = 4141
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.28/32"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      }
     ]
   }
 
@@ -245,6 +279,22 @@ locals {
         cidr_ipv4 = [
           "0.0.0.0/0"
         ]
+        source_security_group_id = null
+        env                      = "stg"
+      }
+    ],
+    atlantis-sg-egress-rule = [
+      {
+        create_yn           = true,
+        security_group_name = "atlantis-sg"
+        description         = "atlantis security group egress rule"
+        type                = "egress"
+        from_port           = 0
+        to_port             = 0
+        protocol            = "-1"
+        cidr_ipv4 = [
+          "0.0.0.0/0"
+        ],
         source_security_group_id = null
         env                      = "stg"
       }
