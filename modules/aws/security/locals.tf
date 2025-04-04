@@ -82,7 +82,7 @@ locals {
     ],
     elasticsearch-api-sg-ingress-rule = [
       {
-        create_yn                = true
+        create_yn                = false
         type                     = "ingress"
         security_group_name      = "elasticsearch-api-sg"
         description              = "elasticsearch api security group ingress rule"
@@ -116,7 +116,7 @@ locals {
     ],
     elasticsearch-api-sg-ingress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "elasticsearch-api-sg"
         type                = "egress"
         description         = "elasticsearch api security group egress rule"
@@ -164,11 +164,26 @@ locals {
         ]
         source_security_group_id = null
         env                      = "stg"
+      },
+      {
+        create_yn           = true
+        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "opensearch es security group inbound"
+        from_port           = 5601
+        to_port             = 5601
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
       }
     ],
     elasticsearch-sg-ingress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch ssh security group inbound"
@@ -183,7 +198,7 @@ locals {
         env                      = "stg"
       },
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch es security group inbound"
@@ -220,7 +235,7 @@ locals {
     ],
     elasticsearch-sg-egress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "elasticsearch-sg"
         description         = "elasticsearch security group egress rule"
         type                = "egress"
