@@ -4,7 +4,7 @@ locals {
   alb_security_group_ingress_rules = {
     search-recommand-alb-sg-ingress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "search-recommand-alb-sg"
         type                = "ingress"
         description         = "search-recommand alb http security group ingress rule"
@@ -18,7 +18,7 @@ locals {
         env                      = "stg"
       },
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "search-recommand-alb-sg"
         type                = "ingress"
         description         = "search-recommand alb https security group ingress rule"
@@ -38,7 +38,7 @@ locals {
   alb_security_group_egress_rules = {
     search-recommand-alb-sg-egress-rule = [
       {
-        create_yn                = true
+        create_yn                = false
         security_group_name      = "search-recommand-alb-sg"
         type                     = "egress"
         description              = "search-recommand alb all traffic security group egress rule"
@@ -50,7 +50,7 @@ locals {
         env                      = "stg"
       },
       {
-        create_yn                = true
+        create_yn                = false
         security_group_name      = "search-recommand-alb-sg"
         type                     = "egress"
         description              = "search-recommand alb all traffic security group egress rule"
@@ -68,7 +68,7 @@ locals {
   ecs_security_group_ingress_rules = {
     opensearch-api-sg-ingress-rule = [
       {
-        create_yn                = true
+        create_yn                = false
         security_group_name      = "opensearch-api-sg"
         type                     = "ingress"
         description              = "opensearch api security group ingress rule"
@@ -100,7 +100,7 @@ locals {
   ecs_security_group_egress_rules = {
     opensearch-api-sg-ingress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "opensearch-api-sg"
         type                = "egress"
         description         = "opensearch api security group egress rule"
@@ -136,7 +136,7 @@ locals {
   ec2_security_group_ingress_rules = {
     opensearch-sg-ingress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch ssh security group inbound"
@@ -145,13 +145,14 @@ locals {
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
       },
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
@@ -160,13 +161,14 @@ locals {
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
       },
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
@@ -175,7 +177,8 @@ locals {
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -192,7 +195,8 @@ locals {
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -207,7 +211,8 @@ locals {
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -225,7 +230,7 @@ locals {
         cidr_ipv4 = [
           "172.21.0.0/16",
           "220.75.180.0/24",
-          "39.118.148.28/32"
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -235,13 +240,13 @@ locals {
         security_group_name = "atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "atlantis server security group inbound"
-        from_port           = 4141
-        to_port             = 4141
+        from_port           = 4114
+        to_port             = 4114
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
           "220.75.180.0/24",
-          "39.118.148.28/32"
+          "39.118.148.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -253,7 +258,7 @@ locals {
   ec2_security_group_egress_rules = {
     opensearch-sg-egress-rule = [
       {
-        create_yn           = true
+        create_yn           = false
         security_group_name = "opensearch-sg"
         description         = "opensearch security group egress rule"
         type                = "egress"

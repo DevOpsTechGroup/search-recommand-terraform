@@ -29,6 +29,7 @@ module "iam" {
   iam_custom_policy     = var.iam_custom_policy
   iam_managed_policy    = var.iam_managed_policy
   iam_policy_attachment = var.iam_policy_attachment
+  iam_instance_profile  = var.iam_instance_profile
 
   # ECS IAM 관련 설정
   ecs_task_role               = var.ecs_task_role

@@ -63,3 +63,13 @@ resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
     data.aws_iam_policy.managed_policy
   ]
 }
+
+# EC2 instance profile
+resource "aws_iam_instance_profile" "ec2_iam_instance_profile" {
+  for_each = {
+    for key, value in var.iam_instance_profile : key => value if value.create_yn
+  }
+
+  name = each.value.name
+  role = aws_iam_role.custom_role[each.value.role_name].name
+}
