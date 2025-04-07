@@ -78,8 +78,8 @@ output "debug_ecs_module" {
     ecs_appautoscaling_target_policy = var.ecs_appautoscaling_target_policy
     ecs_cpu_scale_out_alert          = var.ecs_cpu_scale_out_alert
 
-    ecs_task_role_arn           = module.iam.iam_resources["ecs-task-role-arn"]
-    ecs_task_exec_role_arn      = module.iam.iam_resources["ecs-task-exec-role-arn"]
+    ecs_task_role_arn           = module.iam.iam_role_arns["ecs-task-role"]
+    ecs_task_exec_role_arn      = module.iam.iam_role_arns["ecs-task-exec-role"]
     ecs_security_group          = var.ecs_security_group
     ecs_container_image_version = var.ecs_container_image_version
 
@@ -98,10 +98,9 @@ output "debug_ec2" {
     vpc_id            = module.network.vpc_id
     public_subnet_ids = module.network.public_subnet_ids
 
-    ec2_security_group               = var.ec2_security_group
-    ec2_security_group_ingress_rules = var.ec2_security_group_ingress_rules
-    ec2_security_group_egress_rules  = var.ec2_security_group_egress_rules
-    ec2_instance                     = var.ec2_instance
+    ec2_security_group   = var.ec2_security_group
+    ec2_instance         = var.ec2_instance
+    iam_instance_profile = module.iam.iam_instance_profile
 
     env  = var.env
     tags = var.tags

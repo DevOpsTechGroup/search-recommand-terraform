@@ -43,7 +43,6 @@ variable "public_subnet_ids" {
 variable "alb" {
   description = "ALB 설정"
   type = map(object({
-    create_yn                        = bool
     name                             = string
     internal                         = bool
     load_balancer_type               = string
@@ -59,7 +58,6 @@ variable "alb" {
 variable "alb_security_group" {
   description = "ALB 보안그룹 이름"
   type = map(object({
-    create_yn           = bool
     security_group_name = string
     description         = string
     env                 = string
@@ -70,7 +68,6 @@ variable "alb_security_group" {
 variable "alb_listener" {
   description = "ALB Listener 설정"
   type = map(object({
-    create_yn         = bool
     name              = string
     port              = number
     protocol          = string
@@ -92,7 +89,6 @@ variable "alb_listener" {
 variable "alb_listener_rule" {
   description = "ALB listener rule"
   type = map(object({
-    create_yn         = bool
     type              = string
     path              = list(string)
     alb_listener_name = string
@@ -106,7 +102,6 @@ variable "alb_listener_rule" {
 variable "target_group" {
   description = "Target group configuration"
   type = map(object({
-    create_yn   = bool
     name        = string
     port        = number
     elb_type    = string

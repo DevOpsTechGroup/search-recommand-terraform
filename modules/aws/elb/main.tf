@@ -1,8 +1,6 @@
 # ALB
 resource "aws_lb" "alb" {
-  for_each = {
-    for key, value in var.alb : key => value if value.create_yn
-  }
+  for_each = var.alb
 
   name               = "${each.value.name}-${each.value.env}"                      # ELB 이름
   internal           = each.value.internal                                         # ELB internal or external 여부
@@ -25,9 +23,7 @@ resource "aws_lb" "alb" {
 
 # ALB Listener
 resource "aws_lb_listener" "alb_listener" {
-  for_each = {
-    for key, value in var.alb_listener : key => value if value.create_yn
-  }
+  for_each = var.alb_listener
 
   load_balancer_arn = aws_lb.alb[each.value.load_balancer_arn].arn
   port              = each.value.port
@@ -66,9 +62,7 @@ resource "aws_lb_listener" "alb_listener" {
 
 # ALB Listener Rule
 resource "aws_lb_listener_rule" "alb_listener_rule" {
-  for_each = {
-    for key, value in var.alb_listener_rule : key => value if value.create_yn
-  }
+  for_each = var.alb_listener_rule
 
   listener_arn = aws_lb_listener.alb_listener[each.value.alb_listener_name].arn
   priority     = each.value.priority
@@ -96,9 +90,7 @@ resource "aws_lb_listener_rule" "alb_listener_rule" {
 
 # ALB Target Group
 resource "aws_lb_target_group" "target_group" {
-  for_each = {
-    for key, value in var.target_group : key => value if value.create_yn
-  }
+  for_each = var.target_group
 
   vpc_id      = var.vpc_id                             # VPC ID 지정(외부 모듈 변수 or ??)
   name        = "${each.value.name}-${each.value.env}" # Target Group 이름 지정(원하는 이름 지정)

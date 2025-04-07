@@ -1,10 +1,10 @@
 ########################################
 # IAM 설정
 ########################################
+# 사용자가 생성하는 역할
 variable "iam_custom_role" {
   description = "IAM Role 생성"
   type = map(object({
-    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -24,7 +24,6 @@ variable "iam_custom_role" {
 variable "iam_custom_policy" {
   description = "IAM 사용자 생성 정책"
   type = map(object({
-    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -42,20 +41,28 @@ variable "iam_custom_policy" {
 variable "iam_managed_policy" {
   description = "IAM 관리형 정책"
   type = map(object({
-    create_yn = bool
-    name      = string
-    arn       = string
-    env       = string
+    name = string
+    arn  = string
+    env  = string
   }))
 }
 
+# 사용자가 생성한 역할에 정책 연결
 variable "iam_policy_attachment" {
   description = "IAM Policy를 Role에 연결"
   type = map(object({
-    create_yn   = bool
     role_name   = optional(string)
     policy_name = optional(string)
     policy_type = optional(string)
+  }))
+}
+
+# EC2에 붙힐 IAM instance profile
+variable "iam_instance_profile" {
+  description = "IAM instance profile"
+  type = map(object({
+    name      = string
+    role_name = string
   }))
 }
 

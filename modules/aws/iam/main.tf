@@ -2,17 +2,13 @@
 # IAM은 아무래도 수정이 계속 발생할 것 같기도 하고..
 
 data "aws_iam_policy" "managed_policy" {
-  for_each = {
-    for key, value in var.iam_managed_policy : key => value if value.create_yn
-  }
-  arn = each.value.arn
+  for_each = var.iam_managed_policy
+  arn      = each.value.arn
 }
 
 # IAM Role
 resource "aws_iam_role" "custom_role" {
-  for_each = {
-    for key, value in var.iam_custom_role : key => value if value.create_yn
-  }
+  for_each = var.iam_custom_role
 
   name = each.value.name
   assume_role_policy = jsonencode({
@@ -27,9 +23,7 @@ resource "aws_iam_role" "custom_role" {
 
 # IAM Policy
 resource "aws_iam_policy" "custom_policy" {
-  for_each = {
-    for key, value in var.iam_custom_policy : key => value if value.create_yn
-  }
+  for_each = var.iam_custom_policy
 
   name = each.value.name
   policy = jsonencode({
@@ -44,9 +38,7 @@ resource "aws_iam_policy" "custom_policy" {
 
 # Attachment iam role to policy
 resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
-  for_each = {
-    for key, value in var.iam_policy_attachment : key => value if value.create_yn
-  }
+  for_each = var.iam_policy_attachment
 
   # coalesce(collection function) : null 또는 빈 문자열이 아닌 첫 번째 인수를 반환
   role = aws_iam_role.custom_role[each.value.role_name].name
@@ -62,4 +54,12 @@ resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
     aws_iam_policy.custom_policy,
     data.aws_iam_policy.managed_policy
   ]
+}
+
+# EC2 instance profile
+resource "aws_iam_instance_profile" "ec2_iam_instance_profile" {
+  for_each = var.iam_instance_profile
+
+  name = each.value.name
+  role = aws_iam_role.custom_role[each.value.role_name].name
 }

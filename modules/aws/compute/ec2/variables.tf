@@ -34,13 +34,24 @@ variable "private_subnet_ids" {
 }
 
 ########################################
+# IAM 설정
+########################################
+# EC2에 붙힐 IAM instance profile
+variable "iam_instance_profile" {
+  description = "IAM instance profile"
+  type = map(object({
+    name      = optional(string)
+    role_name = optional(string)
+  }))
+}
+
+########################################
 # EC2 설정
 ########################################
 # EC2 생성
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
-    create_yn = bool
 
     # SSH key pair
     key_pair_name         = string
@@ -49,7 +60,7 @@ variable "ec2_instance" {
     local_file_name       = string
     local_file_permission = string
 
-    # ECS Option
+    # EC2 Option
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
@@ -60,6 +71,15 @@ variable "ec2_instance" {
     security_group_name         = string
     env                         = string
     script_file_name            = optional(string)
+    iam_instance_profile        = optional(string)
+
+    # EC2 block storage
+    root_block_device = object({
+      volume_type           = optional(string)
+      volume_size           = optional(number)
+      delete_on_termination = optional(bool)
+      encrypted             = optional(bool)
+    })
 
     # AMI filter
     owners = string
