@@ -5,7 +5,6 @@
 variable "iam_custom_role" {
   description = "IAM Role 생성"
   type = map(object({
-    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -25,7 +24,6 @@ variable "iam_custom_role" {
 variable "iam_custom_policy" {
   description = "IAM 사용자 생성 정책"
   type = map(object({
-    create_yn   = bool
     name        = optional(string)
     description = optional(string)
     version     = optional(string)
@@ -43,10 +41,9 @@ variable "iam_custom_policy" {
 variable "iam_managed_policy" {
   description = "IAM 관리형 정책"
   type = map(object({
-    create_yn = bool
-    name      = string
-    arn       = string
-    env       = string
+    name = string
+    arn  = string
+    env  = string
   }))
 }
 
@@ -54,7 +51,6 @@ variable "iam_managed_policy" {
 variable "iam_policy_attachment" {
   description = "IAM Policy를 Role에 연결"
   type = map(object({
-    create_yn   = bool
     role_name   = optional(string)
     policy_name = optional(string)
     policy_type = optional(string)
@@ -65,7 +61,6 @@ variable "iam_policy_attachment" {
 variable "iam_instance_profile" {
   description = "IAM instance profile"
   type = map(object({
-    create_yn = bool
     name      = string
     role_name = string
   }))
