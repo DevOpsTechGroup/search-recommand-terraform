@@ -14,7 +14,6 @@ variable "vpc_id" {
 variable "alb_security_group" {
   description = "ALB 보안그룹 이름"
   type = map(object({
-    create_yn           = bool
     security_group_name = string
     description         = string
     env                 = string
@@ -28,7 +27,6 @@ variable "alb_security_group" {
 variable "ecs_security_group" {
   description = "ECS 보안그룹 설정"
   type = map(object({
-    create_yn           = bool
     security_group_name = string
     description         = string
     env                 = string
@@ -42,7 +40,6 @@ variable "ecs_security_group" {
 variable "ec2_security_group" {
   description = "EC2 보안그룹 생성"
   type = map(object({
-    create_yn           = bool
     security_group_name = optional(string)
     description         = optional(string)
     env                 = optional(string)

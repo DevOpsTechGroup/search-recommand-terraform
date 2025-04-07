@@ -1,8 +1,6 @@
 # ALB security group
 resource "aws_security_group" "alb_security_group" {
-  for_each = {
-    for key, value in var.alb_security_group : key => value if value.create_yn
-  }
+  for_each = var.alb_security_group
 
   name        = each.value.security_group_name
   description = each.value.description
@@ -22,7 +20,6 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = {
     for idx, rule in flatten(values(local.alb_security_group_ingress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   type              = each.value.type
@@ -41,7 +38,6 @@ resource "aws_security_group_rule" "alb_security_group_egress_rule" {
   for_each = {
     for idx, rule in flatten(values(local.alb_security_group_egress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   type              = each.value.type
@@ -57,9 +53,7 @@ resource "aws_security_group_rule" "alb_security_group_egress_rule" {
 
 # ECS security group
 resource "aws_security_group" "ecs_security_group" {
-  for_each = {
-    for key, value in var.ecs_security_group : key => value if value.create_yn
-  }
+  for_each = var.ecs_security_group
 
   name        = each.value.security_group_name # 보안그룹명
   description = each.value.description         # 보안그룹 내용
@@ -75,7 +69,6 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = {
     for idx, rule in flatten(values(local.ecs_security_group_ingress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
@@ -95,7 +88,6 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
   for_each = {
     for idx, rule in flatten(values(local.ecs_security_group_egress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   type              = each.value.type
@@ -111,9 +103,7 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
 
 # EC2 security group
 resource "aws_security_group" "ec2_security_group" {
-  for_each = {
-    for key, value in var.ec2_security_group : key => value if value.create_yn
-  }
+  for_each = var.ec2_security_group
 
   name        = each.value.security_group_name # 보안그룹명
   description = each.value.description         # 보안그룹 내용
@@ -129,7 +119,6 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
     for idx, rule in flatten(values(local.ec2_security_group_ingress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   description       = each.value.description                                                   # 보안그룹 DESC
@@ -148,7 +137,6 @@ resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
     for idx, rule in flatten(values(local.ec2_security_group_egress_rules)) :
     "${rule.security_group_name}-${rule.type}-${rule.from_port}-${rule.to_port}-${idx}" => rule
-    if rule.create_yn
   }
 
   description       = each.value.description

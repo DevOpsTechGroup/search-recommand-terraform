@@ -17,12 +17,12 @@ data "aws_ami" "amazon_ami" {
 
 # EC2 instance
 resource "aws_instance" "ec2" {
-  for_each = {
-    for key, value in var.ec2_instance : key => value if value.create_yn
-  }
+  for_each = var.ec2_instance
 
   ami           = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
   instance_type = each.value.instance_type             # EC2 인스턴스 타입 지정
+  # iam_instance_profile = try(var.iam_instance_profile[each.value.iam_instance_profile].name, null)
+  iam_instance_profile = var.iam_instance_profile[each.value.iam_instance_profile].name
 
   # EC2가 위치할 VPC Subnet 영역 지정(az-2a, az-2b)
   subnet_id = lookup(
@@ -50,6 +50,16 @@ resource "aws_instance" "ec2" {
     lookup(each.value, "script_file_name", "") != ""
   ) ? file("${path.module}/script/${each.value.script_file_name}") : null
 
+  dynamic "root_block_device" {
+    for_each = each.value.root_block_device != null ? [each.value.root_block_device] : []
+    content {
+      volume_type           = root_block_device.value.volume_type
+      volume_size           = root_block_device.value.volume_size
+      delete_on_termination = root_block_device.value.delete_on_termination
+      encrypted             = root_block_device.value.encrypted
+    }
+  }
+
   lifecycle {
     create_before_destroy = true
   }
@@ -61,9 +71,7 @@ resource "aws_instance" "ec2" {
 
 # EC2 key pair Decide encryption method + generate a TLS/SSL private key
 resource "tls_private_key" "ec2_key_pair_rsa" {
-  for_each = {
-    for key, value in var.ec2_instance : key => value if value.create_yn
-  }
+  for_each = var.ec2_instance
 
   algorithm = each.value.key_pair_algorithm # RSA 알고리즘 설정
   rsa_bits  = each.value.rsa_bits           # RSA 키 길이를 4096 bit로 설정 (4096 => 보안성 높은 설정 값, default => 2048)
@@ -71,9 +79,7 @@ resource "tls_private_key" "ec2_key_pair_rsa" {
 
 # EC2 key pair
 resource "aws_key_pair" "ec2_key_pair" {
-  for_each = {
-    for key, value in var.ec2_instance : key => value if value.create_yn
-  }
+  for_each = var.ec2_instance
 
   key_name   = each.value.key_pair_name
   public_key = tls_private_key.ec2_key_pair_rsa[each.key].public_key_openssh # Terraform이 생성한 RSA키의 공개 키를 가져와 EC2 SSH 키 페어로 등록
@@ -81,9 +87,7 @@ resource "aws_key_pair" "ec2_key_pair" {
 
 # EC2 key pair to save local file
 resource "local_file" "ec2_key_pair_local_file" {
-  for_each = {
-    for key, value in var.ec2_instance : key => value if value.create_yn
-  }
+  for_each = var.ec2_instance
 
   content         = tls_private_key.ec2_key_pair_rsa[each.key].private_key_pem
   filename        = "${path.module}/${each.value.local_file_name}"

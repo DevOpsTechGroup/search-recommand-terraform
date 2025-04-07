@@ -31,7 +31,6 @@ variable "env" {
 variable "s3_bucket" {
   description = "생성하고자 하는 S3 버킷 정보 기재"
   type = map(object({
-    create_yn   = bool
     bucket_name = string
     bucket_versioning = object({
       versioning_configuration = object({
@@ -61,7 +60,6 @@ variable "s3_bucket" {
 variable "dynamodb_table" {
   description = "DynamoDB Table"
   type = map(object({
-    create_yn    = bool
     name         = string
     hash_key     = string
     billing_mode = string

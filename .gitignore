@@ -134,7 +134,7 @@ dist
 *.tfstate 
 *.tfstate.backup 
 # *.tfvars
-terraform.tfvars
+# terraform.tfvars
 .terraform.tfstate.lock.info
 .apikey.txt
 
@@ -145,4 +145,4 @@ terraform.tfvars
 .DS_Store
 
 modules/aws/compute/ec2/keypair/
-modules/aws/compute/ec2/script/install_atlantis_dev.sh
+modules/aws/compute/ec2/script/install_atlantis.sh
