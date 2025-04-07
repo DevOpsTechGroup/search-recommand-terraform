@@ -1,6 +1,8 @@
 # EC2 amazon ami
 data "aws_ami" "amazon_ami" {
-  for_each = var.ec2_instance
+  for_each = {
+    for key, value in var.ec2_instance : key => value if value.create_yn
+  }
 
   most_recent = true                # AMI 중에서 가장 최신 버전 조회
   owners      = [each.value.owners] # 소유자 지정('amazon', 'self')

@@ -68,7 +68,7 @@ locals {
   ecs_security_group_ingress_rules = {
     opensearch-api-sg-ingress-rule = [
       {
-        create_yn                = false
+        create_yn                = true
         security_group_name      = "opensearch-api-sg"
         type                     = "ingress"
         description              = "opensearch api security group ingress rule"
@@ -100,7 +100,7 @@ locals {
   ecs_security_group_egress_rules = {
     opensearch-api-sg-ingress-rule = [
       {
-        create_yn           = false
+        create_yn           = true
         security_group_name = "opensearch-api-sg"
         type                = "egress"
         description         = "opensearch api security group egress rule"
@@ -136,7 +136,7 @@ locals {
   ec2_security_group_ingress_rules = {
     opensearch-sg-ingress-rule = [
       {
-        create_yn           = false
+        create_yn           = true
         security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch ssh security group inbound"
@@ -258,7 +258,7 @@ locals {
   ec2_security_group_egress_rules = {
     opensearch-sg-egress-rule = [
       {
-        create_yn           = false
+        create_yn           = true
         security_group_name = "opensearch-sg"
         description         = "opensearch security group egress rule"
         type                = "egress"
