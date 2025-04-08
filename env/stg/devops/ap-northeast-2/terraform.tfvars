@@ -595,9 +595,47 @@ ecs_security_group_id = {}
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
-  # opensearch = {
+  opensearch = {
+    key_pair_name         = "opensearch-ec2-key"
+    key_pair_algorithm    = "RSA"
+    rsa_bits              = 4096
+    local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+    local_file_permission = "0600"                           # 6(read + writer)00
 
-  #   # SSH key pair
+    # EC2 Option
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "opensearch-es"
+    security_group_name         = "opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch.sh"
+    iam_instance_profile        = ""
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    # AMI filter
+    owners = "self"
+    filter = [
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["*-opensearch-es-stg"]
+      }
+    ]
+  },
+  # search-opensearch-c01 = {
   #   key_pair_name         = "opensearch-ec2-key"
   #   key_pair_algorithm    = "RSA"
   #   rsa_bits              = 4096
@@ -611,7 +649,7 @@ ec2_instance = {
   #   availability_zones          = "ap-northeast-2a"
   #   associate_public_ip_address = true
   #   disable_api_termination     = true
-  #   instance_name               = "opensearch-es"
+  #   instance_name               = "search-opensearch-c01"
   #   security_group_name         = "opensearch-sg"
   #   env                         = "stg"
   #   script_file_name            = "install_opensearch.sh"
@@ -619,7 +657,7 @@ ec2_instance = {
 
   #   root_block_device = {
   #     volume_type           = "gp3"
-  #     volume_size           = 100
+  #     volume_size           = 30
   #     delete_on_termination = true
   #     encrypted             = false
   #   }
@@ -637,7 +675,207 @@ ec2_instance = {
   #     }
   #   ]
   # },
-  # elasticsearch = {
+  # search-opensearch-c02 = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-c02"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-c03 = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2c"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-c03"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-d01 = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-d01"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-d02 = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-d02"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-d03 = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2c"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-d03"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-c01 = {
 
   #   # SSH key pair
   #   key_pair_name         = "elasticsearch-ec2-key"
@@ -653,7 +891,7 @@ ec2_instance = {
   #   availability_zones          = "ap-northeast-2a"
   #   associate_public_ip_address = true
   #   disable_api_termination     = true
-  #   instance_name               = "elasticsearch"
+  #   instance_name               = "search-elasticsearch-c01"
   #   security_group_name         = "elasticsearch-sg"
   #   env                         = "stg"
   #   script_file_name            = "install_elasticsearch.sh"
@@ -661,7 +899,217 @@ ec2_instance = {
 
   #   root_block_device = {
   #     volume_type           = "gp3"
-  #     volume_size           = 100
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-elasticsearch-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-c02 = {
+
+  #   # SSH key pair
+  #   key_pair_name         = "elasticsearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/elasticsearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                              # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-elasticsearch-c02"
+  #   security_group_name         = "elasticsearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_elasticsearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-elasticsearch-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-c03 = {
+
+  #   # SSH key pair
+  #   key_pair_name         = "elasticsearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/elasticsearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                              # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-elasticsearch-c02"
+  #   security_group_name         = "elasticsearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_elasticsearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-elasticsearch-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-d01 = {
+
+  #   # SSH key pair
+  #   key_pair_name         = "elasticsearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/elasticsearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                              # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-elasticsearch-d01"
+  #   security_group_name         = "elasticsearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_elasticsearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-elasticsearch-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-d02 = {
+
+  #   # SSH key pair
+  #   key_pair_name         = "elasticsearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/elasticsearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                              # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-elasticsearch-d02"
+  #   security_group_name         = "elasticsearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_elasticsearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-elasticsearch-stg"]
+  #     }
+  #   ]
+  # },
+  # search-elasticsearch-d03 = {
+
+  #   # SSH key pair
+  #   key_pair_name         = "elasticsearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/elasticsearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                              # 6(read + writer)00
+
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2c"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-elasticsearch-d03"
+  #   security_group_name         = "elasticsearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_elasticsearch.sh"
+  #   iam_instance_profile        = ""
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
   #     delete_on_termination = true
   #     encrypted             = false
   #   }

@@ -31,6 +31,10 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ALB security group egress rule
@@ -49,6 +53,10 @@ resource "aws_security_group_rule" "alb_security_group_egress_rule" {
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ECS security group
@@ -62,6 +70,10 @@ resource "aws_security_group" "ecs_security_group" {
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${each.value.env}"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ECS security group ingress rule
@@ -81,6 +93,10 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
   # 조건적으로 참조된 보안 그룹 또는 CIDR 블록 사용
   source_security_group_id = try(each.value.source_security_group_id, null) # 다른 보안 그룹 참조 시 지정
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # IP 범위 지정
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # ECS security group egress rule
@@ -99,6 +115,10 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
 
   source_security_group_id = try(each.value.referenced_security_group_id, null)
   cidr_blocks              = try(each.value.cidr_ipv4, null)
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # EC2 security group
@@ -112,6 +132,10 @@ resource "aws_security_group" "ec2_security_group" {
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${each.value.env}"
   })
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # EC2 security group ingress rule
@@ -130,6 +154,10 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 인바운드로 보안그룹이 들어가야 하는 경우 사용
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 # EC2 security group egress rule
@@ -148,4 +176,8 @@ resource "aws_security_group_rule" "ec2_egress_security_group" {
 
   cidr_blocks              = try(each.value.cidr_ipv4, null)                # 허용할 IP 범위
   source_security_group_id = try(each.value.source_security_group_id, null) # 아웃바운드로 보안그룹이 들어가야 하는 경우 사용
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }

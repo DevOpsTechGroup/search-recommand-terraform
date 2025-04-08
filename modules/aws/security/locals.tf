@@ -228,10 +228,14 @@ locals {
         from_port           = 4141
         to_port             = 4141
         protocol            = "tcp"
-        cidr_ipv4 = [
+        cidr_ipv4 = [ # INFO: https://ybchoi.com/28
           "172.21.0.0/16",
           "220.75.180.0/24",
-          "39.118.148.0/24"
+          "39.118.148.0/24",
+          "192.30.252.0/22",
+          "185.199.108.0/22",
+          "140.82.112.0/20",
+          "143.55.64.0/20"
         ]
         source_security_group_id = null
         env                      = "stg"
