@@ -13,6 +13,8 @@ EC2_USER="ec2-user"
 HOME_DIR="/home/${EC2_USER}"
 
 sudo hostnamectl set-hostname atlantis
+sudo rm /etc/localtime
+sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
 sudo dnf update -y
 sudo dnf install -y \
