@@ -7,7 +7,7 @@ set -xe
 GH_USER="<github username>"
 GH_TOKEN="<github token>"
 REPO_ALLOW_LIST="<github repo url>"
-ATLANTIS_PORT=<port number>
+ATLANTIS_PORT=<port>
 CONTAINER_NAME="atlantis"
 EC2_USER="ec2-user"
 HOME_DIR="/home/${EC2_USER}"
