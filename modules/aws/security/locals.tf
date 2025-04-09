@@ -32,6 +32,25 @@ locals {
     ]
   }
 
+  # Flatten alb security group ingress rule
+  alb_ingress_rules_flat = flatten([
+    for group in values(local.alb_security_group_ingress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
+
   # ALB security group egress rule
   alb_security_group_egress_rules = {
     search-recommand-alb-sg-egress-rule = [
@@ -59,6 +78,25 @@ locals {
       }
     ]
   }
+
+  # Flatten alb security group ingress rule
+  alb_egress_rules_flat = flatten([
+    for group in values(local.alb_security_group_egress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
 
   # ECS security group ingress rule
   ecs_security_group_ingress_rules = {
@@ -89,6 +127,25 @@ locals {
       }
     ]
   }
+
+  # Flatten ecs security group ingress rule
+  ecs_ingress_rules_flat = flatten([
+    for group in values(local.ecs_security_group_ingress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
 
   # ECS security group egress rule
   ecs_security_group_egress_rules = {
@@ -123,6 +180,25 @@ locals {
       }
     ]
   }
+
+  # Flatten ecs security group egress rule
+  ecs_egress_rules_flat = flatten([
+    for group in values(local.ecs_security_group_egress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
 
   # EC2 security group ingress rule
   ec2_security_group_ingress_rules = {
@@ -216,7 +292,9 @@ locals {
         cidr_ipv4 = [
           "172.21.0.0/16",
           "220.75.180.0/24",
-          "39.118.148.0/24"
+          "39.118.148.0/24",
+          "192.30.252.0/22",
+          "185.199.108.0/22"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -242,6 +320,25 @@ locals {
       }
     ]
   }
+
+  # Flatten ec2 security group ingress rule
+  ec2_ingress_rules_flat = flatten([
+    for group in values(local.ec2_security_group_ingress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
 
   # EC2 security group egress rule
   ec2_security_group_egress_rules = {
@@ -291,4 +388,23 @@ locals {
       }
     ]
   }
+
+  # Flatten ec2 security group egress rule
+  ec2_egress_rules_flat = flatten([
+    for group in values(local.ec2_security_group_egress_rules) : [
+      for rule in group : [
+        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+          security_group_name      = rule.security_group_name
+          description              = rule.description
+          type                     = rule.type
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = cidr
+          source_security_group_id = rule.source_security_group_id
+          env                      = rule.env
+        }
+      ]
+    ]
+  ])
 }

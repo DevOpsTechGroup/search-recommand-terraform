@@ -400,8 +400,6 @@ ecs_auto_scaling_policy_arn = "AmazonEC2ContainerServiceAutoscaleRole" # 기존�
 # ECS Container Image 버전
 ecs_container_image_version = "1.0.0"
 
-# embedding
-
 # ECS Task Definitions 생성
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
 ecs_task_definitions = {
@@ -594,47 +592,48 @@ ecs_security_group_id = {}
 ########################################
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
+# TODO: EC2 변수의 경우 YAML로 빼면 좋을지 고민중
 ec2_instance = {
-  opensearch = {
-    key_pair_name         = "opensearch-ec2-key"
-    key_pair_algorithm    = "RSA"
-    rsa_bits              = 4096
-    local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
-    local_file_permission = "0600"                           # 6(read + writer)00
+  # opensearch = {
+  #   key_pair_name         = "opensearch-ec2-key"
+  #   key_pair_algorithm    = "RSA"
+  #   rsa_bits              = 4096
+  #   local_file_name       = "keypair/opensearch-ec2-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
+  #   local_file_permission = "0600"                           # 6(read + writer)00
 
-    # EC2 Option
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "opensearch-es"
-    security_group_name         = "opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_opensearch.sh"
-    iam_instance_profile        = ""
+  #   # EC2 Option
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "opensearch-es"
+  #   security_group_name         = "opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_opensearch.sh"
+  #   iam_instance_profile        = ""
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    # AMI filter
-    owners = "self"
-    filter = [
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["*-opensearch-es-stg"]
-      }
-    ]
-  },
+  #   # AMI filter
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-opensearch-es-stg"]
+  #     }
+  #   ]
+  # },
   # search-opensearch-c01 = {
   #   key_pair_name         = "opensearch-ec2-key"
   #   key_pair_algorithm    = "RSA"
