@@ -6,8 +6,8 @@ set -xe
 ########################################
 GH_USER="<github username>"
 GH_TOKEN="<github token>"
-REPO_ALLOW_LIST="<github allow repo URL>"
-ATLANTIS_PORT=<port>
+REPO_ALLOW_LIST="<github repo url>"
+ATLANTIS_PORT=<port number>
 CONTAINER_NAME="atlantis"
 EC2_USER="ec2-user"
 HOME_DIR="/home/${EC2_USER}"
@@ -17,11 +17,7 @@ sudo rm /etc/localtime
 sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
 sudo dnf update -y
-sudo dnf install -y \
-docker git vim unzip jq tree zip curl wget yum-utils \
---allowerasing
-
-# 도커 시작 및 부팅 시 자동 실행 설정
+sudo dnf install -y docker git vim unzip jq tree zip curl wget yum-utils --allowerasing
 sudo systemctl enable --now docker
 
 # ec2-user를 docker 그룹에 추가 (sudo 없이 실행 가능하도록)
@@ -50,16 +46,34 @@ aws --version
 cat <<EOF | sudo tee /home/ec2-user/Dockerfile > /dev/null
 FROM ghcr.io/runatlantis/atlantis:latest
 USER root
+
+# 기존에 깔려있는 terraform은 강제로 제거
+RUN rm -f /usr/local/bin/terraform
+
+# Terraform 1.9.5 설치 전 디렉토리 생성 및 다운로드, 설치 진행
+RUN mkdir -p /root/.atlantis/bin && \
+    curl -Lo /tmp/terraform.zip https://releases.hashicorp.com/terraform/1.9.5/terraform_1.9.5_linux_amd64.zip && \
+    unzip -o /tmp/terraform.zip -d /root/.atlantis/bin/ && \
+    mv /root/.atlantis/bin/terraform /root/.atlantis/bin/terraform1.9.5 && \
+    chmod +x /root/.atlantis/bin/terraform1.9.5 && \
+    rm /tmp/terraform.zip
+
+# 새 버전의 Terraform으로 심볼릭 링크 생성
+RUN ln -s /root/.atlantis/bin/terraform1.9.5 /usr/bin/terraform
+
 RUN apk add --no-cache aws-cli
 EOF
 
 sudo chown ${EC2_USER}:${EC2_USER} ${HOME_DIR}/Dockerfile
 
 # ec2-user 권한으로 Docker 이미지 빌드
-sudo -u ${EC2_USER} bash -c "
-  cd ${HOME_DIR}
-  docker build -t atlantis .
-"
+CMD=$(cat <<EOF
+cd ${HOME_DIR} &&
+docker build -t atlantis .
+EOF
+)
+
+sudo -u "${EC2_USER}" bash -c "$CMD"
 
 ########################################
 # Atlantis 컨테이너 실행
@@ -68,8 +82,8 @@ sudo -u ${EC2_USER} bash -c "
 # 기존 컨테이너 제거
 docker rm -f atlantis || true
 
-sudo -u ${EC2_USER} bash -c "
-  docker run -d \
+RUN_DOKCER=$(cat <<EOF
+docker run -d \
     -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
     --name ${CONTAINER_NAME} \
     atlantis server \
@@ -78,4 +92,7 @@ sudo -u ${EC2_USER} bash -c "
     --gh-user=${GH_USER} \
     --gh-token=${GH_TOKEN} \
     --repo-allowlist=${REPO_ALLOWLIST}
-"
+EOF
+)
+
+sudo -u ${EC2_USER} bash -c ${RUN_DOKCER}
