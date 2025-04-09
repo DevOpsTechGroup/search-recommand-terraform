@@ -8,7 +8,8 @@ projects:
   autoplan:
     enabled: true
     when_modified: [ "*.tf", "../modules/**/*.tf" ]
-  # apply_requirements: [ mergeable, approved ] # merge 가능 상태이며, 최소 1명 이상의 approve가 있는 경우 apply 가능
+  workflows: search-recommand-devops-apnortheast2-stg-wf
+  apply_requirements: [ mergeable, approved ] # merge 가능 상태이며, 최소 1명 이상의 approve가 있는 경우 apply 가능
 
 workflows:
   search-recommand-devops-apnortheast2-stg-wf:
