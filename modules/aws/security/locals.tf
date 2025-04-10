@@ -222,8 +222,53 @@ locals {
         security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
+        from_port           = 9100
+        to_port             = 9100
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      },
+      {
+        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "opensearch es security group inbound"
         from_port           = 9200
         to_port             = 9200
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      },
+      {
+        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "opensearch es security group inbound"
+        from_port           = 9300
+        to_port             = 9300
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        source_security_group_id = null
+        env                      = "stg"
+      },
+      {
+        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "opensearch es security group inbound"
+        from_port           = 9400
+        to_port             = 9400
         protocol            = "tcp"
         cidr_ipv4 = [
           "172.21.0.0/16",
