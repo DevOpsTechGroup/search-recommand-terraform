@@ -145,4 +145,4 @@ dist
 .DS_Store
 
 modules/aws/compute/ec2/keypair/
-modules/aws/compute/ec2/script/install_atlantis.sh
+#modules/aws/compute/ec2/script/install_atlantis.sh

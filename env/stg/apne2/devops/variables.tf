@@ -288,44 +288,6 @@ variable "ecs_security_group" {
   }))
 }
 
-# ECS Role
-variable "ecs_task_role" {
-  description = "ECS Task Role 설정"
-  type        = string
-}
-
-variable "ecs_task_role_policy" {
-  description = "ECS Task Policy 설정"
-  type        = string
-}
-
-variable "ecs_task_exec_role" {
-  description = "ECS Task Exec Role 설정"
-  type        = string
-}
-
-variable "ecs_task_exec_role_policy" {
-  description = "ECS Task Exec Policy 설정"
-  type        = string
-}
-
-variable "ecs_auto_scaling_role" {
-  description = "ECS Auto Scaling Role 설정"
-  type        = string
-}
-
-variable "ecs_auto_scaling_policy_arn" {
-  description = "ECS Auto Scaling Policy 설정"
-  type        = string
-}
-
-# ECS Container Image 버전
-# Image 버전의 경우 사용자에게 직접 받아서 처리한다
-variable "ecs_container_image_version" {
-  description = "ECS Container의 이미지 버전"
-  type        = string
-}
-
 # ECS Task Definitions 생성
 variable "ecs_task_definitions" {
   description = "ECS Task Definition 설정"

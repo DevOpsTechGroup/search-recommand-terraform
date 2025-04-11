@@ -111,13 +111,6 @@ variable "ecs_task_exec_role_arn" {
   type        = string
 }
 
-# ECS Container Image 버전
-# Image 버전의 경우 사용자에게 직접 받아서 처리한다
-variable "ecs_container_image_version" {
-  description = "ECS Container의 이미지 버전"
-  type        = string
-}
-
 # AWS ECS Task
 variable "ecs_task_definitions" {
   description = "ECS Task Definition 설정"
