@@ -62,7 +62,7 @@ locals {
         to_port                  = 0
         protocol                 = "-1"
         cidr_ipv4                = null
-        source_security_group_id = aws_security_group.ecs_security_group["opensearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
+        source_security_group_id = aws_security_group.ecs_security_group["search-opensearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
         env                      = "stg"
       },
       {
@@ -73,7 +73,7 @@ locals {
         to_port                  = 0
         protocol                 = "-1"
         cidr_ipv4                = null
-        source_security_group_id = aws_security_group.ecs_security_group["elasticsearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
+        source_security_group_id = aws_security_group.ecs_security_group["search-elasticsearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
         env                      = "stg"
       }
     ]
@@ -100,9 +100,9 @@ locals {
 
   # ECS security group ingress rule
   ecs_security_group_ingress_rules = {
-    opensearch-api-sg-ingress-rule = [
+    search-opensearch-api-sg-ingress-rule = [
       {
-        security_group_name      = "opensearch-api-sg"
+        security_group_name      = "search-opensearch-api-sg"
         type                     = "ingress"
         description              = "opensearch api security group ingress rule"
         from_port                = 10091
@@ -113,10 +113,10 @@ locals {
         env                      = "stg"
       }
     ],
-    elasticsearch-api-sg-ingress-rule = [
+    search-elasticsearch-api-sg-ingress-rule = [
       {
         type                     = "ingress"
-        security_group_name      = "elasticsearch-api-sg"
+        security_group_name      = "search-elasticsearch-api-sg"
         description              = "elasticsearch api security group ingress rule"
         from_port                = 10092
         to_port                  = 10092
@@ -149,9 +149,9 @@ locals {
 
   # ECS security group egress rule
   ecs_security_group_egress_rules = {
-    opensearch-api-sg-ingress-rule = [
+    search-opensearch-api-sg-ingress-rule = [
       {
-        security_group_name = "opensearch-api-sg"
+        security_group_name = "search-opensearch-api-sg"
         type                = "egress"
         description         = "opensearch api security group egress rule"
         from_port           = 0
@@ -164,9 +164,9 @@ locals {
         env                      = "stg"
       }
     ],
-    elasticsearch-api-sg-ingress-rule = [
+    search-elasticsearch-api-sg-ingress-rule = [
       {
-        security_group_name = "elasticsearch-api-sg"
+        security_group_name = "search-elasticsearch-api-sg"
         type                = "egress"
         description         = "elasticsearch api security group egress rule"
         from_port           = 0
@@ -202,9 +202,9 @@ locals {
 
   # EC2 security group ingress rule
   ec2_security_group_ingress_rules = {
-    opensearch-sg-ingress-rule = [
+    search-opensearch-sg-ingress-rule = [
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch ssh security group inbound"
         from_port           = 22
@@ -219,7 +219,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
         from_port           = 9100
@@ -234,7 +234,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
         from_port           = 9200
@@ -249,7 +249,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
         from_port           = 9300
@@ -264,7 +264,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
         from_port           = 9400
@@ -279,7 +279,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-opensearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "opensearch es security group inbound"
         from_port           = 5601
@@ -294,9 +294,9 @@ locals {
         env                      = "stg"
       }
     ],
-    elasticsearch-sg-ingress-rule = [
+    search-elasticsearch-sg-ingress-rule = [
       {
-        security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch ssh security group inbound"
         from_port           = 22
@@ -311,7 +311,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch es security group inbound"
         from_port           = 9200
@@ -326,9 +326,9 @@ locals {
         env                      = "stg"
       }
     ],
-    atlantis-sg-ingress-rule = [
+    search-atlantis-sg-ingress-rule = [
       {
-        security_group_name = "atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "atlantis ssh security group inbound"
         from_port           = 22
@@ -345,7 +345,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "atlantis server security group inbound"
         from_port           = 4141
@@ -387,9 +387,9 @@ locals {
 
   # EC2 security group egress rule
   ec2_security_group_egress_rules = {
-    opensearch-sg-egress-rule = [
+    search-opensearch-sg-egress-rule = [
       {
-        security_group_name = "opensearch-sg"
+        security_group_name = "search-opensearch-sg"
         description         = "opensearch security group egress rule"
         type                = "egress"
         from_port           = 0
@@ -402,9 +402,9 @@ locals {
         env                      = "stg"
       }
     ],
-    elasticsearch-sg-egress-rule = [
+    search-elasticsearch-sg-egress-rule = [
       {
-        security_group_name = "elasticsearch-sg"
+        security_group_name = "search-elasticsearch-sg"
         description         = "elasticsearch security group egress rule"
         type                = "egress"
         from_port           = 0
@@ -417,9 +417,9 @@ locals {
         env                      = "stg"
       }
     ],
-    atlantis-sg-egress-rule = [
+    search-atlantis-sg-egress-rule = [
       {
-        security_group_name = "atlantis-sg"
+        security_group_name = "search-atlantis-sg"
         description         = "atlantis security group egress rule"
         type                = "egress"
         from_port           = 0

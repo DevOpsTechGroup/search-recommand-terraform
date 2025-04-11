@@ -17,13 +17,6 @@ output "debug_iam_module" {
     iam_custom_policy     = var.iam_custom_policy
     iam_managed_policy    = var.iam_managed_policy
     iam_policy_attachment = var.iam_policy_attachment
-
-    ecs_task_role               = var.ecs_task_role
-    ecs_task_role_policy        = var.ecs_task_role_policy
-    ecs_task_exec_role          = var.ecs_task_exec_role
-    ecs_task_exec_role_policy   = var.ecs_task_exec_role_policy
-    ecs_auto_scaling_role       = var.ecs_auto_scaling_role
-    ecs_auto_scaling_policy_arn = var.ecs_auto_scaling_policy_arn
   }
   sensitive = true
 }
@@ -78,10 +71,9 @@ output "debug_ecs_module" {
     ecs_appautoscaling_target_policy = var.ecs_appautoscaling_target_policy
     ecs_cpu_scale_out_alert          = var.ecs_cpu_scale_out_alert
 
-    ecs_task_role_arn           = module.iam.iam_role_arns["ecs-task-role"]
-    ecs_task_exec_role_arn      = module.iam.iam_role_arns["ecs-task-exec-role"]
-    ecs_security_group          = var.ecs_security_group
-    ecs_container_image_version = var.ecs_container_image_version
+    ecs_task_role_arn      = module.iam.iam_role_arns["search-ecs-task-role"]
+    ecs_task_exec_role_arn = module.iam.iam_role_arns["search-ecs-task-exec-role"]
+    ecs_security_group     = var.ecs_security_group
 
     alb_tg_arn       = module.elb.alb_target_group_arn
     alb_listener_arn = module.elb.alb_listener_arn

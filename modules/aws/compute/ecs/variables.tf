@@ -111,13 +111,6 @@ variable "ecs_task_exec_role_arn" {
   type        = string
 }
 
-# ECS Container Image 버전
-# Image 버전의 경우 사용자에게 직접 받아서 처리한다
-variable "ecs_container_image_version" {
-  description = "ECS Container의 이미지 버전"
-  type        = string
-}
-
 # AWS ECS Task
 variable "ecs_task_definitions" {
   description = "ECS Task Definition 설정"
@@ -135,7 +128,10 @@ variable "ecs_task_definitions" {
     cpu                                     = number
     memory                                  = number
     env                                     = string
-    ephemeral_storage                       = number
+    volume = object({
+      name = string
+    })
+    ephemeral_storage = number
     containers = list(object({
       name          = string
       image         = string
@@ -143,6 +139,7 @@ variable "ecs_task_definitions" {
       cpu           = number
       memory        = number
       port          = number
+      protocol      = string
       essential     = bool
       env_variables = map(string)
       mount_points = list(object({

@@ -2,17 +2,46 @@
 set -xe
 
 ########################################
+# 시스템 변수 셋팅
+########################################
+AWS_EC2_USER="ec2-user"
+HOME_DIR="/home/${AWS_EC2_USER}"
+
+# Github username from SSM
+GH_USER=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-github-username \
+--query "Parameter.Value" \
+--output text \
+--region "ap-northeast-2")
+
+# Github repo url from SSM
+REPO_ALLOW_LIST=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-github-repo \
+--query "Parameter.Value" \
+--output text \
+--region "ap-northeast-2")
+
+# Atlantis port number
+ATLANTIS_PORT=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-port \
+--query "Parameter.Value" \
+--output text \
+--region "ap-northeast-2")
+
+# Github token from SSM
+GH_TOKEN=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-github-token \
+--with-decryption \
+--query "Parameter.Value" \
+--output text \
+--region "ap-northeast-2")
+
+CONTAINER_NAME="search-atlantis"
+
+########################################
 # 시스템 설정 및 기본 패키지 설치
 ########################################
-GH_USER="<github username>"
-GH_TOKEN="<github token>"
-REPO_ALLOW_LIST="<github repo url>"
-ATLANTIS_PORT=<atlantis port>
-CONTAINER_NAME="atlantis"
-EC2_USER="ec2-user"
-HOME_DIR="/home/${EC2_USER}"
-
-sudo hostnamectl set-hostname atlantis
+sudo hostnamectl set-hostname search-atlantis
 sudo rm /etc/localtime
 sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
@@ -64,35 +93,51 @@ RUN ln -s /root/.atlantis/bin/terraform1.9.5 /usr/bin/terraform
 RUN apk add --no-cache aws-cli
 EOF
 
-sudo chown ${EC2_USER}:${EC2_USER} ${HOME_DIR}/Dockerfile
+sudo chown ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/Dockerfile
 
 # ec2-user 권한으로 Docker 이미지 빌드
-CMD=$(cat <<EOF
+BUILD_DOCKER=$(cat <<EOF
 cd ${HOME_DIR} &&
 docker build -t atlantis .
 EOF
 )
 
-sudo -u "${EC2_USER}" bash -c "$CMD"
+sudo -u "${AWS_EC2_USER}" bash -c "$BUILD_DOCKER"
 
 ########################################
 # Atlantis 컨테이너 실행
 ########################################
+# ECS Agenct 비활성화 -> Container 구동 오류 발생
+sudo systemctl stop ecs
+sudo systemctl disable ecs
 
-# 기존 컨테이너 제거
-docker rm -f atlantis || true
+mkdir -p ${HOME_DIR}/atlantis-config
+cat <<EOF | sudo tee ${HOME_DIR}/atlantis-config/config.yaml > /dev/null
+repos:
+  - id: /.*/
+    allowed_overrides: [workflow, apply_requirements]
+    allow_custom_workflows: true
+EOF
 
-RUN_DOKCER=$(cat <<EOF
+sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-config
+
+# 기존 Atlantis 컨테이너 제거
+docker rm -f $CONTAINER_NAME || true
+
+# Atlantis Container 실행
+RUN_DOCKER=$(cat <<EOF
 docker run -d \
     -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
     --name ${CONTAINER_NAME} \
+    -v ${HOME_DIR}/atlantis-config/config.yaml:/home/atlantis/repos.yaml \
+    -e ATLANTIS_REPO_CONFIG=/home/atlantis/repos.yaml \
     atlantis server \
     --automerge \
     --autoplan-modules \
     --gh-user=${GH_USER} \
     --gh-token=${GH_TOKEN} \
-    --repo-allowlist=${REPO_ALLOWLIST}
+    --repo-allowlist=${REPO_ALLOW_LIST}
 EOF
 )
 
-sudo -u ${EC2_USER} bash -c ${RUN_DOKCER}
+sudo -u ${AWS_EC2_USER} bash -c "$RUN_DOCKER"
