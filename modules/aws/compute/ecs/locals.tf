@@ -3,9 +3,9 @@ locals {
   env          = var.env                        # 환경변수
   az_count     = length(var.availability_zones) # 가용영역 개수
 
-  create_ecs_cluster             = true
-  create_ecs_task_definition     = true
-  create_ecs_service             = true
+  create_ecs_cluster             = false
+  create_ecs_task_definition     = false
+  create_ecs_service             = false
   create_appautoscaling_target   = false
   create_appautoscaling_policy   = false
   create_cloudwatch_metric_alarm = false
