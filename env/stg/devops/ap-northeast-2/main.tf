@@ -156,7 +156,8 @@ module "ec2" {
   # EC2 설정
   ec2_instance          = var.ec2_instance                      # EC2 정보 전달
   ec2_security_group_id = module.security.ec2_security_group_id # EC2 보안그룹 ID
-  iam_instance_profile  = module.iam.iam_instance_profile
+  iam_instance_profile  = module.iam.iam_instance_profile       # EC2 instance profile
+  ec2_key_pair          = var.ec2_key_pair                      # EC2 key pair
 
   # 프로젝트 기본 설정
   env                = var.env

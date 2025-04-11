@@ -458,15 +458,6 @@ variable "ecs_security_group_id" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
-
-    # SSH key pair
-    key_pair_name         = string
-    key_pair_algorithm    = string
-    rsa_bits              = number
-    local_file_name       = string
-    local_file_permission = string
-
-    # EC2 Option
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
@@ -478,8 +469,8 @@ variable "ec2_instance" {
     env                         = string
     script_file_name            = optional(string)
     iam_instance_profile        = optional(string)
+    key_pair_name               = string
 
-    # EC2 block storage
     root_block_device = object({
       volume_type           = optional(string)
       volume_size           = optional(number)
@@ -487,7 +478,6 @@ variable "ec2_instance" {
       encrypted             = optional(bool)
     })
 
-    # AMI filter
     owners = string
     filter = list(object({
       name   = optional(string)
@@ -510,6 +500,18 @@ variable "ec2_security_group" {
 variable "ec2_security_group_id" {
   description = "EC2 보안그룹 ID"
   type        = map(string)
+}
+
+# EC2 key pair
+variable "ec2_key_pair" {
+  description = "EC2 key pair"
+  type = map(object({
+    key_pair_name         = string
+    key_pair_algorithm    = string
+    rsa_bits              = string
+    local_file_name       = string
+    local_file_permission = string
+  }))
 }
 
 ########################################

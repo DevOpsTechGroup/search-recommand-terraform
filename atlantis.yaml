@@ -1,0 +1,21 @@
+version: 3
+
+projects:
+- name: search-recommand-devops-apnortheast2-stg
+  branch: /^(dev|master)$/ # dev or master
+  dir: env/stg/devops/ap-northeast-2
+  terraform_version: "1.9.5"
+  autoplan:
+    enabled: true
+    when_modified: [ "*.tf", "../modules/**/*.tf" ]
+  workflow: search-recommand-devops-apnortheast2-stg-wf
+  apply_requirements: [ mergeable, approved ] # merge 가능 상태이며, 최소 1명 이상의 approve가 있는 경우 apply 가능
+
+workflows:
+  search-recommand-devops-apnortheast2-stg-wf:
+    plan:
+      steps:
+      - run: terraform fmt -check -diff
+      - init
+      - plan:
+          extra_args: [ "-lock=true" ]

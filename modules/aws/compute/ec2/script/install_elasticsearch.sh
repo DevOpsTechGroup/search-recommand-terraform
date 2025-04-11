@@ -2,8 +2,9 @@
 ################################
 # 기본 셋팅
 ################################
-# hostname 셋팅
 sudo hostnamectl set-hostname opensearch
+sudo rm /etc/localtime
+sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
 ################################
 # 필수 패키지 설치
