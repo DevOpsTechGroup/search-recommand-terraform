@@ -1,14 +1,3 @@
-# ECS task definition template file
-data "template_file" "container_definitions" {
-  for_each = tomap(var.ecs_task_definitions) # for_each로 반복할 맵 정의
-  template = file("${path.module}/task_definitions.tpl")
-
-  vars = {
-    containers = jsonencode(each.value.containers) # container 정보
-    # ecs_container_image_version = var.ecs_container_image_version   # container image version
-  }
-}
-
 # ECS cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
   for_each = var.ecs_cluster
@@ -55,7 +44,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   # task_definitions.tpl 파일에 있는 mountPoints 이름을 volume으로 사용
   # ECS Fargate의 경우 volume 사용이 불가능하여, bind mount(host path) 사용
   volume {
-    name = "core-shared-volume"
+    name = each.value.volume.name
   }
 
   # ECS 임시 휘발성 볼륨 지정
@@ -64,7 +53,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
   }
 
   # ECS Task Definition 파일을 읽어서
-  container_definitions = data.template_file.container_definitions[each.key].rendered
+  container_definitions = jsonencode(local.task_definition_container_flat[each.key])
 
   tags = merge(var.tags, {
     Name = "${each.value.task_family}-${each.value.env}"

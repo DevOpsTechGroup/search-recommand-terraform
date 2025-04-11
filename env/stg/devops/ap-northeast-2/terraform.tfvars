@@ -83,14 +83,14 @@ alb_security_group = {
 
 # ALB Listencer 생성
 alb_listener = {
-  alb-http-listener = {
-    name              = "alb-http-listener"
+  search-alb-http-listener = {
+    name              = "search-alb-http-listener"
     port              = 80
     protocol          = "HTTP"
     load_balancer_arn = "search-recommand-alb" # 연결할 ALB 이름 지정
     default_action = {                         # TODO: 고정 응답 값 반환하도록 수정
       type = "fixed-response"                  # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
-      # target_group_arn = "opensearch-alb-tg"
+      # target_group_arn = "search-opensearch-alb-tg"
       fixed_response = {
         content_type = "text/plain"
         message_body = "Fixed response content"
@@ -103,26 +103,26 @@ alb_listener = {
 
 # ALB Listener Rule 생성
 alb_listener_rule = {
-  opensearch-alb-http-listener-rule = {
+  search-opensearch-alb-http-listener-rule = {
     type              = "forward"
-    path              = ["/vectorPlaylistSearch"]
-    alb_listener_name = "alb-http-listener"
-    target_group_name = "opensearch-alb-tg"
+    path              = ["/vector"]
+    alb_listener_name = "search-alb-http-listener"
+    target_group_name = "search-opensearch-alb-tg"
     priority          = 1
   },
-  elasticsearch-alb-http-listener-rule = {
+  search-elasticsearch-alb-http-listener-rule = {
     type              = "forward"
-    path              = ["/elasticsearchPlaylistSearch"]
-    alb_listener_name = "alb-http-listener"
-    target_group_name = "elasticsearch-alb-tg"
+    path              = ["/elasticsearch"]
+    alb_listener_name = "search-alb-http-listener"
+    target_group_name = "search-elasticsearch-alb-tg"
     priority          = 2
   }
 }
 
 # ALB Target Group 생성
 target_group = {
-  opensearch-alb-tg = {
-    name        = "opensearch-alb-tg"
+  search-opensearch-alb-tg = {
+    name        = "search-opensearch-alb-tg"
     port        = 10091
     elb_type    = "ALB"
     protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
@@ -140,8 +140,8 @@ target_group = {
       internal            = false
     }
   },
-  elasticsearch-alb-tg = {
-    name        = "elasticsearch-alb-tg"
+  search-elasticsearch-alb-tg = {
+    name        = "search-elasticsearch-alb-tg"
     port        = 10092
     elb_type    = "ALB"
     protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
@@ -168,18 +168,18 @@ alb_security_group_id = {}
 ########################################
 # ECR 리포지토리 생성
 ecr_repository = {
-  opensearch-api = {
-    ecr_repository_name      = "opensearch-api" # 리포지토리명
-    env                      = "stg"            # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"      # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false            # PUSH Scan 여부
+  search-opensearch-api = {
+    ecr_repository_name      = "search-opensearch-api" # 리포지토리명
+    env                      = "stg"                   # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
   },
-  elasticsearch-api = {
-    ecr_repository_name      = "elasticsearch-api" # 리포지토리명
-    env                      = "stg"               # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"         # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false               # PUSH Scan 여부
+  search-elasticsearch-api = {
+    ecr_repository_name      = "search-elasticsearch-api" # 리포지토리명
+    env                      = "stg"                      # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"                # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                      # PUSH Scan 여부
     ecr_force_delete         = false
   }
 }
@@ -374,21 +374,21 @@ iam_instance_profile = {
 ########################################
 # ECS 클러스터 생성
 ecs_cluster = {
-  search-recommand-ecs-cluster = {
-    cluster_name = "search-recommand-ecs-cluster"
+  search-ecs-cluster = {
+    cluster_name = "search-ecs-cluster"
     env          = "stg"
   }
 }
 
 # ECS Security Group 
 ecs_security_group = {
-  opensearch-api-sg = {
-    security_group_name = "opensearch-api-sg"
+  search-opensearch-api-sg = {
+    security_group_name = "search-opensearch-api-sg"
     description         = "opensearch ecs security group"
     env                 = "stg"
   },
-  elasticsearch-api-sg = {
-    security_group_name = "elasticsearch-api-sg"
+  search-elasticsearch-api-sg = {
+    security_group_name = "search-elasticsearch-api-sg"
     description         = "elasticsearch ecs security group"
     env                 = "stg"
   }
@@ -410,8 +410,8 @@ ecs_container_image_version = "1.0.0"
 # ECS Task Definitions 생성
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
 ecs_task_definitions = {
-  opensearch-api-td = {
-    name                                    = "opensearch-api-td"
+  search-opensearch-api-td = {
+    name                                    = "search-opensearch-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -420,19 +420,23 @@ ecs_task_definitions = {
     task_total_memory                       = 2048 # ECS Task Total Mem
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "opensearch-api-td"
+    task_family                             = "search-opensearch-api-td"
     cpu                                     = 1024
     memory                                  = 2048
     env                                     = "stg"
-    ephemeral_storage                       = 21
+    volume = {
+      name = "search-opensearch-api-shared-volume"
+    }
+    ephemeral_storage = 21
     containers = [
       {
-        name      = "opensearch-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/opensearch-api"
+        name      = "search-opensearch-api"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-opensearch-api"
         version   = "1.0.1" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
         port      = 10091
+        protocol  = "tcp"
         essential = true
         env_variables = {
           "TZ"                     = "Asia/Seoul"
@@ -449,8 +453,8 @@ ecs_task_definitions = {
       }
     ]
   },
-  elasticsearch-api-td = {
-    name                                    = "elasticsearch-api-td"
+  search-elasticsearch-api-td = {
+    name                                    = "search-elasticsearch-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -459,19 +463,23 @@ ecs_task_definitions = {
     task_total_memory                       = 2048 # ECS Task Total Mem
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "elasticsearch-api-td"
+    task_family                             = "search-elasticsearch-api-td"
     cpu                                     = 1024
     memory                                  = 2048
     env                                     = "stg"
-    ephemeral_storage                       = 21
+    volume = {
+      name = "search-elasticsearch-api-shared-volume"
+    }
+    ephemeral_storage = 21
     containers = [
       {
-        name      = "elasticsearch-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/elasticsearch-api"
+        name      = "search-elasticsearch-api"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-elasticsearch-api"
         version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
         port      = 10092
+        protocol  = "tcp"
         essential = true
         env_variables = {
           "TZ"                     = "Asia/Seoul"
@@ -492,56 +500,56 @@ ecs_task_definitions = {
 
 # ECS 서비스 생성
 ecs_service = {
-  opensearch-ecs-service = {
-    launch_type                   = "FARGATE"                      # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
-    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-recommand-ecs-cluster" # ECS Cluster명
-    service_name                  = "opensearch-ecs-service"       # 서비스 이름
-    desired_count                 = 1                              # Task 개수
-    container_name                = "opensearch-api"               # 컨테이너 이름
-    container_port                = 10091                          # 컨테이너 포트
-    task_definitions              = "opensearch-api-td"            # 테스크 지정
-    env                           = "stg"                          # ECS Service 환경변수
-    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                          # 우선 public zone에 구성
-    target_group_arn              = "opensearch-alb-tg"            # 연결되어야 하는 Target Group 지정
-    security_group_name           = "opensearch-api-sg"            # 보안그룹 이름
+  search-opensearch-ecs-service = {
+    launch_type                   = "FARGATE"                       # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS"          # ECS Service Role
+    deployment_controller         = "ECS"                           # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    cluster_name                  = "search-ecs-cluster"            # ECS Cluster명
+    service_name                  = "search-opensearch-ecs-service" # 서비스 이름
+    desired_count                 = 1                               # Task 개수
+    container_name                = "search-opensearch-api"         # 컨테이너 이름
+    container_port                = 10091                           # 컨테이너 포트
+    task_definitions              = "search-opensearch-api-td"      # 테스크 지정
+    env                           = "stg"                           # ECS Service 환경변수
+    health_check_grace_period_sec = 250                             # 헬스 체크 그레이스 기간
+    assign_public_ip              = false                           # 우선 public zone에 구성
+    target_group_arn              = "search-opensearch-alb-tg"      # 연결되어야 하는 Target Group 지정
+    security_group_name           = "search-opensearch-api-sg"      # 보안그룹 이름
   },
-  elasticsearch-ecs-service = {
-    launch_type                   = "FARGATE"                      # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
-    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-recommand-ecs-cluster" # ECS Cluster명
-    service_name                  = "elasticsearch-ecs-service"    # 서비스 이름
-    desired_count                 = 1                              # Task 개수
-    container_name                = "elasticsearch-api"            # 컨테이너 이름
-    container_port                = 10092                          # 컨테이너 포트
-    task_definitions              = "elasticsearch-api-td"         # 테스크 지정
-    env                           = "stg"                          # ECS Service 환경변수
-    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                          # 우선 public zone에 구성
-    target_group_arn              = "elasticsearch-alb-tg"         # 연결되어야 하는 Target Group 지정
-    security_group_name           = "elasticsearch-api-sg"         # 보안그룹 이름
+  search-elasticsearch-ecs-service = {
+    launch_type                   = "FARGATE"                          # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS"             # ECS Service Role
+    deployment_controller         = "ECS"                              # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    cluster_name                  = "search-ecs-cluster"               # ECS Cluster명
+    service_name                  = "search-elasticsearch-ecs-service" # 서비스 이름
+    desired_count                 = 1                                  # Task 개수
+    container_name                = "elasticsearch-api"                # 컨테이너 이름
+    container_port                = 10092                              # 컨테이너 포트
+    task_definitions              = "search-elasticsearch-api-td"      # 테스크 지정
+    env                           = "stg"                              # ECS Service 환경변수
+    health_check_grace_period_sec = 250                                # 헬스 체크 그레이스 기간
+    assign_public_ip              = false                              # 우선 public zone에 구성
+    target_group_arn              = "search-elasticsearch-alb-tg"      # 연결되어야 하는 Target Group 지정
+    security_group_name           = "search-elasticsearch-api-sg"      # 보안그룹 이름
   },
 }
 
 # ECS Autoscaling
 ecs_appautoscaling_target = {
-  opensearch-ecs-service = {
-    min_capacity       = 2                                                                 # 최소 Task 2개가 항상 실행되도록 설정
-    max_capacity       = 6                                                                 # 최대 Task 6개까지 증가 할 수 있도록 설정
-    resource_id        = "service/search-recommand-ecs-cluster-stg/opensearch-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
-    scalable_dimension = "ecs:service:DesiredCount"                                        # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
+  search-opensearch-ecs-service = {
+    min_capacity       = 2                                                       # 최소 Task 2개가 항상 실행되도록 설정
+    max_capacity       = 6                                                       # 최대 Task 6개까지 증가 할 수 있도록 설정
+    resource_id        = "service/search-ecs-cluster-stg/opensearch-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
+    scalable_dimension = "ecs:service:DesiredCount"                              # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
     service_namespace  = "ecs"
-    cluster_name       = "search-recommand-ecs-cluster" # ECS 클러스터명 지정
-    service_name       = "opensearch-ecs-service"       # ECS 서비스명 지정
+    cluster_name       = "search-ecs-cluster"            # ECS 클러스터명 지정
+    service_name       = "search-opensearch-ecs-service" # ECS 서비스명 지정
   },
 }
 
 # ECS Autoscaling 정책
 ecs_appautoscaling_target_policy = {
-  opensearch-ecs-service = {
+  search-opensearch-ecs-service = {
     scale_out = {
       name        = "ECSOpenSearchScaleOutPolicy" # 스케일 아웃 정책명
       policy_type = "StepScaling"                 # 정책 타입
@@ -575,7 +583,7 @@ ecs_appautoscaling_target_policy = {
 
 # ECS Autoscaling Cloudwatch policy
 ecs_cpu_scale_out_alert = {
-  opensearch-ecs-service = {
+  search-opensearch-ecs-service = {
     alarm_name          = "ECSOpenSearchScaleOutAlarm"
     comparison_operator = "GreaterThanOrEqualToThreshold" # 메트릭이 임계값보다 크거나 같으면 발동
     evaluation_periods  = "1"                             # 평가 주기는 1번 -> 1번만 조건에 맞아도 이벤트 발생
@@ -585,8 +593,8 @@ ecs_cpu_scale_out_alert = {
     statistic           = "Average"                       # 집계 방식은 평균으로
     threshold           = "30"                            # 30부터 스케일링 진행
     dimensions = {
-      cluster_name = "search-recommand-ecs-cluster"
-      service_name = "opensearch-ecs-service"
+      cluster_name = "search-ecs-cluster"
+      service_name = "search-opensearch-ecs-service"
     }
     env = "stg"
   }
@@ -608,7 +616,7 @@ ec2_instance = {
     associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "search-opensearch-c01"
-    security_group_name         = "opensearch-sg"
+    security_group_name         = "search-opensearch-sg"
     env                         = "stg"
     script_file_name            = "install_opensearch.sh"
     iam_instance_profile        = ""
@@ -645,7 +653,7 @@ ec2_instance = {
     associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "search-opensearch-c02"
-    security_group_name         = "opensearch-sg"
+    security_group_name         = "search-opensearch-sg"
     env                         = "stg"
     script_file_name            = "install_opensearch.sh"
     iam_instance_profile        = ""
@@ -682,7 +690,7 @@ ec2_instance = {
     associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "search-opensearch-d01"
-    security_group_name         = "opensearch-sg"
+    security_group_name         = "search-opensearch-sg"
     env                         = "stg"
     script_file_name            = "install_opensearch.sh"
     iam_instance_profile        = ""
@@ -719,7 +727,7 @@ ec2_instance = {
     associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "search-opensearch-d02"
-    security_group_name         = "opensearch-sg"
+    security_group_name         = "search-opensearch-sg"
     env                         = "stg"
     script_file_name            = "install_opensearch.sh"
     iam_instance_profile        = ""
@@ -756,7 +764,7 @@ ec2_instance = {
   #   associate_public_ip_address = true
   #   disable_api_termination     = true
   #   instance_name               = "atlantis"
-  #   security_group_name         = "atlantis-sg"
+  #   security_group_name         = "search-atlantis-sg"
   #   env                         = "stg"
   #   script_file_name            = "install_atlantis.sh"
   #   iam_instance_profile        = "atlantis-terraform-instance-profile"
@@ -792,18 +800,18 @@ ec2_instance = {
 
 # EC2 보안그룹 생성
 ec2_security_group = {
-  opensearch-sg = {
-    security_group_name = "opensearch-sg"
+  search-opensearch-sg = {
+    security_group_name = "search-opensearch-sg"
     description         = "search-recommand vector opensearch ec2"
     env                 = "stg"
   },
-  elasticsearch-sg = {
-    security_group_name = "elasticsearch-sg"
+  search-elasticsearch-sg = {
+    security_group_name = "search-elasticsearch-sg"
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
   },
-  atlantis-sg = {
-    security_group_name = "atlantis-sg"
+  search-atlantis-sg = {
+    security_group_name = "search-atlantis-sg"
     description         = "search-recommand atlantis ec2"
     env                 = "stg"
   }

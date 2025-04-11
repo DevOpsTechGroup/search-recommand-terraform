@@ -343,7 +343,10 @@ variable "ecs_task_definitions" {
     cpu                                     = number
     memory                                  = number
     env                                     = string
-    ephemeral_storage                       = number
+    volume = object({
+      name = string
+    })
+    ephemeral_storage = number
     containers = list(object({
       name          = string
       image         = string
@@ -351,6 +354,7 @@ variable "ecs_task_definitions" {
       cpu           = number
       memory        = number
       port          = number
+      protocol      = string
       essential     = bool
       env_variables = map(string)
       mount_points = list(object({
