@@ -1,18 +1,22 @@
+# https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#example-using-all-keys
 version: 3
 
 projects:
-- name: search-recommand-devops-apnortheast2-stg
-  branch: /^(dev|master)$/ # dev or master
-  dir: env/stg/apne2/devops
-  terraform_version: "1.9.5"
+- name: search-recommand-stg
+  #branch: /^(dev|master)$/ # dev or master
+  branch: /master/ # master brance만 적용
+  dir: env/stg/apne2/devops # atlantis base dir
+  terraform_version: "v1.9.5"
+  delete_source_branch_on_merge: false
   autoplan:
-    enabled: true
     when_modified: [ "*.tf", "*.tfvars", "../modules/aws/**/*.tf", "../modules/aws/**/*.sh" ]
-  workflow: search-recommand-devops-apnortheast2-stg-wf
-  apply_requirements: [ mergeable, approved ] # merge 가능 상태이며, 최소 1명 이상의 approve가 있는 경우 apply 가능
+    enabled: true
+  workflow: search-recommand-workflow-stg
+  plan_requirements: [ mergeable ] # plan 실행 조건 (merge 가능)
+  apply_requirements: [ mergeable, approved ] # apply 실행 조건 (merge 가능, 승인 1명 이상)
 
 workflows:
-  search-recommand-devops-apnortheast2-stg-wf:
+  search-recommand-workflow-stg:
     plan:
       steps:
       - run: terraform fmt -check -diff
