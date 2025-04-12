@@ -90,11 +90,8 @@ variable "ec2_security_group_id" {
 variable "ec2_key_pair" {
   description = "EC2 key pair"
   type = map(object({
-    key_pair_name         = string
-    key_pair_algorithm    = string
-    rsa_bits              = string
-    local_file_name       = string
-    local_file_permission = string
+    name = string
+    env  = string
   }))
 }
 
