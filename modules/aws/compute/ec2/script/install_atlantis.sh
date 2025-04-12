@@ -119,7 +119,9 @@ repos:
     allow_custom_workflows: true
 EOF
 
+mkdir -p ${HOME_DIR}/atlantis-data
 sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-config
+sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-data
 
 # 기존 Atlantis 컨테이너 제거
 docker rm -f $CONTAINER_NAME || true
