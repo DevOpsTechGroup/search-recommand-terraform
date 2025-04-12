@@ -4,7 +4,7 @@ projects:
 - name: search-recommand-devops-apnortheast2-stg
   branch: /^(dev|master)$/ # dev or master
   dir: env/stg/apne2/devops
-  terraform_version: "v1.9.5"
+  terraform_version: "1.9.5"
   autoplan:
     enabled: true
     when_modified: [ "*.tf", "../modules/**/*.tf" ]
