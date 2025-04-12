@@ -111,22 +111,26 @@ sudo -u "${AWS_EC2_USER}" bash -c "$BUILD_DOCKER"
 sudo systemctl stop ecs
 sudo systemctl disable ecs
 
+# https://www.runatlantis.io/docs/server-side-repo-config.html
 mkdir -p ${HOME_DIR}/atlantis-config
 cat <<EOF | sudo tee ${HOME_DIR}/atlantis-config/config.yaml > /dev/null
 repos:
   - id: /.*/
-    allowed_overrides: [workflow, apply_requirements]
+    allowed_overrides: [workflow, plan_requirements, apply_requirements]
     allow_custom_workflows: true
 EOF
 
-mkdir -p ${HOME_DIR}/atlantis-data
 sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-config
+
+mkdir -p ${HOME_DIR}/atlantis-data
 sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-data
 
 # 기존 Atlantis 컨테이너 제거
 docker rm -f $CONTAINER_NAME || true
 
 # Atlantis Container 실행
+# --automerge: true -> Atlantis Auto Merge 옵션
+# => 위 옵션은 일단 제거 해두었음
 RUN_DOCKER=$(cat <<EOF
 docker run -d \
     -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
@@ -134,7 +138,6 @@ docker run -d \
     -v ${HOME_DIR}/atlantis-config/config.yaml:/home/atlantis/repos.yaml \
     -e ATLANTIS_REPO_CONFIG=/home/atlantis/repos.yaml \
     atlantis server \
-    --automerge \
     --autoplan-modules \
     --gh-user=${GH_USER} \
     --gh-token=${GH_TOKEN} \
