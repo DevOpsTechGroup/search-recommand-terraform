@@ -9,7 +9,7 @@ projects:
   terraform_version: "v1.9.5"
   delete_source_branch_on_merge: false
   autoplan:
-    when_modified: [ "*.tf", "*.tfvars", "../modules/aws/**/*.tf", "../modules/aws/compute/ec2/script/*.sh" ]
+    when_modified: [ "*.tf", "*.tfvars", "../modules/aws/**/*.tf", "../modules/aws/**/*.sh" ]
     enabled: true
   workflow: search-recommand-workflow-stg
   plan_requirements: [ mergeable ] # plan 실행 조건 (merge 가능)
