@@ -832,18 +832,12 @@ ec2_security_group_id = {}
 # EC2 key pair
 ec2_key_pair = {
   search-opensearch-key = {
-    key_pair_name         = "search-opensearch-key"
-    key_pair_algorithm    = "RSA"
-    rsa_bits              = 4096
-    local_file_name       = "keypair/search-opensearch-key.pem" # terraform key pair 생성 후 저장 경로 modules/aws/compute/ec2/...
-    local_file_permission = "0600"                              # 6(read + writer)00
+    name = "search-opensearch-key"
+    env  = "stg"
   },
   search-atlantis-key = {
-    key_pair_name         = "search-atlantis-key"
-    key_pair_algorithm    = "RSA"
-    rsa_bits              = 4096
-    local_file_name       = "keypair/search-atlantis-key.pem"
-    local_file_permission = "0600"
+    name = "search-atlantis-key"
+    env  = "stg"
   }
 }
 
