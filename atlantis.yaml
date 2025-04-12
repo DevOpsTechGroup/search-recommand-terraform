@@ -1,6 +1,5 @@
 version: 3
-automerge: false # auto merge 비활성화
-delete_source_branch_on_merge: false # source branch 자동 삭제 비활성화
+
 projects:
 - name: search-recommand-devops-apnortheast2-stg
   branch: /^(dev|master)$/ # dev or master
