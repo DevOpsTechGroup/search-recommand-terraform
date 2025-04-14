@@ -11,7 +11,6 @@ projects:
     when_modified: [ "*.tf", "*.tfvars", "../modules/aws/**/*.tf", "../modules/aws/**/*.sh" ]
     enabled: true
   workflow: search-recommand-workflow-stg
-  plan_requirements: [ mergeable ] # plan 실행 조건 (merge 가능)
   apply_requirements: [ mergeable, approved ] # apply 실행 조건 (merge 가능, 승인 1명 이상)
 
 workflows:
