@@ -14,6 +14,14 @@ GH_USER=$(aws ssm get-parameter \
 --output text \
 --region "ap-northeast-2")
 
+# Github token from SSM
+GH_TOKEN=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-github-token \
+--with-decryption \
+--query "Parameter.Value" \
+--output text \
+--region "ap-northeast-2")
+
 # Github repo url from SSM
 REPO_ALLOW_LIST=$(aws ssm get-parameter \
 --name /search-recommand/stg/atlantis-github-repo \
@@ -28,9 +36,9 @@ ATLANTIS_PORT=$(aws ssm get-parameter \
 --output text \
 --region "ap-northeast-2")
 
-# Github token from SSM
-GH_TOKEN=$(aws ssm get-parameter \
---name /search-recommand/stg/atlantis-github-token \
+# Atlantis infra cost token
+ATLANTIS_INFRACOST_TOKEN=$(aws ssm get-parameter \
+--name /search-recommand/stg/atlantis-infracost-token \
 --with-decryption \
 --query "Parameter.Value" \
 --output text \
@@ -112,19 +120,6 @@ sudo systemctl stop ecs
 sudo systemctl disable ecs
 
 # https://www.runatlantis.io/docs/server-side-repo-config.html
-mkdir -p ${HOME_DIR}/atlantis-config
-cat <<EOF | sudo tee ${HOME_DIR}/atlantis-config/config.yaml > /dev/null
-repos:
-  - id: /.*/
-    allowed_overrides: [workflow, plan_requirements, apply_requirements]
-    allow_custom_workflows: true
-EOF
-
-sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-config
-
-mkdir -p ${HOME_DIR}/atlantis-data
-sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-data
-
 # 기존 Atlantis 컨테이너 제거
 docker rm -f $CONTAINER_NAME || true
 
@@ -133,15 +128,39 @@ docker rm -f $CONTAINER_NAME || true
 # => 위 옵션은 일단 제거 해두었음
 RUN_DOCKER=$(cat <<EOF
 docker run -d \
-    -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
-    --name ${CONTAINER_NAME} \
-    -v ${HOME_DIR}/atlantis-config/config.yaml:/home/atlantis/repos.yaml \
-    -e ATLANTIS_REPO_CONFIG=/home/atlantis/repos.yaml \
-    atlantis server \
-    --autoplan-modules \
-    --gh-user=${GH_USER} \
-    --gh-token=${GH_TOKEN} \
-    --repo-allowlist=${REPO_ALLOW_LIST}
+  -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
+  --name ${CONTAINER_NAME} \
+  infracost/infracost-atlantis:latest server \
+  --gh-user=${GH_USER} \
+  --gh-token=${GH_TOKEN} \
+  --repo-allowlist=${REPO_ALLOW_LIST} \
+  --repo-config-json='{
+    "repos": [
+      {
+        "id": "/.*/",
+        "workflow": "terraform-infracost"
+      }
+    ],
+    "workflows": {
+      "terraform-infracost": {
+        "plan": {
+          "steps": [
+            "init",
+            "plan",
+            {
+              "env": {
+                "name": "INFRACOST_API_KEY",
+                "value": "'"${ATLANTIS_INFRACOST_TOKEN}"'"
+              }
+            },
+            {
+              "run": "/home/atlantis/infracost_atlantis_diff.sh"
+            }
+          ]
+        }
+      }
+    }
+  }'
 EOF
 )
 
