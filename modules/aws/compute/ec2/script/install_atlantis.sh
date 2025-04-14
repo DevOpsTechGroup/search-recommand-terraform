@@ -139,7 +139,7 @@ docker run -d \
       {
         "id": "/.*/",
         "workflow": "terraform-infracost",
-        "allowed_overrides": ["workflow", "plan_requirements", "apply_requirements"],
+        "allowed_overrides": ["workflow", "plan_requirements", "apply_requirements", "delete_source_branch_on_merge"],
         "allow_custom_workflows": true
       }
     ],
