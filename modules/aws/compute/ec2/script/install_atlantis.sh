@@ -138,22 +138,21 @@ docker run -d \
     "repos": [
       {
         "id": "/.*/",
-        "workflow": "search-recommand-workflow-stg",
-        "terraform_version": "1.9.5",
+        "branch": "/.*/",
+        "workflow": "atlantis-infracost",
+        "allow_custom_workflows":true,
         "allowed_overrides": [
           "workflow",
           "plan_requirements",
           "apply_requirements",
           "delete_source_branch_on_merge"
         ],
-        "allow_custom_workflows": true,
         "autoplan": {
           "enabled": true,
           "when_modified": [
-            "*.tf",
-            "*.tfvars",
-            "../modules/aws/**/*.tf",
-            "../modules/aws/**/*.sh"
+             "**/*.tf",
+             "**/*.tfvars",
+             "**/*.sh"
           ]
         },
         "apply_requirements": ["mergeable", "approved"],
@@ -161,7 +160,7 @@ docker run -d \
       }
     ],
     "workflows": {
-      "search-recommand-workflow-stg": {
+      "atlantis-infracost": {
         "plan": {
           "steps": [
             {
