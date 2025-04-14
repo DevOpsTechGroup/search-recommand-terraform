@@ -130,62 +130,11 @@ RUN_DOCKER=$(cat <<EOF
 docker run -d \
   -p ${ATLANTIS_PORT}:${ATLANTIS_PORT} \
   --name ${CONTAINER_NAME} \
+  -e ATLANTIS_INFRACOST_TOKEN=${ATLANTIS_INFRACOST_TOKEN} \
   infracost/infracost-atlantis:latest server \
   --gh-user=${GH_USER} \
   --gh-token=${GH_TOKEN} \
-  --repo-allowlist=${REPO_ALLOW_LIST} \
-  --repo-config-json='{
-    "repos": [
-      {
-        "id": "/.*/",
-        "branch": "/.*/",
-        "workflow": "atlantis-infracost",
-        "allow_custom_workflows":true,
-        "allowed_overrides": [
-          "workflow",
-          "plan_requirements",
-          "apply_requirements",
-          "delete_source_branch_on_merge"
-        ],
-        "autoplan": {
-          "enabled": true,
-          "when_modified": [
-             "**/*.tf",
-             "**/*.tfvars",
-             "**/*.sh"
-          ]
-        },
-        "apply_requirements": ["mergeable", "approved"],
-        "delete_source_branch_on_merge": false
-      }
-    ],
-    "workflows": {
-      "atlantis-infracost": {
-        "plan": {
-          "steps": [
-            {
-              "run": "terraform fmt -check -diff"
-            },
-            "init",
-            {
-              "plan": {
-                "extra_args": ["-lock=true"]
-              }
-            },
-            {
-              "env": {
-                "name": "INFRACOST_API_KEY",
-                "value": "'"${ATLANTIS_INFRACOST_TOKEN}"'"
-              }
-            },
-            {
-              "run": "/home/atlantis/infracost_atlantis_diff.sh"
-            }
-          ]
-        }
-      }
-    }
-  }'
+  --repo-allowlist=${REPO_ALLOW_LIST}
 EOF
 )
 

@@ -1,0 +1,27 @@
+# https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#example-using-all-keys
+version: 3
+
+projects:
+- name: search-recommand-stg
+  branch: /^(dev|master)$/
+  dir: env/stg/apne2/devops
+  terraform_version: "1.9.5"
+  delete_source_branch_on_merge: false
+  workflow: search-recommand-workflow-stg
+  autoplan:
+    enabled: true
+    when_modified: [ "**/*.tf", "**/*.tfvars", "**/*.sh" ]
+  apply_requirements: [ "mergeable", "approved" ]
+
+workflows:
+  search-recommand-workflow-stg:
+    plan:
+      steps:
+      - run: terraform fmt -check -diff
+      - init
+      - plan:
+          extra_args: [ "-lock=true" ]
+      - env:
+          name: INFRACOST_API_KEY
+          value: ${ATLANTIS_INFRACOST_TOKEN}
+      - run: /home/atlantis/infracost_atlantis_diff.sh
