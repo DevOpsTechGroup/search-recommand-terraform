@@ -134,7 +134,38 @@ docker run -d \
   infracost/infracost-atlantis:latest server \
   --gh-user=${GH_USER} \
   --gh-token=${GH_TOKEN} \
-  --repo-allowlist=${REPO_ALLOW_LIST}
+  --repo-allowlist=${REPO_ALLOW_LIST} \
+  --repo-config-json='
+    {
+      "repos": [
+        {
+          "id": "/.*/",
+          "allowed_overrides": ["apply_requirements", "workflow", "delete_source_branch_on_merge"],
+          "allow_custom_workflows": true,
+          "workflow": "atlantis-infracost"
+        }
+      ],
+      "workflows": {
+        "atlantis-infracost": {
+          "plan": {
+            "steps": [
+              "init",
+              "plan",
+              {
+                "env": {
+                  "name": "INFRACOST_API_KEY",
+                  "value": "'"${ATLANTIS_INFRACOST_TOKEN}"'"
+                }
+              },
+              {
+                "run": "/home/atlantis/infracost_atlantis_diff.sh"
+              }
+            ]
+          }
+        }
+      }
+    }
+  '
 EOF
 )
 
