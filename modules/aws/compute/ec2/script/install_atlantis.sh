@@ -96,7 +96,7 @@ mkdir -p ${HOME_DIR}/atlantis-config
 cat <<EOF | sudo tee ${HOME_DIR}/atlantis-config/config.yaml > /dev/null
 repos:
   - id: /.*/
-    allowed_overrides: [workflow, plan_requirements, apply_requirements]
+    allowed_overrides: [workflow, plan_requirements, apply_requirements, delete_source_branch_on_merge]
     allow_custom_workflows: true
 EOF
 sudo chown -R ${AWS_EC2_USER}:${AWS_EC2_USER} ${HOME_DIR}/atlantis-config
