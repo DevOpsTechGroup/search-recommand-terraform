@@ -138,17 +138,41 @@ docker run -d \
     "repos": [
       {
         "id": "/.*/",
-        "workflow": "terraform-infracost",
-        "allowed_overrides": ["workflow", "plan_requirements", "apply_requirements", "delete_source_branch_on_merge"],
-        "allow_custom_workflows": true
+        "workflow": "search-recommand-workflow-stg",
+        "terraform_version": "1.9.5",
+        "allowed_overrides": [
+          "workflow",
+          "plan_requirements",
+          "apply_requirements",
+          "delete_source_branch_on_merge"
+        ],
+        "allow_custom_workflows": true,
+        "autoplan": {
+          "enabled": true,
+          "when_modified": [
+            "*.tf",
+            "*.tfvars",
+            "../modules/aws/**/*.tf",
+            "../modules/aws/**/*.sh"
+          ]
+        },
+        "apply_requirements": ["mergeable", "approved"],
+        "delete_source_branch_on_merge": false
       }
     ],
     "workflows": {
-      "terraform-infracost": {
+      "search-recommand-workflow-stg": {
         "plan": {
           "steps": [
+            {
+              "run": "terraform fmt -check -diff"
+            },
             "init",
-            "plan",
+            {
+              "plan": {
+                "extra_args": ["-lock=true"]
+              }
+            },
             {
               "env": {
                 "name": "INFRACOST_API_KEY",
@@ -166,4 +190,4 @@ docker run -d \
 EOF
 )
 
-sudo -u ${AWS_EC2_USER} bash -c "$RUN_DOCKER"
+sudo -u "${AWS_EC2_USER}" bash -c "$RUN_DOCKER"
