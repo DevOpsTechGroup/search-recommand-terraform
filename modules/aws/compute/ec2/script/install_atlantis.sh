@@ -138,7 +138,9 @@ docker run -d \
     "repos": [
       {
         "id": "/.*/",
-        "workflow": "terraform-infracost"
+        "workflow": "terraform-infracost",
+        "allowed_overrides": ["workflow", "plan_requirements", "apply_requirements"],
+        "allow_custom_workflows": true
       }
     ],
     "workflows": {

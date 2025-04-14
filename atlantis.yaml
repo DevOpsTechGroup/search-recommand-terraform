@@ -3,8 +3,7 @@ version: 3
 
 projects:
 - name: search-recommand-stg
-  #branch: /^(dev|master)$/ # dev or master
-  branch: /master/ # master brance만 적용
+  branch: /^(dev|master)$/ # dev or master
   dir: env/stg/apne2/devops # atlantis base dir
   terraform_version: "v1.9.5"
   delete_source_branch_on_merge: false
