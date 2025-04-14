@@ -1,0 +1,28 @@
+# https://www.runatlantis.io/docs/repo-level-atlantis-yaml.html#example-using-all-keys
+version: 3
+
+projects:
+- name: search-recommand-stg
+  branch: /^(dev|master)$/ # dev or master
+  dir: env/stg/apne2/devops # atlantis base dir
+  terraform_version: "1.9.5"
+  delete_source_branch_on_merge: false
+  autoplan:
+    enabled: true
+    when_modified:
+    - "*.tf"
+    - "*.tfvars"
+    - "../modules/aws/**/*.tf"
+    - "../modules/aws/compute/ec2/script/*.sh"
+  workflow: search-recommand-workflow-stg
+  plan_requirements: [ mergeable ] # plan 실행 조건
+  apply_requirements: [ mergeable, approved ] # apply 실행 조건
+
+workflows:
+  search-recommand-workflow-stg:
+    plan:
+      steps:
+      - run: terraform fmt -check -diff
+      - init
+      - plan:
+          extra_args: [ "-lock=true" ]
