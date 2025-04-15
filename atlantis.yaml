@@ -3,17 +3,20 @@ version: 3
 
 projects:
 - name: search-recommand-stg
-  #branch: /^(dev|master)$/ # dev or master
-  branch: /master/ # master brance만 적용
+  branch: /^(dev|master)$/ # dev or master
   dir: env/stg/apne2/devops # atlantis base dir
-  terraform_version: "v1.9.5"
+  terraform_version: "1.9.5"
   delete_source_branch_on_merge: false
   autoplan:
-    when_modified: [ "*.tf", "*.tfvars", "../modules/aws/**/*.tf", "../modules/aws/**/*.sh" ]
     enabled: true
+    when_modified:
+    - "*.tf"
+    - "*.tfvars"
+    - "../modules/aws/**/*.tf"
+    - "../modules/aws/compute/ec2/script/*.sh"
   workflow: search-recommand-workflow-stg
-  plan_requirements: [ mergeable ] # plan 실행 조건 (merge 가능)
-  apply_requirements: [ mergeable, approved ] # apply 실행 조건 (merge 가능, 승인 1명 이상)
+  plan_requirements: [ mergeable ] # plan 실행 조건
+  apply_requirements: [ mergeable, approved ] # apply 실행 조건
 
 workflows:
   search-recommand-workflow-stg:
