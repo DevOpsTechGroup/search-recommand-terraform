@@ -618,43 +618,6 @@ ecs_security_group_id = {}
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
-  # search-opensearch-single = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-single"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["*-opensearch-es-stg"]
-  #     }
-  #   ]
-  # },
   search-opensearch-test-c01 = {
     ami_type                    = "custom"
     instance_type               = "t4g.large"
@@ -668,6 +631,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_c01.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.200"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -705,6 +669,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_c02.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.20.200"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -742,6 +707,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_c03.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.30.200"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -779,6 +745,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_d01.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.210"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -816,6 +783,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_d02.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.20.210"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -853,6 +821,7 @@ ec2_instance = {
     script_file_name            = "install_opensearch_d03.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.30.210"
 
     root_block_device = {
       volume_type           = "gp3"

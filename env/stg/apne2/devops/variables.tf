@@ -436,6 +436,7 @@ variable "ec2_instance" {
     script_file_name            = optional(string)
     iam_instance_profile        = optional(string)
     key_pair_name               = string
+    private_ip                  = optional(string)
 
     root_block_device = object({
       volume_type           = optional(string)
