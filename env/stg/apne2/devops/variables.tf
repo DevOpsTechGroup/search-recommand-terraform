@@ -436,6 +436,7 @@ variable "ec2_instance" {
     script_file_name            = optional(string)
     iam_instance_profile        = optional(string)
     key_pair_name               = string
+    private_ip                  = optional(string)
 
     root_block_device = object({
       volume_type           = optional(string)
@@ -501,23 +502,6 @@ variable "s3_bucket" {
       block_public_policy     = bool
       ignore_public_acls      = bool
       restrict_public_buckets = bool
-    })
-    env = string
-  }))
-}
-
-########################################
-# DynamoDB Table 설정
-########################################
-variable "dynamodb_table" {
-  description = "DynamoDB Table"
-  type = map(object({
-    name         = string
-    hash_key     = string
-    billing_mode = string
-    attribute = object({
-      name = string
-      type = string
     })
     env = string
   }))

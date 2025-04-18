@@ -16,7 +16,7 @@ provider "aws" {
 # Terraform 관련 설정
 terraform {
   # terraform 버전 설정
-  required_version = ">= 1.9.5" # terraform 최소 요구 버전 설정(terraform version >= 1.9.5)
+  required_version = ">= 1.11.4" # terraform 최소 요구 버전 설정(terraform version >= 1.9.5)
 
   # 프로바이더 관련 설정
   required_providers {

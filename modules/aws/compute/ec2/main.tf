@@ -30,9 +30,9 @@ data "aws_key_pair" "key_pair" {
 resource "aws_instance" "ec2" {
   for_each = var.ec2_instance
 
-  ami           = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
-  instance_type = each.value.instance_type             # EC2 인스턴스 타입 지정
-  # iam_instance_profile = try(var.iam_instance_profile[each.value.iam_instance_profile].name, null)
+  ami                  = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
+  instance_type        = each.value.instance_type             # EC2 인스턴스 타입 지정
+  private_ip           = try(each.value.private_ip, null)     # EC2 private ip p지정
   iam_instance_profile = try(var.iam_instance_profile[each.value.iam_instance_profile].name, null)
 
   # EC2가 위치할 VPC Subnet 영역 지정(az-2a, az-2b)
@@ -73,6 +73,9 @@ resource "aws_instance" "ec2" {
 
   lifecycle {
     create_before_destroy = true
+    ignore_changes = [
+      ami
+    ]
   }
 
   tags = merge(var.tags, {

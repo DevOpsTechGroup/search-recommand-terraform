@@ -618,231 +618,274 @@ ecs_security_group_id = {}
 # 생성을 원하는 N개의 EC2 정보 입력 
 # -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
 ec2_instance = {
-  # search-opensearch-single = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-single"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["*-opensearch-es-stg"]
-  #     }
-  #   ]
-  # },
-  # search-opensearch-c01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-c01"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "amazon"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["al2023-ami-*-arm64"]
-  #     }
-  #   ]
-  # },
-  # search-opensearch-c02 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2b"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-c02"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "amazon"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["al2023-ami-*-arm64"]
-  #     }
-  #   ]
-  # },
-  # search-opensearch-d01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-d01"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "amazon"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["al2023-ami-*-arm64"]
-  #     }
-  #   ]
-  # },
-  # search-opensearch-d02 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2b"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-d02"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_opensearch.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "amazon"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["al2023-ami-*-arm64"]
-  #     }
-  #   ]
-  # },
-  search-atlantis-01 = {
+  search-opensearch-test-c01 = {
     ami_type                    = "custom"
-    instance_type               = "t2.micro" #TODO: Volume size가 너무 작아서 올리다가 뻑남 + shell script 수정 필요 + atlantis 테스트 필요
+    instance_type               = "t4g.medium"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
     associate_public_ip_address = true
     disable_api_termination     = true
-    instance_name               = "search-atlantis-01"
-    security_group_name         = "search-atlantis-sg"
+    instance_name               = "search-opensearch-test-c01"
+    security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_atlantis.sh"
-    iam_instance_profile        = "search-atlantis-terraform-instance-profile"
-    key_pair_name               = "search-atlantis-key"
+    script_file_name            = "install_opensearch_c01.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.200"
 
     root_block_device = {
-      volume_type           = "gp2"
+      volume_type           = "gp3"
       volume_size           = 30
       delete_on_termination = true
       encrypted             = false
     }
 
     owners = "amazon"
-    # amazon linux2 : amzn2-ami-hvm-*-x86_64-gp2
-    # amazon linux 2023 : al2023-ami-*-x86_64
-    # Ubuntu 22.04 : ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-* / 099720109477
     filter = [
       {
-        name   = "virtualization-type",
-        values = ["hvm"] # t2 계열은 HVM만 지원
+        name   = "virtualization-type"
+        values = ["hvm"]
       },
       {
         name   = "architecture"
-        values = ["x86_64"]
+        values = ["arm64"]
       },
       {
         name   = "name"
-        values = ["al2023-ami-*-x86_64"]
+        values = ["al2023-ami-*-arm64"]
       }
     ]
-  }
+  },
+  search-opensearch-test-c02 = {
+    ami_type                    = "custom"
+    instance_type               = "t4g.medium"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2b"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-c02"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch_c02.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.20.200"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
+  search-opensearch-test-c03 = {
+    ami_type                    = "custom"
+    instance_type               = "t4g.medium"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2c"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-c03"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch_c03.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.30.200"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
+  search-opensearch-test-d01 = {
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-d01"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch_d01.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.210"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
+  search-opensearch-test-d02 = {
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2b"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-d02"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch_d02.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.20.210"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
+  search-opensearch-test-d03 = {
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2c"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-d03"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_opensearch_d03.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.30.210"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
+  # search-atlantis-01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t2.micro" #TODO: Volume size가 너무 작아서 올리다가 뻑남 + shell script 수정 필요 + atlantis 테스트 필요
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-atlantis-01"
+  #   security_group_name         = "search-atlantis-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_atlantis.sh"
+  #   iam_instance_profile        = "search-atlantis-terraform-instance-profile"
+  #   key_pair_name               = "search-atlantis-key"
+
+  #   root_block_device = {
+  #     volume_type           = "gp2"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   owners = "amazon"
+  #   # amazon linux2 : amzn2-ami-hvm-*-x86_64-gp2
+  #   # amazon linux 2023 : al2023-ami-*-x86_64
+  #   # Ubuntu 22.04 : ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-* / 099720109477
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type",
+  #       values = ["hvm"] # t2 계열은 HVM만 지원
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["x86_64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-x86_64"]
+  #     }
+  #   ]
+  # }
 }
 
 # EC2 보안그룹 생성
@@ -882,8 +925,8 @@ ec2_key_pair = {
 # S3 설정
 ########################################
 s3_bucket = {
-  search-recommand-tfstate = {
-    bucket_name = "search-recommand-tfstate"
+  search-recommand-terraform-tfstate = {
+    bucket_name = "search-recommand-terraform-tfstate"
     bucket_versioning = {
       versioning_configuration = {
         status = "Enabled"
@@ -901,22 +944,6 @@ s3_bucket = {
       block_public_policy     = true
       ignore_public_acls      = true
       restrict_public_buckets = true
-    }
-    env = "stg"
-  }
-}
-
-########################################
-# DynamoDB Table 설정
-########################################
-dynamodb_table = {
-  search-recommand-tfstate-lock = {
-    name         = "search-recommand-tfstate-lock"
-    hash_key     = "LockID"
-    billing_mode = "PAY_PER_REQUEST"
-    attribute = {
-      name = "LockID"
-      type = "S"
     }
     env = "stg"
   }
