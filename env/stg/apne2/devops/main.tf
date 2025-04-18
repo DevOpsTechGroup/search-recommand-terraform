@@ -168,9 +168,6 @@ module "storage" {
   # S3 Bucket 관련 설정
   s3_bucket = var.s3_bucket
 
-  # Dynamo DB Table 관련 설정
-  dynamodb_table = var.dynamodb_table
-
   # 프로젝트 기본 설정
   project_name = var.project_name
   env          = var.env
