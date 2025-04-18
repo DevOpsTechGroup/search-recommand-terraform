@@ -52,23 +52,3 @@ resource "aws_s3_bucket_public_access_block" "public_access_block" {
   ignore_public_acls      = each.value.public_access_block.ignore_public_acls
   restrict_public_buckets = each.value.public_access_block.restrict_public_buckets
 }
-
-# DynamoDB for terraform state locking
-resource "aws_dynamodb_table" "terraform_state_lock" {
-  for_each = {
-    for key, value in var.dynamodb_table : key => value if local.create_dynamo_db
-  }
-
-  name         = "${each.value.name}-${each.value.env}" # DynamoDB Table 이름 지정
-  hash_key     = each.value.hash_key                    # DynamoDB 테이블의 파티션 키(Partition Key, Hash Key) 이름
-  billing_mode = each.value.billing_mode                # 비용 관련 설정(사용한 만큼만 과금)
-
-  attribute {
-    name = each.value.attribute.name # 해시 키(Primary Key)로 사용할 컬럼 지정
-    type = each.value.attribute.type # 데이터 타입을 'S'(String)로 지정
-  }
-
-  tags = merge(var.tags, {
-    Name = "${each.value.name}-${each.value.env}"
-  })
-}

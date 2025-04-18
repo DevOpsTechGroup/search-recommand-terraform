@@ -508,23 +508,6 @@ variable "s3_bucket" {
 }
 
 ########################################
-# DynamoDB Table 설정
-########################################
-variable "dynamodb_table" {
-  description = "DynamoDB Table"
-  type = map(object({
-    name         = string
-    hash_key     = string
-    billing_mode = string
-    attribute = object({
-      name = string
-      type = string
-    })
-    env = string
-  }))
-}
-
-########################################
 # CICD 설정
 ########################################
 

@@ -5,7 +5,7 @@ projects:
 - name: search-recommand-stg
   branch: /^(dev|master)$/ # dev or master
   dir: env/stg/apne2/devops # atlantis base dir
-  terraform_version: "1.9.5"
+  terraform_version: "1.11.4"
   delete_source_branch_on_merge: false
   autoplan:
     enabled: true

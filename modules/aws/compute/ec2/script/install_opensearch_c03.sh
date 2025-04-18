@@ -234,8 +234,8 @@ JVM_OPTIONS=$(cat <<'EOF'
 # Xms represents the initial size of total heap space
 # Xmx represents the maximum size of total heap space
 
--Xms3g
--Xmx3g
+-Xms1g
+-Xmx1g
 
 ################################################################
 ## Expert settings

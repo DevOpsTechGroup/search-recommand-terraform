@@ -620,7 +620,7 @@ ecs_security_group_id = {}
 ec2_instance = {
   search-opensearch-test-c01 = {
     ami_type                    = "custom"
-    instance_type               = "t4g.large"
+    instance_type               = "t4g.medium"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
     associate_public_ip_address = true
@@ -658,7 +658,7 @@ ec2_instance = {
   },
   search-opensearch-test-c02 = {
     ami_type                    = "custom"
-    instance_type               = "t4g.large"
+    instance_type               = "t4g.medium"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2b"
     associate_public_ip_address = true
@@ -696,7 +696,7 @@ ec2_instance = {
   },
   search-opensearch-test-c03 = {
     ami_type                    = "custom"
-    instance_type               = "t4g.large"
+    instance_type               = "t4g.medium"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2c"
     associate_public_ip_address = true
@@ -925,8 +925,8 @@ ec2_key_pair = {
 # S3 설정
 ########################################
 s3_bucket = {
-  search-recommand-tfstate = {
-    bucket_name = "search-recommand-tfstate"
+  search-recommand-terraform-tfstate = {
+    bucket_name = "search-recommand-terraform-tfstate"
     bucket_versioning = {
       versioning_configuration = {
         status = "Enabled"
@@ -944,22 +944,6 @@ s3_bucket = {
       block_public_policy     = true
       ignore_public_acls      = true
       restrict_public_buckets = true
-    }
-    env = "stg"
-  }
-}
-
-########################################
-# DynamoDB Table 설정
-########################################
-dynamodb_table = {
-  search-recommand-tfstate-lock = {
-    name         = "search-recommand-tfstate-lock"
-    hash_key     = "LockID"
-    billing_mode = "PAY_PER_REQUEST"
-    attribute = {
-      name = "LockID"
-      type = "S"
     }
     env = "stg"
   }
