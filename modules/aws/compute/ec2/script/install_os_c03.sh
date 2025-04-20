@@ -4,7 +4,7 @@ set -e
 ########################################
 # 시스템 설정 및 기본 패키지 설치
 ########################################
-sudo hostnamectl set-hostname search-opensearch-test-c02
+sudo hostnamectl set-hostname search-opensearch-test-c03
 sudo ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 sudo dnf update -y
 sudo dnf install -y docker git vim unzip jq tree zip curl wget yum-utils --allowerasing
@@ -14,7 +14,7 @@ sudo usermod -aG docker ec2-user
 ################################
 # run_os.sh 스크립트 추가
 ################################
-cat <<EOF > run_os.sh
+cat <<'EOF' > run_os.sh
 #!/bin/bash
 # OpenSearch 실행 경로
 COORDINATOR_PATH="/home/ec2-user/apps-c/opensearch-2.18.0/bin"
@@ -156,7 +156,7 @@ java --version
 ########################################
 cat <<EOF > /home/ec2-user/apps-c/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
-node.name: os-zb-c02
+node.name: os-zc-c03
 
 node.roles: []
 
@@ -185,7 +185,7 @@ EOF
 ########################################
 cat <<EOF > /home/ec2-user/apps-m/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
-node.name: os-zb-m02
+node.name: os-zc-m03
 
 node.roles: [cluster_manager]
 
@@ -197,9 +197,9 @@ http.port: 9100
 transport.tcp.port: 9400
 
 discovery.seed_hosts:
-  - 172.21.10.200:9400 # master node
-  - 172.21.20.200:9400 # master node
-  - 172.21.30.200:9400 # master node
+  - 172.21.10.200:9400
+  - 172.21.20.200:9400
+  - 172.21.30.200:9400
 
 cluster.initial_cluster_manager_nodes:
   - os-za-m01

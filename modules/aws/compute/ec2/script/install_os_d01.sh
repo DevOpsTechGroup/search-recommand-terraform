@@ -14,7 +14,7 @@ cd /home/ec2-user/apps-d
 ################################
 # run_os.sh 스크립트 추가
 ################################
-cat <<EOF > run_os.sh
+cat <<'EOF' > run_os.sh
 #!/bin/bash
 
 # OpenSearch 실행 경로
