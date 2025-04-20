@@ -1,8 +1,6 @@
 # ECS cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
-  for_each = {
-    for key, value in var.ecs_cluster : key => value if local.create_ecs_cluster
-  }
+  for_each = var.ecs_cluster
 
   name = "${each.value.cluster_name}-${each.value.env}" # core-search-cluster-stg
 
@@ -17,9 +15,7 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 # ECS task definition
 resource "aws_ecs_task_definition" "ecs_task_definition" {
-  for_each = {
-    for key, value in var.ecs_task_definitions : key => value if local.create_ecs_task_definition
-  }
+  for_each = var.ecs_task_definitions
 
   family                   = "${each.value.task_family}-${each.value.env}"
   cpu                      = each.value.task_total_cpu
@@ -66,9 +62,7 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
 # ECS service
 resource "aws_ecs_service" "ecs_service" {
-  for_each = {
-    for key, value in var.ecs_service : key => value if local.create_ecs_service
-  }
+  for_each = var.ecs_service
 
   launch_type = each.value.launch_type
   # iam_role                          = each.value.service_role                                                      # IAM Role
@@ -123,9 +117,7 @@ resource "aws_ecs_service" "ecs_service" {
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/appautoscaling_target.html
 # arn:aws:ecs:ap-northeast-2:7xxxxxxxxxx:service/search-xxxx-cluster-prod/search-xxxx-service-nlb-prod
 resource "aws_appautoscaling_target" "ecs_target" {
-  for_each = {
-    for key, value in var.ecs_appautoscaling_target : key => value if local.create_appautoscaling_target
-  }
+  for_each = var.ecs_appautoscaling_target
 
   min_capacity       = each.value.min_capacity       # 최소 Task 2개가 항상 실행되도록 설정
   max_capacity       = each.value.max_capacity       # 최대 Task 6개까지 증가 할 수 있도록 설정
@@ -140,9 +132,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
 
 # ECS autoscaling scale out policy
 resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
-  for_each = {
-    for key, value in var.ecs_appautoscaling_target : key => value if local.create_appautoscaling_policy
-  }
+  for_each = var.ecs_appautoscaling_target_policy
 
   name               = each.value.scale_out.name                                         # AutoScaling 정책 이름
   policy_type        = each.value.scale_out.policy_type                                  # AutoScaling 정책 타입(How to scale out?)
@@ -169,9 +159,7 @@ resource "aws_appautoscaling_policy" "ecs_policy_scale_out" {
 
 # ECS scaleout policy alarm
 resource "aws_cloudwatch_metric_alarm" "ecs_cpu_scale_out_alert" {
-  for_each = {
-    for key, value in var.ecs_cpu_scale_out_alert : key => value if local.create_cloudwatch_metric_alarm
-  }
+  for_each = var.ecs_cpu_scale_out_alert
 
   // TODO: ECS ScaleOut CPU 알람 생성 및 설정
   alarm_name          = each.value.alarm_name          # Cloudwatch 알람 이름
