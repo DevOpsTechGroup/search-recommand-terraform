@@ -19,7 +19,7 @@
 */
 terraform {
   backend "s3" {
-    bucket       = "search-recommand-terraform-tfstate-stg"              # s3 버킷명
+    bucket       = "search-recommand-terraform-tfstate-stg"    # s3 버킷명
     key          = "stg/devops/apne2/search-recommand.tfstate" # state 파일 s3 저장 경로
     region       = "ap-northeast-2"                            # s3 리전
     use_lockfile = true                                        # S3 Native Locking 활성화
