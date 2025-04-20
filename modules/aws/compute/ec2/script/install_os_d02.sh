@@ -152,7 +152,7 @@ EOF
 ################################
 # opensearch.yml 생성 (Data Node 설정)
 ################################
-cat <<EOF > /home/ec2-user/apps-d/opensearch/config/opensearch.yml
+cat <<'EOF' > /home/ec2-user/apps-d/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
 node.name: os-zb-d02
 
