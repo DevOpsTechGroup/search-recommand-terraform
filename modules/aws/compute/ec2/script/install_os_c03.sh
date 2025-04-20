@@ -154,7 +154,7 @@ java --version
 ########################################
 # cordi 노드용 opensearch.yml 작성
 ########################################
-cat <<EOF > /home/ec2-user/apps-c/opensearch/config/opensearch.yml
+cat <<'EOF' > /home/ec2-user/apps-c/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
 node.name: os-zc-c03
 
@@ -183,7 +183,7 @@ EOF
 ########################################
 # master 노드용 opensearch.yml 작성
 ########################################
-cat <<EOF > /home/ec2-user/apps-m/opensearch/config/opensearch.yml
+cat <<'EOF' > /home/ec2-user/apps-m/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
 node.name: os-zc-m03
 
