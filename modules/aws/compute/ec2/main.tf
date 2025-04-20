@@ -73,9 +73,7 @@ resource "aws_instance" "ec2" {
 
   lifecycle {
     create_before_destroy = true
-    ignore_changes = [
-      ami
-    ]
+    ignore_changes        = all # Terraform EC2 생성 후 전부 무시
   }
 
   tags = merge(var.tags, {

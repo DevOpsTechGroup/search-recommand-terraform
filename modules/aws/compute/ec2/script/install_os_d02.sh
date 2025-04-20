@@ -4,7 +4,7 @@ set -e
 ################################
 # 기본 환경 설정
 ################################
-sudo hostnamectl set-hostname search-opensearch-test-d03
+sudo hostnamectl set-hostname search-opensearch-test-d02
 sudo rm -f /etc/localtime
 sudo ln -s /usr/share/zoneinfo/Asia/Seoul /etc/localtime
 
@@ -14,7 +14,7 @@ cd /home/ec2-user/apps-d
 ################################
 # run_os.sh 스크립트 추가
 ################################
-cat <<EOF > run_os.sh
+cat <<'EOF' > run_os.sh
 #!/bin/bash
 
 # OpenSearch 실행 경로
@@ -136,6 +136,7 @@ sudo swapoff -a
 # 2. mmap 용량 확장
 # 이유: OpenSearch는 많은 수의 memory-mapped files을 사용하므로 기본값(65530)으로는 부족
 echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
+
 sudo sysctl -p
 cat /proc/sys/vm/max_map_count
 
@@ -153,7 +154,7 @@ EOF
 ################################
 cat <<EOF > /home/ec2-user/apps-d/opensearch/config/opensearch.yml
 cluster.name: opensearch-test-cluster
-node.name: os-zc-d03
+node.name: os-zb-d02
 
 node.roles: [data]
 

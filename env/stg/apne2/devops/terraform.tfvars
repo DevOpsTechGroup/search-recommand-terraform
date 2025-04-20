@@ -615,9 +615,49 @@ ecs_security_group_id = {}
 ########################################
 # EC2 설정
 ########################################
-# 생성을 원하는 N개의 EC2 정보 입력 
-# -> EC2 성격별로 나누면 될 듯(Elasticsearch, Atlantis.. 등등)
+/**
+  EC2의 경우 중지해두고 사용하는 경우가 존재하기에,
+  다른 리소스와 다르게 create_yn 변수를 통해 개별 리소스를 제어
+*/
 ec2_instance = {
+  search-opensearch-test-sn01 = { // single node
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-sn01"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_os_sn01.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.220"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
   search-opensearch-test-c01 = {
     ami_type                    = "custom"
     instance_type               = "t4g.medium"
@@ -628,7 +668,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-c01"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_c01.sh"
+    script_file_name            = "install_os_c01.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.10.200"
@@ -666,7 +706,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-c02"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_c02.sh"
+    script_file_name            = "install_os_c02.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.20.200"
@@ -704,7 +744,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-c03"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_c03.sh"
+    script_file_name            = "install_os_c03.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.30.200"
@@ -742,7 +782,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-d01"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_d01.sh"
+    script_file_name            = "install_os_d01.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.10.210"
@@ -780,7 +820,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-d02"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_d02.sh"
+    script_file_name            = "install_os_d02.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.20.210"
@@ -818,7 +858,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-d03"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_opensearch_d03.sh"
+    script_file_name            = "install_os_d03.sh"
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.30.210"
