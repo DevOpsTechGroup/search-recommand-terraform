@@ -73,7 +73,7 @@ locals {
         to_port                  = 0
         protocol                 = "-1"
         cidr_ipv4                = null
-        source_security_group_id = aws_security_group.ecs_security_group["search-elasticsearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
+        source_security_group_id = aws_security_group.ecs_security_group["search-embedding-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
         env                      = "stg"
       }
     ]
@@ -82,8 +82,9 @@ locals {
   # Flatten alb security group ingress rule
   alb_egress_rules_flat = flatten([
     for group in values(local.alb_security_group_egress_rules) : [
-      for rule in group : [
-        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+      for rule in group :
+      rule.cidr_ipv4 != null ? [
+        for cidr in rule.cidr_ipv4 : {
           security_group_name      = rule.security_group_name
           type                     = rule.type
           description              = rule.description
@@ -91,6 +92,18 @@ locals {
           to_port                  = rule.to_port
           protocol                 = rule.protocol
           cidr_ipv4                = cidr
+          source_security_group_id = null
+          env                      = rule.env
+        }
+        ] : [
+        {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = null
           source_security_group_id = rule.source_security_group_id
           env                      = rule.env
         }
@@ -105,21 +118,21 @@ locals {
         security_group_name      = "search-opensearch-api-sg"
         type                     = "ingress"
         description              = "opensearch api security group ingress rule"
-        from_port                = 10091
-        to_port                  = 10091
+        from_port                = 8443
+        to_port                  = 8443
         protocol                 = "tcp"
         cidr_ipv4                = null
         source_security_group_id = aws_security_group.alb_security_group["search-recommand-alb-sg"].id # INFO: ECS의 출발지는 ALB만 지정
         env                      = "stg"
       }
     ],
-    search-elasticsearch-api-sg-ingress-rule = [
+    search-embedding-api-sg-ingress-rule = [
       {
         type                     = "ingress"
-        security_group_name      = "search-elasticsearch-api-sg"
+        security_group_name      = "search-embedding-api-sg"
         description              = "elasticsearch api security group ingress rule"
-        from_port                = 10092
-        to_port                  = 10092
+        from_port                = 8000
+        to_port                  = 8000
         protocol                 = "tcp"
         cidr_ipv4                = null
         source_security_group_id = aws_security_group.alb_security_group["search-recommand-alb-sg"].id # INFO: ECS의 출발지는 ALB만 지정
@@ -131,8 +144,9 @@ locals {
   # Flatten ecs security group ingress rule
   ecs_ingress_rules_flat = flatten([
     for group in values(local.ecs_security_group_ingress_rules) : [
-      for rule in group : [
-        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+      for rule in group :
+      rule.cidr_ipv4 != null ? [
+        for cidr in rule.cidr_ipv4 : {
           security_group_name      = rule.security_group_name
           type                     = rule.type
           description              = rule.description
@@ -140,6 +154,18 @@ locals {
           to_port                  = rule.to_port
           protocol                 = rule.protocol
           cidr_ipv4                = cidr
+          source_security_group_id = null
+          env                      = rule.env
+        }
+        ] : [
+        {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = null
           source_security_group_id = rule.source_security_group_id
           env                      = rule.env
         }
@@ -149,7 +175,7 @@ locals {
 
   # ECS security group egress rule
   ecs_security_group_egress_rules = {
-    search-opensearch-api-sg-ingress-rule = [
+    search-opensearch-api-sg-egress-rule = [
       {
         security_group_name = "search-opensearch-api-sg"
         type                = "egress"
@@ -164,9 +190,9 @@ locals {
         env                      = "stg"
       }
     ],
-    search-elasticsearch-api-sg-ingress-rule = [
+    search-embedding-api-sg-egress-rule = [
       {
-        security_group_name = "search-elasticsearch-api-sg"
+        security_group_name = "search-embedding-api-sg"
         type                = "egress"
         description         = "elasticsearch api security group egress rule"
         from_port           = 0
@@ -294,9 +320,9 @@ locals {
         env                      = "stg"
       }
     ],
-    search-elasticsearch-sg-ingress-rule = [
+    search-embedding-sg-ingress-rule = [
       {
-        security_group_name = "search-elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-embedding-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch ssh security group inbound"
         from_port           = 22
@@ -311,7 +337,7 @@ locals {
         env                      = "stg"
       },
       {
-        security_group_name = "search-elasticsearch-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-embedding-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
         description         = "elasticsearch es security group inbound"
         from_port           = 9200
@@ -402,9 +428,9 @@ locals {
         env                      = "stg"
       }
     ],
-    search-elasticsearch-sg-egress-rule = [
+    search-embedding-sg-egress-rule = [
       {
-        security_group_name = "search-elasticsearch-sg"
+        security_group_name = "search-embedding-sg"
         description         = "elasticsearch security group egress rule"
         type                = "egress"
         from_port           = 0
