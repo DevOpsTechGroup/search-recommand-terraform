@@ -125,8 +125,6 @@ variable "ecs_task_definitions" {
     runtime_platform_oprating_system_family = string
     runtime_platform_cpu_architecture       = string
     task_family                             = string
-    cpu                                     = number
-    memory                                  = number
     env                                     = string
     volume = object({
       name = string
