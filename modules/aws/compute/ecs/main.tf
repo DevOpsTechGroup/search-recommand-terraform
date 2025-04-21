@@ -74,7 +74,7 @@ resource "aws_ecs_service" "ecs_service" {
 
   # 네트워크 구성 (Private Subnet 사용)
   network_configuration {
-    subnets          = var.private_subnet_ids # subnet-xxxx, subnet-xxxx, subnet-xxxx
+    subnets          = var.public_subnet_ids # subnet-xxxx, subnet-xxxx, subnet-xxxx
     security_groups  = [var.ecs_security_group_id[each.value.security_group_name]]
     assign_public_ip = each.value.assign_public_ip
   }

@@ -9,10 +9,6 @@ resource "aws_security_group" "alb_security_group" {
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${each.value.env}"
   })
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # ALB security group ingress rule
@@ -62,10 +58,6 @@ resource "aws_security_group" "ecs_security_group" {
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${each.value.env}"
   })
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # ECS security group ingress rule
@@ -116,10 +108,6 @@ resource "aws_security_group" "ec2_security_group" {
   tags = merge(var.tags, {
     Name = "${each.value.security_group_name}-${each.value.env}"
   })
-
-  lifecycle {
-    create_before_destroy = true
-  }
 }
 
 # EC2 security group ingress rule

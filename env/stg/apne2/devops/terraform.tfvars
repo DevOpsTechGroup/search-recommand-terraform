@@ -105,16 +105,16 @@ alb_listener = {
 alb_listener_rule = {
   search-opensearch-alb-http-listener-rule = {
     type              = "forward"
-    path              = ["/vector"]
+    path              = ["/opensearch/*"]
     alb_listener_name = "search-alb-http-listener"
     target_group_name = "search-opensearch-alb-tg"
     priority          = 1
   },
-  search-elasticsearch-alb-http-listener-rule = {
+  search-embedding-alb-http-listener-rule = {
     type              = "forward"
-    path              = ["/elasticsearch"]
+    path              = ["/embed/*"]
     alb_listener_name = "search-alb-http-listener"
-    target_group_name = "search-elasticsearch-alb-tg"
+    target_group_name = "search-embedding-alb-tg"
     priority          = 2
   }
 }
@@ -123,7 +123,7 @@ alb_listener_rule = {
 target_group = {
   search-opensearch-alb-tg = {
     name        = "search-opensearch-alb-tg"
-    port        = 10091
+    port        = 8443
     elb_type    = "ALB"
     protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
     target_type = "ip"   # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
@@ -133,16 +133,16 @@ target_group = {
       enabled             = true
       healthy_threshold   = 3
       interval            = 30
-      port                = 10091
+      port                = 8443
       protocol            = "HTTP"
       timeout             = 15
       unhealthy_threshold = 5
       internal            = false
     }
   },
-  search-elasticsearch-alb-tg = {
-    name        = "search-elasticsearch-alb-tg"
-    port        = 10092
+  search-embedding-alb-tg = {
+    name        = "search-embedding-alb-tg"
+    port        = 8000
     elb_type    = "ALB"
     protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
     target_type = "ip"   # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
@@ -152,7 +152,7 @@ target_group = {
       enabled             = true
       healthy_threshold   = 3
       interval            = 30
-      port                = 10092
+      port                = 8000
       protocol            = "HTTP"
       timeout             = 15
       unhealthy_threshold = 5
@@ -175,11 +175,11 @@ ecr_repository = {
     ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
   },
-  search-elasticsearch-api = {
-    ecr_repository_name      = "search-elasticsearch-api" # 리포지토리명
-    env                      = "stg"                      # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"                # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                      # PUSH Scan 여부
+  search-embedding-api = {
+    ecr_repository_name      = "search-embedding-api" # 리포지토리명
+    env                      = "stg"                  # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"            # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                  # PUSH Scan 여부
     ecr_force_delete         = false
   }
 }
@@ -392,7 +392,6 @@ iam_instance_profile = {
 ########################################
 # ECS 클러스터 설정
 ########################################
-# ECS 클러스터 생성
 ecs_cluster = {
   search-ecs-cluster = {
     cluster_name = "search-ecs-cluster"
@@ -404,17 +403,15 @@ ecs_cluster = {
 ecs_security_group = {
   search-opensearch-api-sg = {
     security_group_name = "search-opensearch-api-sg"
-    description         = "opensearch ecs security group"
+    description         = "opensearch ecs api security group"
     env                 = "stg"
   },
-  search-elasticsearch-api-sg = {
-    security_group_name = "search-elasticsearch-api-sg"
-    description         = "elasticsearch ecs security group"
+  search-embedding-api-sg = {
+    security_group_name = "search-embedding-api-sg"
+    description         = "embedding ecs api security group"
     env                 = "stg"
   }
 }
-
-# embedding
 
 # ECS Task Definitions 생성
 # TODO: containers.env 추가? + image_version 어떻게 받을지?
@@ -430,11 +427,9 @@ ecs_task_definitions = {
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
     task_family                             = "search-opensearch-api-td"
-    cpu                                     = 1024
-    memory                                  = 2048
     env                                     = "stg"
     volume = {
-      name = "search-opensearch-api-shared-volume"
+      name = "search-opensearch-api-sv"
     }
     ephemeral_storage = 21
     containers = [
@@ -444,7 +439,7 @@ ecs_task_definitions = {
         version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
-        port      = 10091
+        port      = 8443
         protocol  = "tcp"
         essential = true
         env_variables = {
@@ -453,7 +448,7 @@ ecs_task_definitions = {
         }
         mount_points = []
         health_check = {
-          command  = "curl --fail http://127.0.0.1:10091/health-check || exit 1"
+          command  = "curl --fail http://127.0.0.1:8443/health-check || exit 1"
           interval = 30
           timeout  = 10
           retries  = 3
@@ -462,8 +457,8 @@ ecs_task_definitions = {
       }
     ]
   },
-  search-elasticsearch-api-td = {
-    name                                    = "search-elasticsearch-api-td"
+  search-embedding-api-td = {
+    name                                    = "search-embedding-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -472,22 +467,20 @@ ecs_task_definitions = {
     task_total_memory                       = 2048 # ECS Task Total Mem
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "search-elasticsearch-api-td"
-    cpu                                     = 1024
-    memory                                  = 2048
+    task_family                             = "search-embedding-api-td"
     env                                     = "stg"
     volume = {
-      name = "search-elasticsearch-api-shared-volume"
+      name = "search-embedding-api-sv"
     }
     ephemeral_storage = 21
     containers = [
       {
-        name      = "search-elasticsearch-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-elasticsearch-api"
+        name      = "search-embedding-api"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embedding-api"
         version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
-        port      = 10092
+        port      = 8000
         protocol  = "tcp"
         essential = true
         env_variables = {
@@ -496,7 +489,7 @@ ecs_task_definitions = {
         }
         mount_points = []
         health_check = {
-          command  = "curl --fail http://127.0.0.1:10092/health-check || exit 1"
+          command  = "curl --fail http://127.0.0.1:8000/health-check || exit 1"
           interval = 30
           timeout  = 10
           retries  = 3
@@ -517,29 +510,29 @@ ecs_service = {
     service_name                  = "search-opensearch-ecs-service" # 서비스 이름
     desired_count                 = 1                               # Task 개수
     container_name                = "search-opensearch-api"         # 컨테이너 이름
-    container_port                = 10091                           # 컨테이너 포트
+    container_port                = 8443                            # 컨테이너 포트
     task_definitions              = "search-opensearch-api-td"      # 테스크 지정
     env                           = "stg"                           # ECS Service 환경변수
     health_check_grace_period_sec = 250                             # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                           # 우선 public zone에 구성
+    assign_public_ip              = true                            # 우선 public zone에 구성
     target_group_arn              = "search-opensearch-alb-tg"      # 연결되어야 하는 Target Group 지정
     security_group_name           = "search-opensearch-api-sg"      # 보안그룹 이름
   },
-  search-elasticsearch-ecs-service = {
-    launch_type                   = "FARGATE"                          # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"             # ECS Service Role
-    deployment_controller         = "ECS"                              # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-ecs-cluster"               # ECS Cluster명
-    service_name                  = "search-elasticsearch-ecs-service" # 서비스 이름
-    desired_count                 = 1                                  # Task 개수
-    container_name                = "search-elasticsearch-api"         # 컨테이너 이름
-    container_port                = 10092                              # 컨테이너 포트
-    task_definitions              = "search-elasticsearch-api-td"      # 테스크 지정
-    env                           = "stg"                              # ECS Service 환경변수
-    health_check_grace_period_sec = 250                                # 헬스 체크 그레이스 기간
-    assign_public_ip              = false                              # 우선 public zone에 구성
-    target_group_arn              = "search-elasticsearch-alb-tg"      # 연결되어야 하는 Target Group 지정
-    security_group_name           = "search-elasticsearch-api-sg"      # 보안그룹 이름
+  search-embedding-ecs-service = {
+    launch_type                   = "FARGATE"                      # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
+    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    cluster_name                  = "search-ecs-cluster"           # ECS Cluster명
+    service_name                  = "search-embedding-ecs-service" # 서비스 이름
+    desired_count                 = 1                              # Task 개수
+    container_name                = "search-embedding-api"         # 컨테이너 이름
+    container_port                = 8000                           # 컨테이너 포트
+    task_definitions              = "search-embedding-api-td"      # 테스크 지정
+    env                           = "stg"                          # ECS Service 환경변수
+    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
+    assign_public_ip              = true                           # 우선 public zone에 구성
+    target_group_arn              = "search-embedding-alb-tg"      # 연결되어야 하는 Target Group 지정
+    security_group_name           = "search-embedding-api-sg"      # 보안그룹 이름
   },
 }
 
@@ -547,8 +540,8 @@ ecs_service = {
 # TODO: resource_id 이 부분은 module에서 받을 수 있으면 받도록 수정 필요
 ecs_appautoscaling_target = {
   search-opensearch-ecs-service = {
-    min_capacity       = 2                                                                  # 최소 Task 2개가 항상 실행되도록 설정
-    max_capacity       = 6                                                                  # 최대 Task 6개까지 증가 할 수 있도록 설정
+    min_capacity       = 1                                                                  # 최소 Task 2개가 항상 실행되도록 설정
+    max_capacity       = 5                                                                  # 최대 Task 6개까지 증가 할 수 있도록 설정
     resource_id        = "service/search-ecs-cluster-stg/search-opensearch-ecs-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
     scalable_dimension = "ecs:service:DesiredCount"                                         # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
     service_namespace  = "ecs"
@@ -935,7 +928,7 @@ ec2_security_group = {
     description         = "search-recommand vector opensearch ec2"
     env                 = "stg"
   },
-  search-elasticsearch-sg = {
+  search-embedding-sg = {
     security_group_name = "search-elasticsearch-sg"
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
