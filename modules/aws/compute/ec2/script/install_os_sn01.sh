@@ -212,6 +212,7 @@ ln -s "opensearch-dashboards-${OS_VERSION}" opensearch-dashboards
 
 cat <<'EOCONF' > /home/ec2-user/apps/opensearch-dashboards/config/opensearch_dashboards.yml
 server.host: "0.0.0.0"
+opensearch_security.enabled: false
 opensearch.hosts: ["http://localhost:9200"]
 EOCONF
 

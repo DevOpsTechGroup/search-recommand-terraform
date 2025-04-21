@@ -82,8 +82,9 @@ locals {
   # Flatten alb security group ingress rule
   alb_egress_rules_flat = flatten([
     for group in values(local.alb_security_group_egress_rules) : [
-      for rule in group : [
-        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+      for rule in group :
+      rule.cidr_ipv4 != null ? [
+        for cidr in rule.cidr_ipv4 : {
           security_group_name      = rule.security_group_name
           type                     = rule.type
           description              = rule.description
@@ -91,6 +92,18 @@ locals {
           to_port                  = rule.to_port
           protocol                 = rule.protocol
           cidr_ipv4                = cidr
+          source_security_group_id = null
+          env                      = rule.env
+        }
+        ] : [
+        {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = null
           source_security_group_id = rule.source_security_group_id
           env                      = rule.env
         }
@@ -131,8 +144,9 @@ locals {
   # Flatten ecs security group ingress rule
   ecs_ingress_rules_flat = flatten([
     for group in values(local.ecs_security_group_ingress_rules) : [
-      for rule in group : [
-        for cidr in rule.cidr_ipv4 != null ? rule.cidr_ipv4 : [] : {
+      for rule in group :
+      rule.cidr_ipv4 != null ? [
+        for cidr in rule.cidr_ipv4 : {
           security_group_name      = rule.security_group_name
           type                     = rule.type
           description              = rule.description
@@ -140,6 +154,18 @@ locals {
           to_port                  = rule.to_port
           protocol                 = rule.protocol
           cidr_ipv4                = cidr
+          source_security_group_id = null
+          env                      = rule.env
+        }
+        ] : [
+        {
+          security_group_name      = rule.security_group_name
+          type                     = rule.type
+          description              = rule.description
+          from_port                = rule.from_port
+          to_port                  = rule.to_port
+          protocol                 = rule.protocol
+          cidr_ipv4                = null
           source_security_group_id = rule.source_security_group_id
           env                      = rule.env
         }
