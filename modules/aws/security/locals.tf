@@ -128,14 +128,18 @@ locals {
     ],
     search-embedding-api-sg-ingress-rule = [
       {
-        type                     = "ingress"
-        security_group_name      = "search-embedding-api-sg"
-        description              = "elasticsearch api security group ingress rule"
-        from_port                = 8000
-        to_port                  = 8000
-        protocol                 = "tcp"
-        cidr_ipv4                = null
-        source_security_group_id = aws_security_group.alb_security_group["search-recommand-alb-sg"].id # INFO: ECS의 출발지는 ALB만 지정
+        type                = "ingress"
+        security_group_name = "search-embedding-api-sg"
+        description         = "elasticsearch api security group ingress rule"
+        from_port           = 8000
+        to_port             = 8000
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.0.0/16",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        source_security_group_id = null
         env                      = "stg"
       }
     ]

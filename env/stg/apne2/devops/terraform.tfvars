@@ -116,6 +116,13 @@ alb_listener_rule = {
     alb_listener_name = "search-alb-http-listener"
     target_group_name = "search-embedding-alb-tg"
     priority          = 2
+  },
+  search-opensearch-alb-swagger-listener-rule = {
+    type              = "forward"
+    path              = ["/swagger-ui/*"]
+    alb_listener_name = "search-alb-http-listener"
+    target_group_name = "search-opensearch-alb-tg"
+    priority          = 3
   }
 }
 
