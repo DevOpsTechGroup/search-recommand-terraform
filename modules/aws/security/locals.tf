@@ -11,7 +11,8 @@ locals {
         to_port             = 80
         protocol            = "tcp"
         cidr_ipv4 = [
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "183.111.245.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -24,7 +25,8 @@ locals {
         to_port             = 443
         protocol            = "tcp"
         cidr_ipv4 = [
-          "220.75.180.0/24"
+          "220.75.180.0/24",
+          "183.111.245.0/24"
         ]
         source_security_group_id = null
         env                      = "stg"
@@ -65,17 +67,17 @@ locals {
         source_security_group_id = aws_security_group.ecs_security_group["search-opensearch-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
         env                      = "stg"
       },
-      {
-        security_group_name      = "search-recommand-alb-sg"
-        type                     = "egress"
-        description              = "search-recommand alb all traffic security group egress rule"
-        from_port                = 0
-        to_port                  = 0
-        protocol                 = "-1"
-        cidr_ipv4                = null
-        source_security_group_id = aws_security_group.ecs_security_group["search-embedding-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
-        env                      = "stg"
-      }
+      # {
+      #   security_group_name      = "search-recommand-alb-sg"
+      #   type                     = "egress"
+      #   description              = "search-recommand alb all traffic security group egress rule"
+      #   from_port                = 0
+      #   to_port                  = 0
+      #   protocol                 = "-1"
+      #   cidr_ipv4                = null
+      #   source_security_group_id = aws_security_group.ecs_security_group["search-embedding-api-sg"].id # INFO: ECS API의 보안그룹을 목적지로 지정
+      #   env                      = "stg"
+      # }
     ]
   }
 
@@ -126,23 +128,23 @@ locals {
         env                      = "stg"
       }
     ],
-    search-embedding-api-sg-ingress-rule = [
-      {
-        type                = "ingress"
-        security_group_name = "search-embedding-api-sg"
-        description         = "elasticsearch api security group ingress rule"
-        from_port           = 8000
-        to_port             = 8000
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-embedding-api-sg-ingress-rule = [
+    #   {
+    #     type                = "ingress"
+    #     security_group_name = "search-embedding-api-sg"
+    #     description         = "elasticsearch api security group ingress rule"
+    #     from_port           = 8000
+    #     to_port             = 8000
+    #     protocol            = "tcp"
+    #     cidr_ipv4 = [
+    #       "172.21.0.0/16",
+    #       "220.75.180.0/24",
+    #       "39.118.148.0/24"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ecs security group ingress rule
@@ -194,21 +196,21 @@ locals {
         env                      = "stg"
       }
     ],
-    search-embedding-api-sg-egress-rule = [
-      {
-        security_group_name = "search-embedding-api-sg"
-        type                = "egress"
-        description         = "elasticsearch api security group egress rule"
-        from_port           = 0
-        to_port             = 0
-        protocol            = "-1" # 모든 프로토콜 허용
-        cidr_ipv4 = [
-          "0.0.0.0/0"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-embedding-api-sg-egress-rule = [
+    #   {
+    #     security_group_name = "search-embedding-api-sg"
+    #     type                = "egress"
+    #     description         = "elasticsearch api security group egress rule"
+    #     from_port           = 0
+    #     to_port             = 0
+    #     protocol            = "-1" # 모든 프로토콜 허용
+    #     cidr_ipv4 = [
+    #       "0.0.0.0/0"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ecs security group egress rule
@@ -356,44 +358,44 @@ locals {
         env                      = "stg"
       }
     ],
-    search-atlantis-sg-ingress-rule = [
-      {
-        security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "atlantis ssh security group inbound"
-        from_port           = 22
-        to_port             = 22
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24",
-          "192.30.252.0/22",
-          "185.199.108.0/22"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      },
-      {
-        security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "atlantis server security group inbound"
-        from_port           = 4141
-        to_port             = 4141
-        protocol            = "tcp"
-        cidr_ipv4 = [ # INFO: https://ybchoi.com/28
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24",
-          "192.30.252.0/22",
-          "185.199.108.0/22",
-          "140.82.112.0/20",
-          "143.55.64.0/20"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-atlantis-sg-ingress-rule = [
+    #   {
+    #     security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+    #     type                = "ingress"
+    #     description         = "atlantis ssh security group inbound"
+    #     from_port           = 22
+    #     to_port             = 22
+    #     protocol            = "tcp"
+    #     cidr_ipv4 = [
+    #       "172.21.0.0/16",
+    #       "220.75.180.0/24",
+    #       "39.118.148.0/24",
+    #       "192.30.252.0/22",
+    #       "185.199.108.0/22"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   },
+    #   {
+    #     security_group_name = "search-atlantis-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+    #     type                = "ingress"
+    #     description         = "atlantis server security group inbound"
+    #     from_port           = 4141
+    #     to_port             = 4141
+    #     protocol            = "tcp"
+    #     cidr_ipv4 = [ # INFO: https://ybchoi.com/28
+    #       "172.21.0.0/16",
+    #       "220.75.180.0/24",
+    #       "39.118.148.0/24",
+    #       "192.30.252.0/22",
+    #       "185.199.108.0/22",
+    #       "140.82.112.0/20",
+    #       "143.55.64.0/20"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ec2 security group ingress rule
@@ -447,21 +449,21 @@ locals {
         env                      = "stg"
       }
     ],
-    search-atlantis-sg-egress-rule = [
-      {
-        security_group_name = "search-atlantis-sg"
-        description         = "atlantis security group egress rule"
-        type                = "egress"
-        from_port           = 0
-        to_port             = 0
-        protocol            = "-1"
-        cidr_ipv4 = [
-          "0.0.0.0/0"
-        ],
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-atlantis-sg-egress-rule = [
+    #   {
+    #     security_group_name = "search-atlantis-sg"
+    #     description         = "atlantis security group egress rule"
+    #     type                = "egress"
+    #     from_port           = 0
+    #     to_port             = 0
+    #     protocol            = "-1"
+    #     cidr_ipv4 = [
+    #       "0.0.0.0/0"
+    #     ],
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ec2 security group egress rule

@@ -413,11 +413,11 @@ ecs_security_group = {
     description         = "opensearch ecs api security group"
     env                 = "stg"
   },
-  search-embedding-api-sg = {
-    security_group_name = "search-embedding-api-sg"
-    description         = "embedding ecs api security group"
-    env                 = "stg"
-  }
+  # search-embedding-api-sg = {
+  #   security_group_name = "search-embedding-api-sg"
+  #   description         = "embedding ecs api security group"
+  #   env                 = "stg"
+  # }
 }
 
 # ECS Task Definitions 생성
@@ -443,7 +443,7 @@ ecs_task_definitions = {
       {
         name      = "search-opensearch-api"
         image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-opensearch-api"
-        version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
+        version   = "1.0.3" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
         port      = 8443
@@ -464,47 +464,47 @@ ecs_task_definitions = {
       }
     ]
   },
-  search-embedding-api-td = {
-    name                                    = "search-embedding-api-td"
-    task_role                               = "ecs_task_role"
-    task_exec_role                          = "ecs_task_exec_role"
-    network_mode                            = "awsvpc"
-    launch_type                             = "FARGATE"
-    task_total_cpu                          = 1024 # ECS Task Total CPU
-    task_total_memory                       = 2048 # ECS Task Total Mem
-    runtime_platform_oprating_system_family = "LINUX"
-    runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "search-embedding-api-td"
-    env                                     = "stg"
-    volume = {
-      name = "search-embedding-api-sv"
-    }
-    ephemeral_storage = 21
-    containers = [
-      {
-        name      = "search-embedding-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embedding-api"
-        version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
-        cpu       = 512     # container cpu
-        memory    = 1024    # container mem
-        port      = 8000
-        protocol  = "tcp"
-        essential = true
-        env_variables = {
-          "TZ"                     = "Asia/Seoul"
-          "SPRING_PROFILES_ACTIVE" = "stg"
-        }
-        mount_points = []
-        health_check = {
-          command  = "curl --fail http://127.0.0.1:8000/health-check || exit 1"
-          interval = 30
-          timeout  = 10
-          retries  = 3
-        }
-        env = "stg"
-      }
-    ]
-  },
+  # search-embedding-api-td = {
+  #   name                                    = "search-embedding-api-td"
+  #   task_role                               = "ecs_task_role"
+  #   task_exec_role                          = "ecs_task_exec_role"
+  #   network_mode                            = "awsvpc"
+  #   launch_type                             = "FARGATE"
+  #   task_total_cpu                          = 1024 # ECS Task Total CPU
+  #   task_total_memory                       = 2048 # ECS Task Total Mem
+  #   runtime_platform_oprating_system_family = "LINUX"
+  #   runtime_platform_cpu_architecture       = "X86_64"
+  #   task_family                             = "search-embedding-api-td"
+  #   env                                     = "stg"
+  #   volume = {
+  #     name = "search-embedding-api-sv"
+  #   }
+  #   ephemeral_storage = 21
+  #   containers = [
+  #     {
+  #       name      = "search-embedding-api"
+  #       image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embedding-api"
+  #       version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
+  #       cpu       = 512     # container cpu
+  #       memory    = 1024    # container mem
+  #       port      = 8000
+  #       protocol  = "tcp"
+  #       essential = true
+  #       env_variables = {
+  #         "TZ"                     = "Asia/Seoul"
+  #         "SPRING_PROFILES_ACTIVE" = "stg"
+  #       }
+  #       mount_points = []
+  #       health_check = {
+  #         command  = "curl --fail http://127.0.0.1:8000/health-check || exit 1"
+  #         interval = 30
+  #         timeout  = 10
+  #         retries  = 3
+  #       }
+  #       env = "stg"
+  #     }
+  #   ]
+  # },
 }
 
 # ECS 서비스 생성
@@ -525,22 +525,22 @@ ecs_service = {
     target_group_arn              = "search-opensearch-alb-tg"      # 연결되어야 하는 Target Group 지정
     security_group_name           = "search-opensearch-api-sg"      # 보안그룹 이름
   },
-  search-embedding-ecs-service = {
-    launch_type                   = "FARGATE"                      # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
-    deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-ecs-cluster"           # ECS Cluster명
-    service_name                  = "search-embedding-ecs-service" # 서비스 이름
-    desired_count                 = 1                              # Task 개수
-    container_name                = "search-embedding-api"         # 컨테이너 이름
-    container_port                = 8000                           # 컨테이너 포트
-    task_definitions              = "search-embedding-api-td"      # 테스크 지정
-    env                           = "stg"                          # ECS Service 환경변수
-    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
-    assign_public_ip              = true                           # 우선 public zone에 구성
-    target_group_arn              = "search-embedding-alb-tg"      # 연결되어야 하는 Target Group 지정
-    security_group_name           = "search-embedding-api-sg"      # 보안그룹 이름
-  },
+  # search-embedding-ecs-service = {
+  #   launch_type                   = "FARGATE"                      # ECS Launch Type
+  #   service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
+  #   deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+  #   cluster_name                  = "search-ecs-cluster"           # ECS Cluster명
+  #   service_name                  = "search-embedding-ecs-service" # 서비스 이름
+  #   desired_count                 = 1                              # Task 개수
+  #   container_name                = "search-embedding-api"         # 컨테이너 이름
+  #   container_port                = 8000                           # 컨테이너 포트
+  #   task_definitions              = "search-embedding-api-td"      # 테스크 지정
+  #   env                           = "stg"                          # ECS Service 환경변수
+  #   health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
+  #   assign_public_ip              = true                           # 우선 public zone에 구성
+  #   target_group_arn              = "search-embedding-alb-tg"      # 연결되어야 하는 Target Group 지정
+  #   security_group_name           = "search-embedding-api-sg"      # 보안그룹 이름
+  # },
 }
 
 # ECS Autoscaling
@@ -658,234 +658,234 @@ ec2_instance = {
       }
     ]
   },
-  search-opensearch-test-c01 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.medium"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-c01"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_c01.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.10.200"
+  # search-opensearch-test-c01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.medium"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-c01"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_c01.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.10.200"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
-  search-opensearch-test-c02 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.medium"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2b"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-c02"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_c02.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.20.200"
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-test-c02 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.medium"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-c02"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_c02.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.20.200"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
-  search-opensearch-test-c03 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.medium"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2c"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-c03"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_c03.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.30.200"
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-test-c03 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.medium"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2c"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-c03"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_c03.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.30.200"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
-  search-opensearch-test-d01 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-d01"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_d01.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.10.210"
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-test-d01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-d01"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_d01.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.10.210"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
-  search-opensearch-test-d02 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2b"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-d02"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_d02.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.20.210"
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-test-d02 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2b"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-d02"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_d02.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.20.210"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
-  search-opensearch-test-d03 = {
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2c"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-opensearch-test-d03"
-    security_group_name         = "search-opensearch-sg"
-    env                         = "stg"
-    script_file_name            = "install_os_d03.sh"
-    iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.30.210"
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
+  # search-opensearch-test-d03 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2c"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-d03"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_d03.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.30.210"
 
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 30
-      delete_on_termination = true
-      encrypted             = false
-    }
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
 
-    owners = "amazon"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
-      {
-        name   = "name"
-        values = ["al2023-ami-*-arm64"]
-      }
-    ]
-  },
+  #   owners = "amazon"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["al2023-ami-*-arm64"]
+  #     }
+  #   ]
+  # },
   # search-atlantis-01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t2.micro" #TODO: Volume size가 너무 작아서 올리다가 뻑남 + shell script 수정 필요 + atlantis 테스트 필요
@@ -936,15 +936,15 @@ ec2_security_group = {
     env                 = "stg"
   },
   search-embedding-sg = {
-    security_group_name = "search-elasticsearch-sg"
+    security_group_name = "search-embedding-sg"
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
   },
-  search-atlantis-sg = {
-    security_group_name = "search-atlantis-sg"
-    description         = "search-recommand atlantis ec2"
-    env                 = "stg"
-  }
+  # search-atlantis-sg = {
+  #   security_group_name = "search-atlantis-sg"
+  #   description         = "search-recommand atlantis ec2"
+  #   env                 = "stg"
+  # }
 }
 
 ec2_security_group_id = {}
@@ -955,10 +955,10 @@ ec2_key_pair = {
     name = "search-opensearch-key"
     env  = "stg"
   },
-  search-atlantis-key = {
-    name = "search-atlantis-key"
-    env  = "stg"
-  }
+  # search-atlantis-key = {
+  #   name = "search-atlantis-key"
+  #   env  = "stg"
+  # }
 }
 
 ########################################
