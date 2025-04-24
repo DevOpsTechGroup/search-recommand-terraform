@@ -110,19 +110,12 @@ alb_listener_rule = {
     target_group_name = "search-opensearch-alb-tg"
     priority          = 1
   },
-  search-embedding-alb-http-listener-rule = {
-    type              = "forward"
-    path              = ["/embed/*"]
-    alb_listener_name = "search-alb-http-listener"
-    target_group_name = "search-embedding-alb-tg"
-    priority          = 2
-  },
   search-opensearch-alb-swagger-listener-rule = {
     type              = "forward"
     path              = ["/swagger-ui/*"]
     alb_listener_name = "search-alb-http-listener"
     target_group_name = "search-opensearch-alb-tg"
-    priority          = 3
+    priority          = 2
   }
 }
 
@@ -147,25 +140,6 @@ target_group = {
       internal            = false
     }
   },
-  search-embedding-alb-tg = {
-    name        = "search-embedding-alb-tg"
-    port        = 8000
-    elb_type    = "ALB"
-    protocol    = "HTTP" # HTTP(ALB) or TCP(NLB)
-    target_type = "ip"   # FARGATE는 IP로 지정해야 함, 동적으로 IP(ENI) 할당됨
-    env         = "stg"
-    health_check = {
-      path                = "/health-check"
-      enabled             = true
-      healthy_threshold   = 3
-      interval            = 30
-      port                = 8000
-      protocol            = "HTTP"
-      timeout             = 15
-      unhealthy_threshold = 5
-      internal            = false
-    }
-  }
 }
 
 alb_security_group_id = {}
@@ -182,13 +156,6 @@ ecr_repository = {
     ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
   },
-  # search-embedding-api = {
-  #   ecr_repository_name      = "search-embedding-api" # 리포지토리명
-  #   env                      = "stg"                  # ECR 개발환경
-  #   ecr_image_tag_mutability = "IMMUTABLE"            # image 버전 고유하게 관리할지 여부
-  #   ecr_scan_on_push         = false                  # PUSH Scan 여부
-  #   ecr_force_delete         = false
-  # }
 }
 
 ########################################
@@ -412,12 +379,7 @@ ecs_security_group = {
     security_group_name = "search-opensearch-api-sg"
     description         = "opensearch ecs api security group"
     env                 = "stg"
-  },
-  # search-embedding-api-sg = {
-  #   security_group_name = "search-embedding-api-sg"
-  #   description         = "embedding ecs api security group"
-  #   env                 = "stg"
-  # }
+  }
 }
 
 # ECS Task Definitions 생성
@@ -464,47 +426,6 @@ ecs_task_definitions = {
       }
     ]
   },
-  # search-embedding-api-td = {
-  #   name                                    = "search-embedding-api-td"
-  #   task_role                               = "ecs_task_role"
-  #   task_exec_role                          = "ecs_task_exec_role"
-  #   network_mode                            = "awsvpc"
-  #   launch_type                             = "FARGATE"
-  #   task_total_cpu                          = 1024 # ECS Task Total CPU
-  #   task_total_memory                       = 2048 # ECS Task Total Mem
-  #   runtime_platform_oprating_system_family = "LINUX"
-  #   runtime_platform_cpu_architecture       = "X86_64"
-  #   task_family                             = "search-embedding-api-td"
-  #   env                                     = "stg"
-  #   volume = {
-  #     name = "search-embedding-api-sv"
-  #   }
-  #   ephemeral_storage = 21
-  #   containers = [
-  #     {
-  #       name      = "search-embedding-api"
-  #       image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embedding-api"
-  #       version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
-  #       cpu       = 512     # container cpu
-  #       memory    = 1024    # container mem
-  #       port      = 8000
-  #       protocol  = "tcp"
-  #       essential = true
-  #       env_variables = {
-  #         "TZ"                     = "Asia/Seoul"
-  #         "SPRING_PROFILES_ACTIVE" = "stg"
-  #       }
-  #       mount_points = []
-  #       health_check = {
-  #         command  = "curl --fail http://127.0.0.1:8000/health-check || exit 1"
-  #         interval = 30
-  #         timeout  = 10
-  #         retries  = 3
-  #       }
-  #       env = "stg"
-  #     }
-  #   ]
-  # },
 }
 
 # ECS 서비스 생성
@@ -525,22 +446,6 @@ ecs_service = {
     target_group_arn              = "search-opensearch-alb-tg"      # 연결되어야 하는 Target Group 지정
     security_group_name           = "search-opensearch-api-sg"      # 보안그룹 이름
   },
-  # search-embedding-ecs-service = {
-  #   launch_type                   = "FARGATE"                      # ECS Launch Type
-  #   service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
-  #   deployment_controller         = "ECS"                          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-  #   cluster_name                  = "search-ecs-cluster"           # ECS Cluster명
-  #   service_name                  = "search-embedding-ecs-service" # 서비스 이름
-  #   desired_count                 = 1                              # Task 개수
-  #   container_name                = "search-embedding-api"         # 컨테이너 이름
-  #   container_port                = 8000                           # 컨테이너 포트
-  #   task_definitions              = "search-embedding-api-td"      # 테스크 지정
-  #   env                           = "stg"                          # ECS Service 환경변수
-  #   health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
-  #   assign_public_ip              = true                           # 우선 public zone에 구성
-  #   target_group_arn              = "search-embedding-alb-tg"      # 연결되어야 하는 Target Group 지정
-  #   security_group_name           = "search-embedding-api-sg"      # 보안그룹 이름
-  # },
 }
 
 # ECS Autoscaling
@@ -620,7 +525,7 @@ ecs_security_group_id = {}
   다른 리소스와 다르게 create_yn 변수를 통해 개별 리소스를 제어
 */
 ec2_instance = {
-  # batch-embedding-test-01 = {
+  # search-batch-embedding-test-01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t3.large"
   #   subnet_type                 = "public"
