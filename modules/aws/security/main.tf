@@ -15,7 +15,11 @@ resource "aws_security_group" "alb_security_group" {
 resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = {
     for idx, rule in local.alb_ingress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   type              = each.value.type
@@ -33,7 +37,11 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
 resource "aws_security_group_rule" "alb_security_group_egress_rule" {
   for_each = {
     for idx, rule in local.alb_egress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   type              = each.value.type
@@ -64,7 +72,11 @@ resource "aws_security_group" "ecs_security_group" {
 resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = {
     for idx, rule in local.ecs_ingress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   type              = each.value.type                                                          # 보안그룹 타입(ingress, egress)
@@ -83,7 +95,11 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
 resource "aws_security_group_rule" "ecs_egress_security_group" {
   for_each = {
     for idx, rule in local.ecs_egress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   type              = each.value.type
@@ -114,7 +130,11 @@ resource "aws_security_group" "ec2_security_group" {
 resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
     for idx, rule in local.ec2_ingress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   description       = each.value.description                                                   # 보안그룹 DESC
@@ -132,7 +152,11 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
 resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
     for idx, rule in local.ec2_egress_rules_flat :
-    "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${idx}" => rule
+    replace(
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "/",
+      "_"
+    ) => rule
   }
 
   description       = each.value.description
