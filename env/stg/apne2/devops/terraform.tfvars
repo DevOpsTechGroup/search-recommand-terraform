@@ -620,6 +620,36 @@ ecs_security_group_id = {}
   다른 리소스와 다르게 create_yn 변수를 통해 개별 리소스를 제어
 */
 ec2_instance = {
+  batch-embedding-test-01 = {
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "batch-embedding-test-01"
+    security_group_name         = "search-embedding-sg"
+    env                         = "stg"
+    script_file_name            = "" 
+    iam_instance_profile        = ""
+    key_pair_name               = "search-embedding-key"
+    private_ip                  = "172.21.10.230"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 20
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "self"
+    filter = [
+      {
+        name   = "name"
+        values = ["batch-embedding-server-*"]
+      }
+    ]
+  },
   search-opensearch-test-sn01 = { // single node
     ami_type                    = "custom"
     instance_type               = "t4g.large"
@@ -953,6 +983,10 @@ ec2_security_group_id = {}
 ec2_key_pair = {
   search-opensearch-key = {
     name = "search-opensearch-key"
+    env  = "stg"
+  },
+  search-embedding-key = {
+    name = "search-embedding-key"
     env  = "stg"
   },
   # search-atlantis-key = {
