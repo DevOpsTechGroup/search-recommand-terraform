@@ -1,6 +1,8 @@
 # S3 bucket
 resource "aws_s3_bucket" "s3" {
-  for_each = var.s3_bucket
+  for_each = {
+    for key, value in var.s3_bucket : key => value if local.create_s3_bucket
+  }
 
   #   region = var.aws_region
   bucket = "${each.value.bucket_name}-${each.value.env}"
@@ -16,7 +18,9 @@ resource "aws_s3_bucket" "s3" {
 
 # S3 bucket versioning
 resource "aws_s3_bucket_versioning" "versioning" {
-  for_each = var.s3_bucket
+  for_each = {
+    for key, value in var.s3_bucket : key => value if local.create_s3_bucket
+  }
 
   bucket = aws_s3_bucket.s3[each.key].id
 
@@ -31,7 +35,9 @@ resource "aws_s3_bucket_versioning" "versioning" {
 
 # S3 object encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "server_side_encrypt" {
-  for_each = var.s3_bucket
+  for_each = {
+    for key, value in var.s3_bucket : key => value if local.create_s3_bucket
+  }
 
   bucket = aws_s3_bucket.s3[each.key].id
 
@@ -48,7 +54,9 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "server_side_encry
 
 # S3 bucket access configuration
 resource "aws_s3_bucket_public_access_block" "public_access_block" {
-  for_each = var.s3_bucket
+  for_each = {
+    for key, value in var.s3_bucket : key => value if local.create_s3_bucket
+  }
 
   bucket                  = aws_s3_bucket.s3[each.key].id
   block_public_acls       = each.value.public_access_block.block_public_acls
