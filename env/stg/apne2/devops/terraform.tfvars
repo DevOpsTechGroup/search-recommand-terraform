@@ -156,6 +156,20 @@ ecr_repository = {
     ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
   },
+  search-embedding-api = {
+    ecr_repository_name      = "search-embedding-api" # 리포지토리명
+    env                      = "stg"                   # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                   # PUSH Scan 여부
+    ecr_force_delete         = false
+  },
+  search-embedding-batch = {
+    ecr_repository_name      = "search-embedding-batch" # 리포지토리명
+    env                      = "stg"                   # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                   # PUSH Scan 여부
+    ecr_force_delete         = false
+  }
 }
 
 ########################################
@@ -525,6 +539,36 @@ ecs_security_group_id = {}
   다른 리소스와 다르게 create_yn 변수를 통해 개별 리소스를 제어
 */
 ec2_instance = {
+  search-jenkins-test-01 = {
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-jenkins-test-01"
+    security_group_name         = "search-jenkins-sg"
+    env                         = "stg"
+    script_file_name            = "" 
+    iam_instance_profile        = ""
+    key_pair_name               = "search-jenkins-key"
+    private_ip                  = "172.21.10.240"
+
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
+
+    owners = "self"
+    filter = [
+      {
+        name   = "name"
+        values = ["search-jenkins-test-01-*"]
+      }
+    ]
+  }
   # search-batch-embedding-test-01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t3.large"
@@ -865,6 +909,11 @@ ec2_instance = {
 
 # EC2 보안그룹 생성
 ec2_security_group = {
+  search-jenkins-sg = {
+    security_group_name = "search-jenkins-sg"
+    description         = "search-recommand vector jenkins ec2"
+    env                 = "stg"
+  }
   # search-opensearch-sg = {
   #   security_group_name = "search-opensearch-sg"
   #   description         = "search-recommand vector opensearch ec2"
@@ -886,6 +935,10 @@ ec2_security_group_id = {}
 
 # EC2 key pair
 ec2_key_pair = {
+  search-jenkins-key = {
+    name = "search-jenkins-key"
+    env  = "stg"
+  }
   # search-opensearch-key = {
   #   name = "search-opensearch-key"
   #   env  = "stg"
