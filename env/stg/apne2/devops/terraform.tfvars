@@ -112,7 +112,7 @@ alb_listener_rule = {
   },
   search-opensearch-alb-swagger-listener-rule = {
     type              = "forward"
-    path              = ["/swagger-ui/*"]
+    path              = ["/v1/opensearch/*"]
     alb_listener_name = "search-alb-http-listener"
     target_group_name = "search-opensearch-alb-tg"
     priority          = 2
@@ -158,16 +158,16 @@ ecr_repository = {
   },
   search-embedding-api = {
     ecr_repository_name      = "search-embedding-api" # 리포지토리명
-    env                      = "stg"                   # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                   # PUSH Scan 여부
+    env                      = "stg"                  # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"            # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                  # PUSH Scan 여부
     ecr_force_delete         = false
   },
   search-embedding-batch = {
     ecr_repository_name      = "search-embedding-batch" # 리포지토리명
-    env                      = "stg"                   # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"             # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                   # PUSH Scan 여부
+    env                      = "stg"                    # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"              # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                    # PUSH Scan 여부
     ecr_force_delete         = false
   }
 }
@@ -419,7 +419,7 @@ ecs_task_definitions = {
       {
         name      = "search-opensearch-api"
         image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-opensearch-api"
-        version   = "1.0.3" # container image version은 ecs_container_image_version 변수 사용
+        version   = "1.0.0" # container image version은 ecs_container_image_version 변수 사용
         cpu       = 512     # container cpu
         memory    = 1024    # container mem
         port      = 8443
@@ -549,7 +549,7 @@ ec2_instance = {
     instance_name               = "search-jenkins-test-01"
     security_group_name         = "search-jenkins-sg"
     env                         = "stg"
-    script_file_name            = "" 
+    script_file_name            = ""
     iam_instance_profile        = ""
     key_pair_name               = "search-jenkins-key"
     private_ip                  = "172.21.10.240"
@@ -569,74 +569,74 @@ ec2_instance = {
       }
     ]
   }
-  # search-batch-embedding-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "batch-embedding-test-01"
-  #   security_group_name         = "search-embedding-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "" 
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-embedding-key"
-  #   private_ip                  = "172.21.10.230"
+  search-batch-embedding-test-01 = {
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-batch-embedding-test-01"
+    security_group_name         = "search-embedding-sg"
+    env                         = "stg"
+    script_file_name            = ""
+    iam_instance_profile        = ""
+    key_pair_name               = "search-embedding-key"
+    private_ip                  = "172.21.10.230"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 20
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 20
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "name"
-  #       values = ["batch-embedding-server-*"]
-  #     }
-  #   ]
-  # },
-  # search-opensearch-test-sn01 = { // single node
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-test-sn01"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_os_sn01.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-  #   private_ip                  = "172.21.10.220"
+    owners = "self"
+    filter = [
+      {
+        name   = "name"
+        values = ["batch-embedding-server-*"]
+      }
+    ]
+  },
+  search-opensearch-test-sn01 = { // single node
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-sn01"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_os_sn01.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.220"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "amazon"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["al2023-ami-*-arm64"]
-  #     }
-  #   ]
-  # },
+    owners = "amazon"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["al2023-ami-*-arm64"]
+      }
+    ]
+  },
   # search-opensearch-test-c01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
@@ -914,16 +914,16 @@ ec2_security_group = {
     description         = "search-recommand vector jenkins ec2"
     env                 = "stg"
   }
-  # search-opensearch-sg = {
-  #   security_group_name = "search-opensearch-sg"
-  #   description         = "search-recommand vector opensearch ec2"
-  #   env                 = "stg"
-  # },
-  # search-embedding-sg = {
-  #   security_group_name = "search-embedding-sg"
-  #   description         = "search-recommand elasticsearch ec2"
-  #   env                 = "stg"
-  # },
+  search-opensearch-sg = {
+    security_group_name = "search-opensearch-sg"
+    description         = "search-recommand vector opensearch ec2"
+    env                 = "stg"
+  },
+  search-embedding-sg = {
+    security_group_name = "search-embedding-sg"
+    description         = "search-recommand elasticsearch ec2"
+    env                 = "stg"
+  },
   # search-atlantis-sg = {
   #   security_group_name = "search-atlantis-sg"
   #   description         = "search-recommand atlantis ec2"
@@ -939,14 +939,14 @@ ec2_key_pair = {
     name = "search-jenkins-key"
     env  = "stg"
   }
-  # search-opensearch-key = {
-  #   name = "search-opensearch-key"
-  #   env  = "stg"
-  # },
-  # search-embedding-key = {
-  #   name = "search-embedding-key"
-  #   env  = "stg"
-  # },
+  search-opensearch-key = {
+    name = "search-opensearch-key"
+    env  = "stg"
+  },
+  search-embedding-key = {
+    name = "search-embedding-key"
+    env  = "stg"
+  },
   # search-atlantis-key = {
   #   name = "search-atlantis-key"
   #   env  = "stg"

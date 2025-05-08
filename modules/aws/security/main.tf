@@ -16,7 +16,7 @@ resource "aws_security_group_rule" "alb_security_group_ingress_rule" {
   for_each = {
     for idx, rule in local.alb_ingress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
@@ -38,7 +38,7 @@ resource "aws_security_group_rule" "alb_security_group_egress_rule" {
   for_each = {
     for idx, rule in local.alb_egress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
@@ -73,7 +73,7 @@ resource "aws_security_group_rule" "ecs_ingress_security_group" {
   for_each = {
     for idx, rule in local.ecs_ingress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
@@ -96,7 +96,7 @@ resource "aws_security_group_rule" "ecs_egress_security_group" {
   for_each = {
     for idx, rule in local.ecs_egress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
@@ -131,7 +131,7 @@ resource "aws_security_group_rule" "ec2_ingress_security_group" {
   for_each = {
     for idx, rule in local.ec2_ingress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
@@ -153,7 +153,7 @@ resource "aws_security_group_rule" "ec2_egress_security_group" {
   for_each = {
     for idx, rule in local.ec2_egress_rules_flat :
     replace(
-      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "sg"}",
+      "${rule.security_group_name}-${rule.env}-${rule.from_port}-${rule.to_port}-${rule.cidr_ipv4 != null ? rule.cidr_ipv4 : "0.0.0.0/0"}",
       "/",
       "_"
     ) => rule
