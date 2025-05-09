@@ -411,38 +411,38 @@ locals {
     #     env                      = "stg"
     #   }
     # ]
-    search-jenkins-sg-ingress-rule = [
-      {
-        security_group_name = "search-jenkins-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "jenkins security group inbound"
-        from_port           = 8080
-        to_port             = 8080
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      },
-      {
-        security_group_name = "search-jenkins-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "jenkins security group inbound"
-        from_port           = 22
-        to_port             = 22
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-jenkins-sg-ingress-rule = [
+    #   {
+    #     security_group_name = "search-jenkins-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+    #     type                = "ingress"
+    #     description         = "jenkins security group inbound"
+    #     from_port           = 8080
+    #     to_port             = 8080
+    #     protocol            = "tcp"
+    #     cidr_ipv4 = [
+    #       "172.21.0.0/16",
+    #       "220.75.180.0/24",
+    #       "39.118.148.0/24"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   },
+    #   {
+    #     security_group_name = "search-jenkins-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+    #     type                = "ingress"
+    #     description         = "jenkins security group inbound"
+    #     from_port           = 22
+    #     to_port             = 22
+    #     protocol            = "tcp"
+    #     cidr_ipv4 = [
+    #       "172.21.0.0/16",
+    #       "220.75.180.0/24",
+    #       "39.118.148.0/24"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ec2 security group ingress rule
@@ -511,21 +511,21 @@ locals {
     #     env                      = "stg"
     #   }
     # ]
-    search-jenkins-sg-egress-rule = [
-      {
-        security_group_name = "search-jenkins-sg"
-        description         = "elasticsearch security group egress rule"
-        type                = "egress"
-        from_port           = 0
-        to_port             = 0
-        protocol            = "-1" # 모든 프로토콜 허용
-        cidr_ipv4 = [
-          "0.0.0.0/0"
-        ]
-        source_security_group_id = null
-        env                      = "stg"
-      }
-    ]
+    # search-jenkins-sg-egress-rule = [
+    #   {
+    #     security_group_name = "search-jenkins-sg"
+    #     description         = "elasticsearch security group egress rule"
+    #     type                = "egress"
+    #     from_port           = 0
+    #     to_port             = 0
+    #     protocol            = "-1" # 모든 프로토콜 허용
+    #     cidr_ipv4 = [
+    #       "0.0.0.0/0"
+    #     ]
+    #     source_security_group_id = null
+    #     env                      = "stg"
+    #   }
+    # ]
   }
 
   # Flatten ec2 security group egress rule
