@@ -11,7 +11,7 @@ module "security" {
   ec2_security_group = var.ec2_security_group
 
   # 네트워크 관련 설정
-  vpc_id = module.network.vpc_id
+  vpc_id = module.network.vpc_ida
 
   # 프로젝트 기본 설정
   tags = var.tags # 공통 태그
