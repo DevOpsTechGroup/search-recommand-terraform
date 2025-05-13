@@ -173,3 +173,26 @@ module "storage" {
   env          = var.env
   tags         = var.tags
 }
+
+module "vpc_endpoint" {
+  source = "../../../../modules/aws/vpc_endpoint"
+
+  # 네트워크
+  vpc_id                  = module.network.vpc_id
+  vpc_endpoint_gateway    = var.vpc_endpoint_gateway
+  vpc_endpoint_interface  = var.vpc_endpoint_interface
+  private_route_table_ids = module.network.private_route_table_id
+  security_group_ids      = module.security.all_security_group_id
+  subnet_ids              = module.network.private_subnet_ids
+
+  # 프로젝트 기본 설정
+  project_name = var.project_name
+  env          = var.env
+  aws_region   = var.aws_region
+  tags         = var.tags
+
+  depends_on = [
+    module.network,
+    module.security
+  ]
+}

@@ -56,6 +56,37 @@ enable_dns_support = true
 # DNS 이름을 만들지 말지 정하는 옵션, 이것도 켜야 실제 VPC 내의 리소스들이 DNS로 통신이 가능할 듯
 enable_dns_hostnames = true
 
+# VPC Endpoint Gateway 설정
+vpc_endpoint_gateway = {
+  search-vpc-endpoint-s3 = {
+    endpoint_name     = "search-vpc-endpoint-s3"
+    service_name      = "com.amazonaws.ap-northeast-2.s3"
+    vpc_endpoint_type = "Gateway"
+  }
+}
+
+# VPC Endpoint Interface 설정
+vpc_endpoint_interface = {
+  search-vpc-endpoint-ecr-dkr = {
+    endpoint_name = "search-vpc-endpoint-ecr-dkr"
+    security_group_name = [
+      "search-opensearch-api-sg"
+    ]
+    service_name        = "com.amazonaws.ap-northeast-2.ecr.dkr"
+    vpc_endpoint_type   = "Interface"
+    private_dns_enabled = true
+  },
+  search-vpc-endpoint-ecr-api = {
+    endpoint_name = "search-vpc-endpoint-ecr-api"
+    security_group_name = [
+      "search-opensearch-api-sg"
+    ]
+    service_name        = "com.amazonaws.ap-northeast-2.ecr.api"
+    vpc_endpoint_type   = "Interface"
+    private_dns_enabled = true
+  }
+}
+
 ########################################
 # 로드밸런서 설정
 ########################################
@@ -539,36 +570,6 @@ ecs_security_group_id = {}
   다른 리소스와 다르게 create_yn 변수를 통해 개별 리소스를 제어
 */
 ec2_instance = {
-  # search-jenkins-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-jenkins-test-01"
-  #   security_group_name         = "search-jenkins-sg"
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-jenkins-key"
-  #   private_ip                  = "172.21.10.240"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "name"
-  #       values = ["search-jenkins-test-01-*"]
-  #     }
-  #   ]
-  # }
   search-batch-embedding-test-01 = {
     ami_type                    = "custom"
     instance_type               = "t3.large"
@@ -577,7 +578,7 @@ ec2_instance = {
     associate_public_ip_address = true
     disable_api_termination     = true
     instance_name               = "search-batch-embedding-test-01"
-    security_group_name         = "search-embedding-sg"
+    security_group_name         = "search-embedding-sg" # TODO: EC2 -> ECS로 전환 필요
     env                         = "stg"
     script_file_name            = ""
     iam_instance_profile        = ""
@@ -912,16 +913,41 @@ ec2_instance = {
   #       values = ["al2023-ami-*-x86_64"]
   #     }
   #   ]
+  # },
+  # search-jenkins-test-01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t3.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-jenkins-test-01"
+  #   security_group_name         = "search-jenkins-sg"
+  #   env                         = "stg"
+  #   script_file_name            = ""
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-jenkins-key"
+  #   private_ip                  = "172.21.10.240"
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "name"
+  #       values = ["search-jenkins-test-01-*"]
+  #     }
+  #   ]
   # }
 }
 
 # EC2 보안그룹 생성
 ec2_security_group = {
-  # search-jenkins-sg = {
-  #   security_group_name = "search-jenkins-sg"
-  #   description         = "search-recommand vector jenkins ec2"
-  #   env                 = "stg"
-  # }
   search-opensearch-sg = {
     security_group_name = "search-opensearch-sg"
     description         = "search-recommand vector opensearch ec2"
@@ -932,6 +958,11 @@ ec2_security_group = {
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
   },
+  # search-jenkins-sg = {
+  #   security_group_name = "search-jenkins-sg"
+  #   description         = "search-recommand vector jenkins ec2"
+  #   env                 = "stg"
+  # },
   # search-atlantis-sg = {
   #   security_group_name = "search-atlantis-sg"
   #   description         = "search-recommand atlantis ec2"
@@ -943,10 +974,6 @@ ec2_security_group_id = {}
 
 # EC2 key pair
 ec2_key_pair = {
-  # search-jenkins-key = {
-  #   name = "search-jenkins-key"
-  #   env  = "stg"
-  # }
   search-opensearch-key = {
     name = "search-opensearch-key"
     env  = "stg"
@@ -955,6 +982,10 @@ ec2_key_pair = {
     name = "search-embedding-key"
     env  = "stg"
   },
+  # search-jenkins-key = {
+  #   name = "search-jenkins-key"
+  #   env  = "stg"
+  # },
   # search-atlantis-key = {
   #   name = "search-atlantis-key"
   #   env  = "stg"
