@@ -160,6 +160,7 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    subnets                       = string
     launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
     deployment_controller         = string
