@@ -49,3 +49,13 @@ output "ec2_security_group_id" {
     for key, value in aws_security_group.ec2_security_group : key => value.id
   }
 }
+
+# 모든 보안그룹 ID만 합쳐서 반환
+output "all_security_group_id" {
+  description = "모든 보안그룹 ID만 합쳐서 반환"
+  value = merge(
+    { for key, value in aws_security_group.alb_security_group : key => value.id },
+    { for key, value in aws_security_group.ecs_security_group : key => value.id },
+    { for key, value in aws_security_group.ec2_security_group : key => value.id }
+  )
+}
