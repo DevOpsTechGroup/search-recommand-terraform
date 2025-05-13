@@ -50,6 +50,7 @@ resource "aws_internet_gateway" "igw" {
 
 # Public routing table
 resource "aws_route_table" "public_route_table" {
+  # TODO: Route Table은 현재 1개만 생성, 추후 N개의 Route Table이 필요한 경우 수정 필요 
   vpc_id = aws_vpc.main.id
 
   route {
@@ -76,6 +77,7 @@ resource "aws_route_table_association" "public_route_table_association" {
 
 # Private routing table
 resource "aws_route_table" "private_route_table" {
+  # TODO: Route Table은 현재 1개만 생성, 추후 N개의 Route Table이 필요한 경우 수정 필요 
   vpc_id = aws_vpc.main.id
 
   tags = merge(var.tags, {

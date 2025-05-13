@@ -56,6 +56,28 @@ enable_dns_support = true
 # DNS 이름을 만들지 말지 정하는 옵션, 이것도 켜야 실제 VPC 내의 리소스들이 DNS로 통신이 가능할 듯
 enable_dns_hostnames = true
 
+# VPC Endpoint Gateway 설정
+vpc_endpoint_gateway = {
+  search-vpc-endpoint-s3 = {
+    service_name      = "com.amazonaws.ap-northeast-2.s3"
+    vpc_endpoint_type = "Gateway"
+  }
+}
+
+# VPC Endpoint Interface 설정
+vpc_endpoint_interface = {
+  search-vpc-endpoint-ecr-dkr = {
+    service_name        = "com.amazonaws.ap-northeast-2.ecr.dkr"
+    vpc_endpoint_type   = "Interface"
+    private_dns_enabled = true
+  },
+  search-vpc-endpoint-ecr-api = {
+    service_name        = "com.amazonaws.ap-northeast-2.ecr.api"
+    vpc_endpoint_type   = "Interface"
+    private_dns_enabled = true
+  }
+}
+
 ########################################
 # 로드밸런서 설정
 ########################################

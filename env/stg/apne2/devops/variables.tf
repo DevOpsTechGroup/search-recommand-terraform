@@ -90,6 +90,25 @@ variable "enable_dns_hostnames" {
   type        = bool
 }
 
+# VPC Endpoint Gateway 설정
+variable "vpc_endpoint_gateway" {
+  description = "VPC Endpoint Gateway 설정"
+  type = map(object({
+    service_name      = string
+    vpc_endpoint_type = string
+  }))
+}
+
+# VPC Endpoint Interface 설정
+variable "vpc_endpoint_interface" {
+  description = "VPC Endpoint Interface 설정"
+  type = map(object({
+    service_name        = string
+    vpc_endpoint_type   = string
+    private_dns_enabled = bool
+  }))
+}
+
 ########################################
 # 로드밸런서 설정
 ########################################
