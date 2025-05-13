@@ -41,6 +41,7 @@ variable "vpc_id" {
 variable "vpc_endpoint_gateway" {
   description = "VPC Endpoint Gateway 설정"
   type = map(object({
+    endpoint_name     = string
     service_name      = string
     vpc_endpoint_type = string
   }))
@@ -50,10 +51,30 @@ variable "vpc_endpoint_gateway" {
 variable "vpc_endpoint_interface" {
   description = "VPC Endpoint Interface 설정"
   type = map(object({
+    endpoint_name       = string
+    security_group_name = list(string)
     service_name        = string
     vpc_endpoint_type   = string
     private_dns_enabled = bool
   }))
+}
+
+# Private Route Table IDS
+variable "private_route_table_ids" {
+  description = "Private Route Table IDS"
+  type        = list(string)
+}
+
+# Security Group IDs
+variable "security_group_ids" {
+  description = "Security Group IDs"
+  type        = map(string)
+}
+
+# Subnet IDs
+variable "subnet_ids" {
+  description = "Subnet IDs"
+  type        = list(string)
 }
 
 ########################################
