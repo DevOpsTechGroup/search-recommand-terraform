@@ -58,8 +58,8 @@ enable_dns_hostnames = true
 
 # VPC Endpoint Gateway 설정
 vpc_endpoint_gateway = {
-  search-vpc-endpoint-s3 = {
-    endpoint_name     = "search-vpc-endpoint-s3"
+  search-s3 = {
+    endpoint_name     = "search-s3"
     service_name      = "com.amazonaws.ap-northeast-2.s3"
     vpc_endpoint_type = "Gateway"
   }
@@ -67,8 +67,8 @@ vpc_endpoint_gateway = {
 
 # VPC Endpoint Interface 설정
 vpc_endpoint_interface = {
-  search-vpc-endpoint-ecr-dkr = {
-    endpoint_name = "search-vpc-endpoint-ecr-dkr"
+  search-ecr-dkr = {
+    endpoint_name = "search-ecr-dkr"
     security_group_name = [
       "search-opensearch-api-sg"
     ]
@@ -76,8 +76,8 @@ vpc_endpoint_interface = {
     vpc_endpoint_type   = "Interface"
     private_dns_enabled = true
   },
-  search-vpc-endpoint-ecr-api = {
-    endpoint_name = "search-vpc-endpoint-ecr-api"
+  search-ecr-api = {
+    endpoint_name = "search-ecr-api"
     security_group_name = [
       "search-opensearch-api-sg"
     ]
@@ -91,52 +91,52 @@ vpc_endpoint_interface = {
 # 로드밸런서 설정
 ########################################
 alb = {
-  search-recommand-alb = {
-    name                             = "search-recommand-alb"
+  search-opensearch-alb = {
+    name                             = "search-opensearch-alb"
     internal                         = false
     load_balancer_type               = "application"
     enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
     enable_cross_zone_load_balancing = true
     idle_timeout                     = 300
-    security_group_name              = "search-recommand-alb-sg"
+    security_group_name              = "search-opensearch-alb-sg"
     env                              = "stg"
   },
-  search-embedding-alb = {
-    name                             = "search-embedding-alb"
+  search-embed-alb = {
+    name                             = "search-embed-alb"
     internal                         = true # Internal ALB
     load_balancer_type               = "application"
     enable_deletion_protection       = false # 생성하고 난 후에 true로 변경
     enable_cross_zone_load_balancing = true
     idle_timeout                     = 300
-    security_group_name              = "search-embedding-alb-sg"
+    security_group_name              = "search-embed-alb-sg"
     env                              = "stg"
   }
 }
 
 # ALB 보안그룹 생성
 alb_security_group = {
-  search-recommand-alb-sg = {
-    security_group_name = "search-recommand-alb-sg"
+  search-opensearch-alb-sg = {
+    security_group_name = "search-opensearch-alb-sg"
     description         = "search-recommand alb security group"
     env                 = "stg"
   },
-  search-embedding-alb-sg = {
-    security_group_name = "search-embedding-alb-sg"
-    description         = "search-embedding alb security group"
+  search-embed-alb-sg = {
+    security_group_name = "search-embed-alb-sg"
+    description         = "search-embed alb security group"
     env                 = "stg"
   }
 }
 
 # ALB Listencer 생성
 alb_listener = {
-  search-recommand-alb-http-listener = {
-    name              = "search-recommand-alb-http-listener"
+  search-opensearch-alb-http-listener = {
+    name              = "search-opensearch-alb-http-listener"
     port              = 80
     protocol          = "HTTP"
-    load_balancer_arn = "search-recommand-alb" # 연결할 ALB 이름 지정
-    default_action = {                         # TODO: 고정 응답 값 반환하도록 수정
-      type = "fixed-response"                  # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
-      # target_group_arn = "search-opensearch-alb-tg"
+    load_balancer_arn = "search-opensearch-alb" # 연결할 ALB 이름 지정
+    default_action = {                          # TODO: 고정 응답 값 반환하도록 수정
+      type = "fixed-response"                   # forward, redirect(다른 URL 전환), fixed-response(고정 응답값)
+      # target_group_arn = "opensearch-alb-tg"
       fixed_response = {
         content_type = "text/plain"
         message_body = "Fixed response content"
@@ -145,11 +145,11 @@ alb_listener = {
     }
     env = "stg"
   },
-  search-embedding-alb-blue-listener = {
-    name              = "search-embedding-alb-blue-listener"
+  search-embed-alb-blue-listener = {
+    name              = "search-embed-alb-blue-listener"
     port              = 8000
     protocol          = "HTTP"
-    load_balancer_arn = "search-embedding-alb" # 연결할 ALB 이름 지정
+    load_balancer_arn = "search-embed-alb" # 연결할 ALB 이름 지정
     default_action = {
       type = "fixed-response"
       fixed_response = {
@@ -160,11 +160,11 @@ alb_listener = {
     }
     env = "stg"
   },
-  search-embedding-alb-green-listener = {
-    name              = "search-embedding-alb-green-listener"
+  search-embed-alb-green-listener = {
+    name              = "search-embed-alb-green-listener"
     port              = 8001
     protocol          = "HTTP"
-    load_balancer_arn = "search-embedding-alb" # 연결할 ALB 이름 지정
+    load_balancer_arn = "search-embed-alb" # 연결할 ALB 이름 지정
     default_action = {
       type = "fixed-response"
       fixed_response = {
@@ -180,31 +180,31 @@ alb_listener = {
 # ALB Listener Rule 생성
 alb_listener_rule = {
   search-opensearch-alb-http-listener-rule = {
-    type              = "forward"                            # forward, redirect, fixed-response
-    path              = ["/opensearch/*"]                    # URL 경로
-    alb_listener_name = "search-recommand-alb-http-listener" # 연결할 ALB Listener명
-    target_group_name = "search-opensearch-alb-tg"           # 연결할 Target Group명
+    type              = "forward"                             # forward, redirect, fixed-response
+    path              = ["/opensearch/*"]                     # URL 경로
+    alb_listener_name = "search-opensearch-alb-http-listener" # 연결할 ALB Listener명
+    target_group_name = "search-opensearch-alb-tg"            # 연결할 Target Group명
     priority          = 1
   },
   search-opensearch-alb-swagger-listener-rule = {
-    type              = "forward"                            # forward, redirect, fixed-response
-    path              = ["/v1/opensearch/*"]                 # URL 경로
-    alb_listener_name = "search-recommand-alb-http-listener" # 연결할 ALB Listener명
-    target_group_name = "search-opensearch-alb-tg"           # 연결할 Target Group명
+    type              = "forward"                             # forward, redirect, fixed-response
+    path              = ["/v1/opensearch/*"]                  # URL 경로
+    alb_listener_name = "search-opensearch-alb-http-listener" # 연결할 ALB Listener명
+    target_group_name = "search-opensearch-alb-tg"            # 연결할 Target Group명
     priority          = 2
   },
-  search-embedding-alb-blue-listener-rule = {
+  search-embed-alb-blue-listener-rule = {
     type              = "forward"
-    path              = ["/embedding/*"]
-    alb_listener_name = "search-embedding-alb-blue-listener"
-    target_group_name = "search-embedding-alb-blue-tg"
+    path              = ["/embed/*"]
+    alb_listener_name = "search-embed-alb-blue-listener"
+    target_group_name = "search-embed-alb-blue-tg"
     priority          = 1
   },
-  search-embedding-alb-green-listener-rule = {
+  search-embed-alb-green-listener-rule = {
     type              = "forward"
-    path              = ["/embedding/*"]
-    alb_listener_name = "search-embedding-alb-green-listener"
-    target_group_name = "search-embedding-alb-green-tg"
+    path              = ["/embed/*"]
+    alb_listener_name = "search-embed-alb-green-listener"
+    target_group_name = "search-embed-alb-green-tg"
     priority          = 2
   }
 }
@@ -230,8 +230,8 @@ target_group = {
       internal            = false
     }
   },
-  search-embedding-alb-blue-tg = {
-    name        = "search-embedding-alb-blue-tg"
+  search-embed-alb-blue-tg = {
+    name        = "search-embed-alb-blue-tg"
     port        = 8000
     elb_type    = "ALB"
     protocol    = "HTTP"
@@ -249,8 +249,8 @@ target_group = {
       internal            = false
     }
   },
-  search-embedding-alb-green-tg = {
-    name        = "search-embedding-alb-green-tg"
+  search-embed-alb-green-tg = {
+    name        = "search-embed-alb-green-tg"
     port        = 8000
     elb_type    = "ALB"
     protocol    = "HTTP"
@@ -284,18 +284,18 @@ ecr_repository = {
     ecr_scan_on_push         = false                   # PUSH Scan 여부
     ecr_force_delete         = false
   },
-  search-embedding-api = {
-    ecr_repository_name      = "search-embedding-api" # 리포지토리명
-    env                      = "stg"                  # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"            # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                  # PUSH Scan 여부
+  search-embed-api = {
+    ecr_repository_name      = "search-embed-api" # 리포지토리명
+    env                      = "stg"              # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"        # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false              # PUSH Scan 여부
     ecr_force_delete         = false
   },
-  search-embedding-batch = {
-    ecr_repository_name      = "search-embedding-batch" # 리포지토리명
-    env                      = "stg"                    # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"              # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                    # PUSH Scan 여부
+  search-embed-batch = {
+    ecr_repository_name      = "search-embed-batch" # 리포지토리명
+    env                      = "stg"                # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"          # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                # PUSH Scan 여부
     ecr_force_delete         = false
   }
 }
@@ -305,6 +305,7 @@ ecr_repository = {
 ########################################
 # 사용자가 생성하는 역할(Role)
 iam_custom_role = {
+  # ECS Task Role
   search-ecs-task-role = {
     name    = "search-ecs-task-role"
     version = "2012-10-17"
@@ -319,6 +320,7 @@ iam_custom_role = {
     }
     env = "stg"
   },
+  # ECS Task Execution Role
   search-ecs-task-exec-role = {
     name    = "search-ecs-task-exec-role"
     version = "2012-10-17"
@@ -333,6 +335,7 @@ iam_custom_role = {
     }
     env = "stg"
   },
+  # ECS Auto Scaling Role
   search-ecs-auto-scaling-role = {
     name    = "search-ecs-auto-scaling-role"
     version = "2012-10-17"
@@ -347,8 +350,24 @@ iam_custom_role = {
     }
     env = "stg"
   },
-  search-atlantis-terraform-role = {
-    name    = "search-atlantis-terraform-role"
+  # CodeDeploy Service Role
+  search-codedeploy-service-role = {
+    name    = "search-codedeploy-service-role"
+    version = "2012-10-17"
+    arn     = ""
+    statement = {
+      Sid    = "CodeDeployServiceRole"
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "codedeploy.amazonaws.com"
+      }
+    }
+    env = "stg"
+  },
+  # Atlantis EC2 Service Role
+  search-ec2-atlantis-role = {
+    name    = "search-ec2-atlantis-role"
     version = "2012-10-17"
     arn     = ""
     statement = {
@@ -365,6 +384,7 @@ iam_custom_role = {
 
 # 사용자가 생성하는 정책(Policy)
 iam_custom_policy = {
+  # ECS Task Policy
   search-ecs-task-policy = {
     name        = "search-ecs-task-policy"
     description = "Policy For ECS Task Role"
@@ -383,6 +403,7 @@ iam_custom_policy = {
     }
     env = "stg"
   },
+  # ECS Task Execution Policy
   search-ecs-task-exec-policy = {
     name        = "search-ecs-task-exec-policy"
     description = "Policy for ecs task execution role"
@@ -408,6 +429,7 @@ iam_custom_policy = {
     }
     env = "stg"
   },
+  # Atlantis Main Policy
   search-atlantis-main-policy = {
     name        = "search-atlantis-main-policy"
     description = "Policy for ec2 atlantis role"
@@ -439,6 +461,7 @@ iam_custom_policy = {
     }
     env = "stg"
   },
+  # Atlantis SSM KMS Policy
   search-atlantis-ssm-kms-policy = {
     name        = "search-atlantis-ssm-kms-policy"
     description = "Policy for ec2 atlantis role"
@@ -464,44 +487,49 @@ iam_custom_policy = {
 # 기존 AWS에서 제공되는 정책 사용(Policy) - data "aws_iam_policy" "existing_policy" { }
 # 아래 변수의 경우 Policy를 사용하기는 하는데, 기존 AWS Managed Policy를 사용하는 경우 사용하는 변수
 iam_managed_policy = {
+  # ECS Auto Scaling Policy
   search-ecs-auto-scaling-policy = {
     name = "AmazonEC2ContainerServiceAutoscaleRole"
     arn  = "arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceAutoscaleRole"
     env  = "stg"
+  },
+  # CodeDeploy Service Role
+  search-codedeploy-service-role = {
+    name = "AWSCodeDeployRoleForECS"
+    arn  = "arn:aws:iam::aws:policy/AWSCodeDeployRoleForECS"
+    env  = "stg"
   }
 }
 
-# Role - Policy 연결
-# custom: custom policy
-# managed: aws managed policy
+# IAM 역할(Role)에 정책(Policy)을 연결
 iam_policy_attachment = {
   search-ecs-task-role-attachment = {
     role_name   = "search-ecs-task-role"
     policy_name = "search-ecs-task-policy"
-    policy_type = "custom"
   },
   search-ecs-task-exec-role = {
     role_name   = "search-ecs-task-exec-role"
     policy_name = "search-ecs-task-exec-policy"
-    policy_type = "custom"
   },
   search-ecs-auto-scaling-role = {
     role_name   = "search-ecs-auto-scaling-role"
-    policy_name = "search-ecs-auto-scaling-policy"
-    policy_type = "managed"
+    policy_name = "search-ecs-auto-scaling-policy" # iam_managed_policy 변수의 KEY로 지정
   },
-  search-atlantis-terraform-role = {
-    role_name   = "search-atlantis-terraform-role"
+  search-codedeploy-service-role = {
+    role_name   = "search-codedeploy-service-role"
+    policy_name = "search-codedeploy-service-role" # iam_managed_policy 변수의 KEY로 지정
+  },
+  search-atlantis-role = {
+    role_name   = "search-ec2-atlantis-role"
     policy_name = "search-atlantis-main-policy"
-    policy_type = "custom"
   }
 }
 
-# IAM instance profile
+# IAM 인스턴스 프로파일(instance profile)
 iam_instance_profile = {
-  search-atlantis-terraform-instance-profile = {
-    name      = "search-atlantis-terraform-instance-profile"
-    role_name = "search-atlantis-terraform-role"
+  search-atlantis-instance-profile = {
+    name      = "search-ec2-atlantis-instance-profile"
+    role_name = "search-ec2-atlantis-role"
   }
 }
 
@@ -509,22 +537,22 @@ iam_instance_profile = {
 # ECS 클러스터 설정
 ########################################
 ecs_cluster = {
-  search-recommand-ecs-cluster = {
-    cluster_name = "search-recommand-ecs-cluster"
+  search-ecs-cluster = {
+    cluster_name = "search-ecs-cluster"
     env          = "stg"
   }
 }
 
-# ECS Security Group 
+# ECS 보안그룹(security group) 
 ecs_security_group = {
   search-opensearch-api-sg = {
     security_group_name = "search-opensearch-api-sg"
     description         = "opensearch ecs api security group"
     env                 = "stg"
   },
-  search-embedding-api-sg = {
-    security_group_name = "search-embedding-api-sg"
-    description         = "embedding api security group"
+  search-embed-api-sg = {
+    security_group_name = "search-embed-api-sg"
+    description         = "embed api security group"
     env                 = "stg"
   }
 }
@@ -573,8 +601,8 @@ ecs_task_definitions = {
       }
     ]
   },
-  search-embedding-api-td = {
-    name                                    = "search-embedding-api-td"
+  search-embed-api-td = {
+    name                                    = "search-embed-api-td"
     task_role                               = "ecs_task_role"
     task_exec_role                          = "ecs_task_exec_role"
     network_mode                            = "awsvpc"
@@ -583,13 +611,16 @@ ecs_task_definitions = {
     task_total_memory                       = 2048
     runtime_platform_oprating_system_family = "LINUX"
     runtime_platform_cpu_architecture       = "X86_64"
-    task_family                             = "search-embedding-api-td"
+    task_family                             = "search-embed-api-td"
     env                                     = "stg"
-    ephemeral_storage                       = 21
+    volume = {
+      name = "search-embed-shared-volume"
+    }
+    ephemeral_storage = 21
     containers = [
       {
-        name      = "search-embedding-api"
-        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embedding-api"
+        name      = "search-embed-api"
+        image     = "842675972665.dkr.ecr.ap-northeast-2.amazonaws.com/search-embed-api"
         version   = "1.0.0"
         cpu       = 256
         memory    = 512
@@ -617,10 +648,11 @@ ecs_task_definitions = {
 ecs_service = {
   search-opensearch-ecs-service = {
     subnets                       = "private"
-    launch_type                   = "FARGATE"                       # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"          # ECS Service Role
-    deployment_controller         = "ECS"                           # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-recommand-ecs-cluster"  # ECS Cluster명
+    launch_type                   = "FARGATE"              # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS" # ECS Service Role
+    deployment_controller         = "ECS"                  # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    deployment_circuit_breaker    = true
+    cluster_name                  = "search-ecs-cluster"            # ECㅂS Cluster명
     service_name                  = "search-opensearch-ecs-service" # 서비스 이름
     desired_count                 = 0                               # Task 개수
     container_name                = "search-opensearch-api"         # 컨테이너 이름
@@ -632,22 +664,23 @@ ecs_service = {
     target_group_arn              = "search-opensearch-alb-tg"      # 연결되어야 하는 Target Group 지정
     security_group_name           = "search-opensearch-api-sg"      # 보안그룹 이름
   },
-  search-embedding-ecs-service = {
+  search-embed-ecs-service = {
     subnets                       = "private"
-    launch_type                   = "FARGATE"                      # ECS Launch Type
-    service_role                  = "AWSServiceRoleForECS"         # ECS Service Role
-    deployment_controller         = "CODE_DEPLOY"                  # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
-    cluster_name                  = "search-recommand-ecs-cluster" # ECS Cluster명
-    service_name                  = "search-embedding-ecs-service" # 서비스 이름
-    desired_count                 = 0                              # Task 개수
-    container_name                = "search-embedding-api"         # 컨테이너 이름
-    container_port                = 8000                           # 컨테이너 포트
-    task_definitions              = "search-embedding-api-td"      # 테스크 지정
-    env                           = "stg"                          # ECS Service 환경변수
-    health_check_grace_period_sec = 250                            # 헬스 체크 그레이스 기간
-    assign_public_ip              = true                           # 우선 public zone에 구성
-    target_group_arn              = "search-embedding-alb-tg"      # 연결되어야 하는 Target Group 지정
-    security_group_name           = "search-embedding-api-sg"      # 보안그룹 이름
+    launch_type                   = "FARGATE"              # ECS Launch Type
+    service_role                  = "AWSServiceRoleForECS" # ECS Service Role
+    deployment_controller         = "CODE_DEPLOY"          # ECS Deployment Controller (ECS | CODE_DEPLOY | EXTERNAL)
+    deployment_circuit_breaker    = false
+    cluster_name                  = "search-ecs-cluster"       # ECS Cluster명
+    service_name                  = "search-embed-ecs-service" # 서비스 이름
+    desired_count                 = 0                          # Task 개수
+    container_name                = "search-embed-api"         # 컨테이너 이름
+    container_port                = 8000                       # 컨테이너 포트
+    task_definitions              = "search-embed-api-td"      # 테스크 지정
+    env                           = "stg"                      # ECS Service 환경변수
+    health_check_grace_period_sec = 250                        # 헬스 체크 그레이스 기간
+    assign_public_ip              = true                       # 우선 public zone에 구성
+    target_group_arn              = "search-embed-alb-blue-tg" # 연결되어야 하는 Target Group 지정 # FIXME: 수정 필요 -> TG 2개 연결
+    security_group_name           = "search-embed-api-sg"      # 보안그룹 이름
   }
 }
 
@@ -655,22 +688,22 @@ ecs_service = {
 # TODO: resource_id 이 부분은 module에서 받을 수 있으면 받도록 수정 필요
 ecs_appautoscaling_target = {
   search-opensearch-ecs-service = {
-    min_capacity       = 1                                                                            # 최소 Task 2개가 항상 실행되도록 설정
-    max_capacity       = 3                                                                            # 최대 Task 6개까지 증가 할 수 있도록 설정
-    resource_id        = "service/search-recommand-ecs-cluster-stg/search-opensearch-ecs-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
-    scalable_dimension = "ecs:service:DesiredCount"                                                   # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
+    min_capacity       = 1                                                                  # 최소 Task 2개가 항상 실행되도록 설정
+    max_capacity       = 3                                                                  # 최대 Task 6개까지 증가 할 수 있도록 설정
+    resource_id        = "service/search-ecs-cluster-stg/search-opensearch-ecs-service-stg" # TODO: 하드코딩된 부분 수정 -> AG를 적용할 대상 리소스 지정, 여기서는 ECS 서비스 ARN 형식의 일부 기재
+    scalable_dimension = "ecs:service:DesiredCount"                                         # 조정할 수 있는 AWS 리소스의 특정 속성을 지정하는 필드
     service_namespace  = "ecs"
-    cluster_name       = "search-recommand-ecs-cluster"  # ECS 클러스터명 지정
+    cluster_name       = "search-ecs-cluster"            # ECS 클러스터명 지정
     service_name       = "search-opensearch-ecs-service" # ECS 서비스명 지정
   },
-  search-embedding-ecs-service = {
+  search-embed-ecs-service = {
     min_capacity       = 1
     max_capacity       = 3
-    resource_id        = "service/search-recommand-ecs-cluster-stg/search-embedding-ecs-service-stg"
+    resource_id        = "service/search-ecs-cluster-stg/search-embed-ecs-service-stg"
     scalable_dimension = "ecs:service:DesiredCount"
     service_namespace  = "ecs"
-    cluster_name       = "search-recommand-ecs-cluster"
-    service_name       = "search-embedding-ecs-service"
+    cluster_name       = "search-ecs-cluster"
+    service_name       = "search-embed-ecs-service"
   }
 }
 
@@ -706,9 +739,9 @@ ecs_appautoscaling_target_policy = {
       }
     }
   },
-  search-embedding-ecs-service = {
+  search-embed-ecs-service = {
     scale_out = {
-      name        = "ECSEmbeddingScaleOutPolicy"
+      name        = "ECSEmbedScaleOutPolicy"
       policy_type = "StepScaling"
       step_scaling_policy_conf = {
         adjustment_type         = "ChangeInCapacity"
@@ -747,13 +780,13 @@ ecs_cpu_scale_out_alert = {
     statistic           = "Average"                       # 집계 방식은 평균으로
     threshold           = "30"                            # 30부터 스케일링 진행
     dimensions = {
-      cluster_name = "search-recommand-ecs-cluster"
+      cluster_name = "search-ecs-cluster"
       service_name = "search-opensearch-ecs-service"
     }
     env = "stg"
   },
-  search-embedding-ecs-service = {
-    alarm_name          = "ECSEmbeddingScaleOutAlarm"
+  search-embed-ecs-service = {
+    alarm_name          = "ECSEmbedScaleOutAlarm"
     comparison_operator = "GreaterThanOrEqualToThreshold"
     evaluation_periods  = "1"
     metric_name         = "CPUUtilization"
@@ -762,8 +795,8 @@ ecs_cpu_scale_out_alert = {
     statistic           = "Average"
     threshold           = "30"
     dimensions = {
-      cluster_name = "search-recommand-ecs-cluster"
-      service_name = "search-embedding-ecs-service"
+      cluster_name = "search-ecs-cluster"
+      service_name = "search-embed-ecs-service"
     }
     env = "stg"
   }
@@ -775,44 +808,6 @@ ecs_security_group_id = {}
 # EC2 설정
 ########################################
 ec2_instance = {
-  search-batch-embedding-test-01 = {
-    ami_type                    = "custom"
-    instance_type               = "t3.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-batch-embedding-test-01"
-    security_group_name         = "search-embedding-sg" # TODO: EC2 -> ECS로 전환 필요
-    env                         = "stg"
-    script_file_name            = ""
-    iam_instance_profile        = ""
-    key_pair_name               = "search-embedding-key"
-    private_ip                  = "172.21.10.230"
-
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 20
-      delete_on_termination = true
-      encrypted             = false
-    }
-
-    owners = "self"
-    filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["x86_64"]
-      },
-      {
-        name   = "name"
-        values = ["*-embedding-server-*"]
-      }
-    ]
-  },
   search-opensearch-test-sn01 = { // single node
     ami_type                    = "custom"
     instance_type               = "t4g.large"
@@ -851,6 +846,44 @@ ec2_instance = {
       }
     ]
   },
+  # search-batch-embed-test-01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t3.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-batch-embed-test-01"
+  #   security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
+  #   env                         = "stg"
+  #   script_file_name            = ""
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-embed-key"
+  #   private_ip                  = "172.21.10.230"
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["x86_64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-embedding-server-*"]
+  #     }
+  #   ]
+  # },
   # search-opensearch-test-c01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
@@ -1158,8 +1191,8 @@ ec2_security_group = {
     description         = "search-recommand vector opensearch ec2"
     env                 = "stg"
   },
-  search-embedding-sg = {
-    security_group_name = "search-embedding-sg"
+  search-embed-sg = {
+    security_group_name = "search-embed-sg"
     description         = "search-recommand elasticsearch ec2"
     env                 = "stg"
   },
@@ -1183,8 +1216,8 @@ ec2_key_pair = {
     name = "search-opensearch-key"
     env  = "stg"
   },
-  search-embedding-key = {
-    name = "search-embedding-key"
+  search-embed-key = {
+    name = "search-embed-key"
     env  = "stg"
   },
   # search-jenkins-key = {
@@ -1222,6 +1255,96 @@ s3_bucket = {
       restrict_public_buckets = true
     }
     env = "stg"
+  }
+}
+
+########################################
+# CI/CD 설정
+########################################
+# CodeDeploy Application 생성
+codedeploy_app = {
+  search-embed-api-codedeploy-app = {
+    compute_platform = "ECS"                             # Compute 플랫폼 지정 (ECS, Lambda, Server)
+    name             = "search-embed-api-codedeploy-app" # CodeDeploy Application명
+    env              = "stg"
+  }
+}
+
+# CodeDeploy 배포 그룹 생성
+codedeploy_deployment_group = {
+  search-embed-api-codedeploy-deployment-group = {
+    app_name               = "search-embed-api-codedeploy-app"              # CodeDeploy Application명 지정
+    deployment_group_name  = "search-embed-api-codedeploy-deployment-group" # 배포 그룹명
+    deployment_config_name = "CodeDeployDefault.ECSCanary10Percent5Minutes" # 10% 까나리아 배포 구성
+
+    # 배포 실패 시 자동 롤백 설정 
+    auto_rollback_configuration = {
+      enabled = true                 # 자동 롤백 활성화
+      events  = "DEPLOYMENT_FAILURE" # 배포 실패 시 자동 롤백 수행
+    }
+
+    # Blue/Green 배포 전략 관련 설정
+    blue_green_deployment_config = {
+      deployment_ready_option = {
+        action_on_timeout    = "STOP_DEPLOYMENT" # 테스트 완료 후 대기 시간 초과 시 자동으로 배포 계속
+        wait_time_in_minutes = 5                 # 테스트 환경에서 대기할 시간 (분)
+      }
+      terminate_blue_instances_on_deployment_success = {
+        action                           = "TERMINATE" # 배포 성공 시 기존(Blue) 인스턴스 종료
+        termination_wait_time_in_minutes = 5           # 배포 성공 후 기존(Blue) 인스턴스 종료 대기 시간 (분)
+      }
+    }
+
+    # 배포 방식 지정
+    deployment_style = {
+      deployment_type = "BLUE_GREEN" # 배포 방식: Blue/Green
+
+      # WITH_TRAFFIC_CONTROL : 트래픽을 ALB 리스너 기반으로 Blue -> Green으로 전환하도록 CodeDeploy에 위임
+      # WITHOUT_TRAFFIC_CONTROL : 트래픽 전환없이 ECS Service만 업데이트 (테스트 목적, 특수 상황)
+      deployment_option = "WITH_TRAFFIC_CONTROL"
+    }
+
+    # ECS 정보
+    ecs_service = {
+      cluster_name = "search-ecs-cluster"
+      service_name = "search-embed-ecs-service"
+    }
+
+    # 로드 밸런서 및 타겟 그룹 설정
+    load_balancer_info = {
+      target_group_pair_info = {
+        prod_traffic_route = {
+          listener_arns = "search-embed-alb-blue-listener"
+        }
+        test_traffic_route = {
+          listener_arns = "search-embed-alb-green-listener"
+        }
+        target_group = [
+          { name = "search-embed-alb-blue-tg" },
+          { name = "search-embed-alb-green-tg" }
+        ]
+      }
+    }
+    env = "stg"
+  }
+}
+
+# CodeDeploy 배포 구성 생성
+codedeploy_deployment_config = {
+  search-embed-api-codedeploy-deployment-config = {
+    deployment_config_name = "search-embed-api-codedeploy-deployment-config" # CodeDeploy에서 사용할 배포 구성 이름
+    compute_platform       = "ECS"                                           # 배포 대상 플랫폼(ECS, Lambda, Server 중 하나)
+
+    traffic_routing_config = {
+      # 트래픽 라우팅 전략(TimeBasedCanary, TimeBasedLinear, AllAtOnce)
+      type = "TimeBasedCanary"
+
+      # 배포 시 Canary 방식으로 트래픽을 점진적으로 전환하기 위한 설정
+      time_based_canary = {
+        interval   = 5  # 최초 배포 시 전환할 트래픽 비율 (%)
+        percentage = 10 # 최초 전환 이후, 나머지 트래픽을 전환하기까지 기다릴 시간 (분)
+      }
+    }
   }
 }
 

@@ -175,6 +175,7 @@ variable "ecs_service" {
     assign_public_ip              = bool   # 퍼블릭 IP 지정 여부
     target_group_arn              = string
     security_group_name           = string
+    deployment_circuit_breaker    = bool
   }))
 }
 

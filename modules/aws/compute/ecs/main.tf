@@ -60,9 +60,9 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 resource "aws_ecs_service" "ecs_service" {
   for_each = var.ecs_service
 
+  cluster                           = "${each.value.cluster_name}-${each.value.env}" # ECS 클러스터 이름
+  name                              = "${each.value.service_name}-${each.value.env}" # ECS 서비스 이름
   launch_type                       = each.value.launch_type
-  cluster                           = "${each.value.cluster_name}-${each.value.env}"                               # ECS 클러스터 이름
-  name                              = "${each.value.service_name}-${each.value.env}"                               # ECS 서비스 이름
   desired_count                     = each.value.desired_count                                                     # 원하는 태스크 개수
   health_check_grace_period_seconds = each.value.health_check_grace_period_sec                                     # 헬스 체크 그레이스 기간
   task_definition                   = aws_ecs_task_definition.ecs_task_definition[each.value.task_definitions].arn # Task Definition ARN
@@ -81,20 +81,23 @@ resource "aws_ecs_service" "ecs_service" {
     container_port   = each.value.container_port
   }
 
-  # 배포 회로 차단기 및 롤백
-  deployment_circuit_breaker {
-    enable   = true
-    rollback = true
+  # 배포 회로 차단기 및 롤백 - Rolling Update에서만 사용
+  dynamic "deployment_circuit_breaker" {
+    for_each = each.value.deployment_circuit_breaker ? [1] : []
+    content {
+      enable   = true
+      rollback = true
+    }
   }
 
-  # 배포 컨트롤러 설정
+  # 배포 컨트롤러 설정 (ECS | CODE_DEPLOY | EXTERNAL)
   deployment_controller {
     type = each.value.deployment_controller
   }
 
   lifecycle {
-    # prevent_destroy = true # Terraform 리소스 삭제 방지
     create_before_destroy = true # 리소스 삭제 되기 전 생성 후 삭제 진행
+    ignore_changes        = [desired_count, load_balancer]
   }
 
   # ECS Service는 Cluster, TD, 보안그룹이 생성된 이후에 생성 되어야 함
