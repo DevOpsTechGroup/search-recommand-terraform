@@ -18,7 +18,7 @@ resource "aws_codedeploy_deployment_group" "codedeploy_deployment_group" {
   for_each = var.codedeploy_deployment_group
 
   app_name               = aws_codedeploy_app.codedeploy_app[each.value.app_name].name # CodeDeploy Application명 지정
-  deployment_group_name  = each.value.deployment_group_name                            # 배포 그룹명
+  deployment_group_name  = "${each.value.deployment_group_name}-${each.value.env}"     # 배포 그룹명
   deployment_config_name = each.value.deployment_config_name                           # 배포 그룹 방식 (CodeDeployDefault.ECSAllAtOnce)
   service_role_arn       = var.service_role_arn
 
