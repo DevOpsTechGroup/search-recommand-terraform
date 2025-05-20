@@ -609,6 +609,19 @@ variable "codedeploy_deployment_config" {
 }
 
 ########################################
+# ACM 설정
+########################################
+variable "acm_certificate" {
+  description = "ACM 인증서 설정"
+  type = map(object({
+    domain_name               = string # ACM 인증서를 발급할 도메인명
+    validation_method         = string # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
+    subject_alternative_names = string # 추가로 인증서에 포함시킬 도메인 목록
+    env                       = string # 환경 변수
+  }))
+}
+
+########################################
 # 공통 태그 설정
 ########################################
 variable "tags" {
