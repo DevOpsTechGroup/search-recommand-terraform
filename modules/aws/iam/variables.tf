@@ -53,7 +53,6 @@ variable "iam_policy_attachment" {
   type = map(object({
     role_name   = optional(string)
     policy_name = optional(string)
-    policy_type = optional(string)
   }))
 }
 

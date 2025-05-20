@@ -160,6 +160,7 @@ variable "ecs_task_definitions" {
 variable "ecs_service" {
   description = "ECS 서비스 설정"
   type = map(object({
+    subnets                       = string
     launch_type                   = string # ECS Launch Type ( EC2 or Fargate )
     service_role                  = string # ECS Service Role
     deployment_controller         = string
@@ -174,6 +175,7 @@ variable "ecs_service" {
     assign_public_ip              = bool   # 퍼블릭 IP 지정 여부
     target_group_arn              = string
     security_group_name           = string
+    deployment_circuit_breaker    = bool
   }))
 }
 
