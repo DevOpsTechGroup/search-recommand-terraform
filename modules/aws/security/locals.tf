@@ -2,9 +2,9 @@ locals {
 
   # ALB security group ingress rule
   alb_security_group_ingress_rules = {
-    search-recommand-alb-sg-ingress-rule = [
+    search-alb-sg-ingress-rule = [
       {
-        security_group_name = "search-recommand-alb-sg"
+        security_group_name = "search-opensearch-alb-sg"
         type                = "ingress"
         description         = "search-recommand alb http security group ingress rule"
         from_port           = 80
@@ -18,7 +18,7 @@ locals {
         env             = "stg"
       },
       {
-        security_group_name = "search-recommand-alb-sg"
+        security_group_name = "search-opensearch-alb-sg"
         type                = "ingress"
         description         = "search-recommand alb https security group ingress rule"
         from_port           = 443
@@ -55,9 +55,9 @@ locals {
 
   # ALB security group egress rule
   alb_security_group_egress_rules = {
-    search-recommand-alb-sg-egress-rule = [
+    search-opensearch-alb-sg-egress-rule = [
       {
-        security_group_name = "search-recommand-alb-sg"
+        security_group_name = "search-opensearch-alb-sg"
         type                = "egress"
         description         = "search-recommand alb all traffic security group egress rule"
         from_port           = 0
@@ -117,31 +117,65 @@ locals {
         to_port             = 8443
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.10.0/24",
-          "172.21.20.0/24",
-          "172.21.30.0/24"
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        security_groups = null
+        env             = "stg"
+      },
+      {
+        security_group_name = "search-opensearch-api-sg"
+        type                = "ingress"
+        description         = "opensearch api security group ingress rule"
+        from_port           = 443
+        to_port             = 443
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24"
         ]
         security_groups = null
         env             = "stg"
       }
     ],
-    # search-embedding-api-sg-ingress-rule = [
-    #   {
-    #     type                = "ingress"
-    #     security_group_name = "search-embedding-api-sg"
-    #     description         = "elasticsearch api security group ingress rule"
-    #     from_port           = 8000
-    #     to_port             = 8000
-    #     protocol            = "tcp"
-    #     cidr_ipv4 = [
-    #       "172.21.0.0/16",
-    #       "220.75.180.0/24",
-    #       "39.118.148.0/24"
-    #     ]
-    #     security_groups = null
-    #     env                      = "stg"
-    #   }
-    # ]
+    search-embed-api-sg-ingress-rule = [
+      {
+        type                = "ingress"
+        security_group_name = "search-embed-api-sg"
+        description         = "embed api security group ingress rule"
+        from_port           = 8000
+        to_port             = 8000
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        security_groups = null
+        env             = "stg"
+      },
+      {
+        security_group_name = "search-embed-api-sg"
+        type                = "ingress"
+        description         = "embed api security group ingress rule"
+        from_port           = 443
+        to_port             = 443
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24"
+        ]
+        security_groups = null
+        env             = "stg"
+      }
+    ]
   }
 
   # Flatten ecs security group ingress rule
@@ -194,14 +228,14 @@ locals {
         env             = "stg"
       }
     ],
-    search-embedding-api-sg-egress-rule = [
+    search-embed-api-sg-egress-rule = [
       {
-        security_group_name = "search-embedding-api-sg"
+        security_group_name = "search-embed-api-sg"
         type                = "egress"
-        description         = "embedding api security group egress rule"
+        description         = "embed api security group egress rule"
         from_port           = 0
         to_port             = 0
-        protocol            = "tcp"
+        protocol            = "-1"
         cidr_ipv4 = [
           "0.0.0.0/0"
         ]
@@ -241,7 +275,9 @@ locals {
         to_port             = 22
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -256,7 +292,9 @@ locals {
         to_port             = 9100
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -271,7 +309,9 @@ locals {
         to_port             = 9200
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -286,7 +326,9 @@ locals {
         to_port             = 9300
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -301,7 +343,9 @@ locals {
         to_port             = 9400
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -316,7 +360,9 @@ locals {
         to_port             = 5601
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -324,46 +370,18 @@ locals {
         env             = "stg"
       }
     ],
-    search-embedding-sg-ingress-rule = [
+    search-embed-sg-ingress-rule = [
       {
-        security_group_name = "search-embedding-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        security_group_name = "search-embed-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
         type                = "ingress"
-        description         = "elasticsearch ssh security group inbound"
-        from_port           = 22
-        to_port             = 22
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24"
-        ]
-        security_groups = null
-        env             = "stg"
-      },
-      {
-        security_group_name = "search-embedding-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "elasticsearch es security group inbound"
-        from_port           = 9200
-        to_port             = 9200
-        protocol            = "tcp"
-        cidr_ipv4 = [
-          "172.21.0.0/16",
-          "220.75.180.0/24",
-          "39.118.148.0/24"
-        ]
-        security_groups = null
-        env             = "stg"
-      },
-      {
-        security_group_name = "search-embedding-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
-        type                = "ingress"
-        description         = "elasticsearch es security group inbound"
+        description         = "embed es security group inbound"
         from_port           = 8000
         to_port             = 8000
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.0.0/16",
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
           "220.75.180.0/24",
           "39.118.148.0/24"
         ]
@@ -479,10 +497,10 @@ locals {
         env             = "stg"
       }
     ],
-    search-embedding-sg-egress-rule = [
+    search-embed-sg-egress-rule = [
       {
-        security_group_name = "search-embedding-sg"
-        description         = "elasticsearch security group egress rule"
+        security_group_name = "search-embed-sg"
+        description         = "embed security group egress rule"
         type                = "egress"
         from_port           = 0
         to_port             = 0

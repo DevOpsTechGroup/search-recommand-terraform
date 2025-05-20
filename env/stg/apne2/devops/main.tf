@@ -196,3 +196,31 @@ module "vpc_endpoint" {
     module.security
   ]
 }
+
+module "codedeploy" {
+  source = "../../../../modules/aws/cicd/codedeploy"
+
+  # CI/CD 관련 설정
+  codedeploy_app               = var.codedeploy_app
+  codedeploy_deployment_group  = var.codedeploy_deployment_group
+  codedeploy_deployment_config = var.codedeploy_deployment_config
+
+  # IAM 관련 설정
+  service_role_arn = module.iam.iam_role_arns["search-codedeploy-service-role"]
+
+  # 로드밸런서 관련 설정
+  alb_listener_arn = module.elb.alb_listener_arn # 모든 ALB ARN 전달
+
+  # 프로젝트 기본 설정
+  project_name = var.project_name
+  env          = var.env
+  tags         = var.tags
+
+  depends_on = [
+    module.network,  # network 모듈 참조
+    module.iam,      # IAM 모듈 참조
+    module.security, # security 보안그룹 모듈 참조
+    module.elb,      # load balancer 모듈 참조
+    module.ecs       # ecs 모듈 참조
+  ]
+}

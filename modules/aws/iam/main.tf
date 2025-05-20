@@ -1,12 +1,9 @@
-# FIXME: IAM Role도 FOR - LOOP로 처리하는게 맞을지 모르겠음..
-# IAM은 아무래도 수정이 계속 발생할 것 같기도 하고..
-
 data "aws_iam_policy" "managed_policy" {
   for_each = var.iam_managed_policy
   arn      = each.value.arn
 }
 
-# IAM Role
+# IAM 역할(Role)
 resource "aws_iam_role" "custom_role" {
   for_each = var.iam_custom_role
 
@@ -21,7 +18,7 @@ resource "aws_iam_role" "custom_role" {
   })
 }
 
-# IAM Policy
+# IAM 정책(Policy)
 resource "aws_iam_policy" "custom_policy" {
   for_each = var.iam_custom_policy
 
@@ -36,7 +33,7 @@ resource "aws_iam_policy" "custom_policy" {
   })
 }
 
-# Attachment iam role to policy
+# IAM 역할(Role)에 정책(Policy)을 연결
 resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
   for_each = var.iam_policy_attachment
 
@@ -56,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "role_policy_attachment" {
   ]
 }
 
-# EC2 instance profile
+# EC2 인스턴스 프로파일
 resource "aws_iam_instance_profile" "ec2_iam_instance_profile" {
   for_each = var.iam_instance_profile
 
