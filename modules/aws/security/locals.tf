@@ -387,6 +387,23 @@ locals {
         ]
         security_groups = null
         env             = "stg"
+      },
+      {
+        security_group_name = "search-embed-sg" # 참조하는 보안그룹 이름을 넣어야 each.key로 구분 가능
+        type                = "ingress"
+        description         = "embed es security group inbound"
+        from_port           = 22
+        to_port             = 22
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24",
+          "220.75.180.0/24",
+          "39.118.148.0/24"
+        ]
+        security_groups = null
+        env             = "stg"
       }
     ],
     # search-atlantis-sg-ingress-rule = [
