@@ -237,6 +237,19 @@ module "acm" {
   tags         = var.tags
 }
 
-module "route53" {
+module "route53_from_acm" {
   source = "../../../../modules/aws/route53"
+
+  # Route53 관련 설정
+  route53_domain_from_acm   = var.route53_domain_from_acm
+  domain_validation_options = module.acm.acm_domain_validation_options
+
+  # 프로젝트 기본 설정
+  project_name = var.project_name
+  env          = var.env
+  tags         = var.tags
+
+  depends_on = [
+    module.acm
+  ]
 }

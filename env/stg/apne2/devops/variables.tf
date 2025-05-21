@@ -622,6 +622,16 @@ variable "acm_certificate" {
 }
 
 ########################################
+# Route 53 설정
+########################################
+variable "route53_domain_from_acm" {
+  description = "Route53 호스팅 영역 설정"
+  type = map(object({
+    name = string
+  }))
+}
+
+########################################
 # 공통 태그 설정
 ########################################
 variable "tags" {

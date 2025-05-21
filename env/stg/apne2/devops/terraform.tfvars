@@ -1352,11 +1352,20 @@ codedeploy_deployment_config = {
 # ACM 설정
 ########################################
 acm_certificate = {
-  search-acm-certificate = {
+  search-ymkim-shop-certificate = {
     domain_name               = "*.ymkim.shop" # ACM 인증서를 발급할 도메인명
     validation_method         = "DNS"          # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
     subject_alternative_names = "ymkim.shop"   # 추가로 인증서에 포함시킬 도메인 목록
     env                       = "stg"          # 환경 변수
+  }
+}
+
+########################################
+# Route53 설정
+########################################
+route53_domain_from_acm = {
+  search-ymkim-shop-route53-domain-from-acm = {
+    name = "ymkim.shop"
   }
 }
 
