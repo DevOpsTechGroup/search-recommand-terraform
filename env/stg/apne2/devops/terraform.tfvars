@@ -1352,20 +1352,47 @@ codedeploy_deployment_config = {
 # ACM 설정
 ########################################
 acm_certificate = {
-  search-ymkim-shop-certificate = {
+  search-certificate = {
+    mode                      = "create"       # create or import
     domain_name               = "*.ymkim.shop" # ACM 인증서를 발급할 도메인명
-    validation_method         = "DNS"          # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
     subject_alternative_names = "ymkim.shop"   # 추가로 인증서에 포함시킬 도메인 목록
+    dns_validate              = true           # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
+    certificate_body          = null           # 인증서 본문
+    private_key               = null           # 개인키
+    certificate_chain         = null           # 인증서 체인
     env                       = "stg"          # 환경 변수
-  }
+  },
+  # search-certificate-internal = {
+  #   mode                      = "import"                   # create or import
+  #   domain_name               = "internal.ymkim.shop"      # ACM 인증서를 발급할 도메인명
+  #   subject_alternative_names = null                       # 추가로 인증서에 포함시킬 도메인 목록
+  #   dns_validate              = false                      # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
+  #   certificate_body          = file("certs/internal.crt") # 인증서 본문
+  #   private_key               = file("certs/internal.key") # 개인키
+  #   certificate_chain         = file("certs/chain.crt")    # 인증서 체인
+  #   env                       = "stg"                      # 환경 변수
+  # }
 }
 
 ########################################
 # Route53 설정
 ########################################
-route53_domain_from_acm = {
-  search-ymkim-shop-route53-domain-from-acm = {
+route53_zone_settings = {
+  search-certificate = {
+    mode = "create"
     name = "ymkim.shop"
+  },
+  # search-certificate-internal = { # Route53 생성 안함
+  #   mode = "import"
+  #   name = "internal.ymkim.shop"
+  # }
+}
+
+route53_record_settings = {
+  search-certificate = {
+    mode            = "create"
+    ttl             = 300
+    allow_overwrite = true
   }
 }
 

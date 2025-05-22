@@ -7,7 +7,7 @@ output "debug_security" {
 
     vpc_id = module.network.vpc_id
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_iam_module" {
@@ -18,7 +18,7 @@ output "debug_iam_module" {
     iam_managed_policy    = var.iam_managed_policy
     iam_policy_attachment = var.iam_policy_attachment
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_network_module" {
@@ -31,7 +31,7 @@ output "debug_network_module" {
     private_subnets_cidr = var.private_subnets_cidr
     availability_zones   = var.availability_zones
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_elb_module" {
@@ -44,7 +44,7 @@ output "debug_elb_module" {
     alb_security_group = var.alb_security_group
     public_subnet_ids  = module.network.public_subnet_ids
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_ecr_module" {
@@ -52,7 +52,7 @@ output "debug_ecr_module" {
   value = {
     ecr_repository = var.ecr_repository
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_ecs_module" {
@@ -81,7 +81,7 @@ output "debug_ecs_module" {
     alb_security_group_id  = module.security.alb_security_group_id
     ecs_security_group_arn = module.security.ecs_security_group_arn
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_ec2" {
@@ -97,7 +97,7 @@ output "debug_ec2" {
     env  = var.env
     tags = var.tags
   }
-  sensitive = true
+  sensitive = false
 }
 
 output "debug_storage_module" {
@@ -105,5 +105,37 @@ output "debug_storage_module" {
   value = {
     s3_bucket = var.s3_bucket
   }
-  sensitive = true
+  sensitive = false
+}
+
+output "codedeploy" {
+  description = "codedeploy 모듈 변수 확인"
+  value = {
+    codedeploy_app               = var.codedeploy_app
+    codedeploy_deployment_group  = var.codedeploy_deployment_group
+    codedeploy_deployment_config = var.codedeploy_deployment_config
+
+    service_role_arn = module.iam.iam_role_arns["search-codedeploy-service-role"]
+
+    alb_listener_arn = module.elb.alb_listener_arn
+  }
+  sensitive = false
+}
+
+output "acm" {
+  description = "acm 모듈 변수 확인"
+  value = {
+    acm_certificate = var.acm_certificate
+  }
+  sensitive = false
+}
+
+output "route53" {
+  description = "route53 모듈 변수 확인"
+  value = {
+    route53_zone_settings     = var.route53_zone_settings
+    route53_record_settings   = var.route53_record_settings
+    domain_validation_options = module.acm.acm_domain_validation_options
+  }
+  sensitive = false
 }

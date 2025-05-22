@@ -614,9 +614,13 @@ variable "codedeploy_deployment_config" {
 variable "acm_certificate" {
   description = "ACM 인증서 설정"
   type = map(object({
+    mode                      = string
     domain_name               = string # ACM 인증서를 발급할 도메인명
-    validation_method         = string # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
     subject_alternative_names = string # 추가로 인증서에 포함시킬 도메인 목록
+    dns_validate              = bool
+    certificate_body          = optional(string)
+    private_key               = optional(string)
+    certificate_chain         = optional(string)
     env                       = string # 환경 변수
   }))
 }
@@ -624,10 +628,19 @@ variable "acm_certificate" {
 ########################################
 # Route 53 설정
 ########################################
-variable "route53_domain_from_acm" {
-  description = "Route53 호스팅 영역 설정"
+variable "route53_zone_settings" {
+  description = "Route53 Zone 설정"
   type = map(object({
+    mode = string
     name = string
+  }))
+}
+
+variable "route53_record_settings" {
+  description = "Route53 Record 설정"
+  type = map(object({
+    ttl             = number
+    allow_overwrite = bool
   }))
 }
 
