@@ -229,28 +229,11 @@ module "acm" {
   source = "../../../../modules/aws/acm"
 
   # ACM 관련 설정
-  acm_certificate = var.acm_certificate
+  acm_certificate       = var.acm_certificate
+  route53_zone_settings = var.route53_zone_settings
 
   # 프로젝트 기본 설정
   project_name = var.project_name
   env          = var.env
   tags         = var.tags
-}
-
-module "route53" {
-  source = "../../../../modules/aws/route53"
-
-  # Route53 관련 설정
-  route53_zone_settings     = var.route53_zone_settings
-  route53_record_settings   = var.route53_record_settings
-  domain_validation_options = module.acm.acm_domain_validation_options
-
-  # 프로젝트 기본 설정
-  project_name = var.project_name
-  env          = var.env
-  tags         = var.tags
-
-  depends_on = [
-    module.acm
-  ]
 }

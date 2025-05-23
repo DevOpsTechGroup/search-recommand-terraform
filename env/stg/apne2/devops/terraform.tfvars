@@ -1388,14 +1388,6 @@ route53_zone_settings = {
   # }
 }
 
-route53_record_settings = {
-  search-certificate = {
-    mode            = "create"
-    ttl             = 300
-    allow_overwrite = true
-  }
-}
-
 ########################################
 # 공통 태그 설정
 ########################################

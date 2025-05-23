@@ -7,7 +7,7 @@ output "debug_security" {
 
     vpc_id = module.network.vpc_id
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_iam_module" {
@@ -18,7 +18,7 @@ output "debug_iam_module" {
     iam_managed_policy    = var.iam_managed_policy
     iam_policy_attachment = var.iam_policy_attachment
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_network_module" {
@@ -31,7 +31,7 @@ output "debug_network_module" {
     private_subnets_cidr = var.private_subnets_cidr
     availability_zones   = var.availability_zones
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_elb_module" {
@@ -44,7 +44,7 @@ output "debug_elb_module" {
     alb_security_group = var.alb_security_group
     public_subnet_ids  = module.network.public_subnet_ids
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_ecr_module" {
@@ -52,7 +52,7 @@ output "debug_ecr_module" {
   value = {
     ecr_repository = var.ecr_repository
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_ecs_module" {
@@ -81,7 +81,7 @@ output "debug_ecs_module" {
     alb_security_group_id  = module.security.alb_security_group_id
     ecs_security_group_arn = module.security.ecs_security_group_arn
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_ec2" {
@@ -97,7 +97,7 @@ output "debug_ec2" {
     env  = var.env
     tags = var.tags
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "debug_storage_module" {
@@ -105,7 +105,7 @@ output "debug_storage_module" {
   value = {
     s3_bucket = var.s3_bucket
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "codedeploy" {
@@ -119,7 +119,7 @@ output "codedeploy" {
 
     alb_listener_arn = module.elb.alb_listener_arn
   }
-  sensitive = false
+  sensitive = true
 }
 
 output "acm" {
@@ -127,15 +127,5 @@ output "acm" {
   value = {
     acm_certificate = var.acm_certificate
   }
-  sensitive = false
-}
-
-output "route53" {
-  description = "route53 모듈 변수 확인"
-  value = {
-    route53_zone_settings     = var.route53_zone_settings
-    route53_record_settings   = var.route53_record_settings
-    domain_validation_options = module.acm.acm_domain_validation_options
-  }
-  sensitive = false
+  sensitive = true
 }

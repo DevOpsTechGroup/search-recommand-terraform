@@ -636,14 +636,6 @@ variable "route53_zone_settings" {
   }))
 }
 
-variable "route53_record_settings" {
-  description = "Route53 Record 설정"
-  type = map(object({
-    ttl             = number
-    allow_overwrite = bool
-  }))
-}
-
 ########################################
 # 공통 태그 설정
 ########################################
