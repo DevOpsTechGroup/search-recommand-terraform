@@ -609,6 +609,34 @@ variable "codedeploy_deployment_config" {
 }
 
 ########################################
+# ACM 설정
+########################################
+variable "acm_certificate" {
+  description = "ACM 인증서 설정"
+  type = map(object({
+    mode                      = string
+    domain_name               = string # ACM 인증서를 발급할 도메인명
+    subject_alternative_names = string # 추가로 인증서에 포함시킬 도메인 목록
+    dns_validate              = bool
+    certificate_body          = optional(string)
+    private_key               = optional(string)
+    certificate_chain         = optional(string)
+    env                       = string # 환경 변수
+  }))
+}
+
+########################################
+# Route 53 설정
+########################################
+variable "route53_zone_settings" {
+  description = "Route53 Zone 설정"
+  type = map(object({
+    mode = string
+    name = string
+  }))
+}
+
+########################################
 # 공통 태그 설정
 ########################################
 variable "tags" {

@@ -224,3 +224,16 @@ module "codedeploy" {
     module.ecs       # ecs 모듈 참조
   ]
 }
+
+module "acm" {
+  source = "../../../../modules/aws/acm"
+
+  # ACM 관련 설정
+  acm_certificate       = var.acm_certificate
+  route53_zone_settings = var.route53_zone_settings
+
+  # 프로젝트 기본 설정
+  project_name = var.project_name
+  env          = var.env
+  tags         = var.tags
+}
