@@ -846,44 +846,44 @@ ec2_instance = {
       }
     ]
   },
-  # search-batch-embed-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-batch-embed-test-01"
-  #   security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-embed-key"
-  #   private_ip                  = "172.21.10.230"
+  search-batch-embed-test-01 = {
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-batch-embed-test-01"
+    security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
+    env                         = "stg"
+    script_file_name            = ""
+    iam_instance_profile        = ""
+    key_pair_name               = "search-embed-key"
+    private_ip                  = "172.21.10.230"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 20
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 20
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["x86_64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["*-embedding-server-*"]
-  #     }
-  #   ]
-  # },
+    owners = "self"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["x86_64"]
+      },
+      {
+        name   = "name"
+        values = ["*-embedding-server-*"]
+      }
+    ]
+  },
   # search-opensearch-test-c01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
@@ -1346,6 +1346,46 @@ codedeploy_deployment_config = {
       }
     }
   }
+}
+
+########################################
+# ACM 설정
+########################################
+acm_certificate = {
+  search-certificate = {
+    mode                      = "create"       # create or import
+    domain_name               = "*.ymkim.shop" # ACM 인증서를 발급할 도메인명
+    subject_alternative_names = "ymkim.shop"   # 추가로 인증서에 포함시킬 도메인 목록
+    dns_validate              = true           # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
+    certificate_body          = null           # 인증서 본문
+    private_key               = null           # 개인키
+    certificate_chain         = null           # 인증서 체인
+    env                       = "stg"          # 환경 변수
+  },
+  # search-certificate-internal = {
+  #   mode                      = "import"                   # create or import
+  #   domain_name               = "internal.ymkim.shop"      # ACM 인증서를 발급할 도메인명
+  #   subject_alternative_names = null                       # 추가로 인증서에 포함시킬 도메인 목록
+  #   dns_validate              = false                      # ACM 인증서 발급 방법(DNS, EMAIL) 소유권 검증
+  #   certificate_body          = file("certs/internal.crt") # 인증서 본문
+  #   private_key               = file("certs/internal.key") # 개인키
+  #   certificate_chain         = file("certs/chain.crt")    # 인증서 체인
+  #   env                       = "stg"                      # 환경 변수
+  # }
+}
+
+########################################
+# Route53 설정
+########################################
+route53_zone_settings = {
+  search-certificate = {
+    mode = "create"
+    name = "ymkim.shop"
+  },
+  # search-certificate-internal = { # Route53 생성 안함
+  #   mode = "import"
+  #   name = "internal.ymkim.shop"
+  # }
 }
 
 ########################################
