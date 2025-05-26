@@ -107,3 +107,25 @@ output "debug_storage_module" {
   }
   sensitive = true
 }
+
+output "codedeploy" {
+  description = "codedeploy 모듈 변수 확인"
+  value = {
+    codedeploy_app               = var.codedeploy_app
+    codedeploy_deployment_group  = var.codedeploy_deployment_group
+    codedeploy_deployment_config = var.codedeploy_deployment_config
+
+    service_role_arn = module.iam.iam_role_arns["search-codedeploy-service-role"]
+
+    alb_listener_arn = module.elb.alb_listener_arn
+  }
+  sensitive = true
+}
+
+output "acm" {
+  description = "acm 모듈 변수 확인"
+  value = {
+    acm_certificate = var.acm_certificate
+  }
+  sensitive = true
+}
