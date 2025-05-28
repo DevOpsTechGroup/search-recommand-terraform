@@ -846,82 +846,82 @@ ec2_instance = {
       }
     ]
   }
-  # search-opensearch-test-sn01 = { // single node
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-test-sn01"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = "install_os_sn01.sh"
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-  #   private_ip                  = "172.21.10.220"
+  search-opensearch-test-sn01 = { // single node
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-sn01"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = "install_os_sn01.sh"
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.220"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["search-opensearch-test-*"]
-  #     }
-  #   ]
-  # },
-  # search-batch-embed-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-batch-embed-test-01"
-  #   security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-embed-key"
-  #   private_ip                  = "172.21.10.230"
+    owners = "self"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["search-opensearch-test-*"]
+      }
+    ]
+  },
+  search-embed-test-01 = {
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-embed-test-01"
+    security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
+    env                         = "stg"
+    script_file_name            = ""
+    iam_instance_profile        = ""
+    key_pair_name               = "search-embed-key"
+    private_ip                  = "172.21.10.230"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 20
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 20
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["x86_64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["*-embedding-server-*"]
-  #     }
-  #   ]
-  # },
+    owners = "self"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["x86_64"]
+      },
+      {
+        name   = "name"
+        values = ["*-embedding-server-*"]
+      }
+    ]
+  },
   # search-opensearch-test-c01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
