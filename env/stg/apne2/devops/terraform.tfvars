@@ -808,20 +808,20 @@ ecs_security_group_id = {}
 # EC2 설정
 ########################################
 ec2_instance = {
-  search-opensearch-test-sn01 = { // single node
-    ami_type                    = "custom"
-    instance_type               = "t4g.large"
+  search-jenkins-test-01 = {
+    ami_type                    = "offer"
+    instance_type               = "t3.medium"
     subnet_type                 = "public"
     availability_zones          = "ap-northeast-2a"
     associate_public_ip_address = true
     disable_api_termination     = true
-    instance_name               = "search-opensearch-test-sn01"
-    security_group_name         = "search-opensearch-sg"
+    instance_name               = "search-jenkins-test-01"
+    security_group_name         = "search-jenkins-sg"
     env                         = "stg"
-    script_file_name            = "install_os_sn01.sh"
+    script_file_name            = "install_jenkins.sh"
     iam_instance_profile        = ""
-    key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.10.220"
+    key_pair_name               = "search-jenkins-test"
+    private_ip                  = "172.21.10.240"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -830,46 +830,12 @@ ec2_instance = {
       encrypted             = false
     }
 
-    owners = "self"
+    owners = "amazon"
     filter = [
-      {
-        name   = "virtualization-type"
-        values = ["hvm"]
-      },
-      {
-        name   = "architecture"
-        values = ["arm64"]
-      },
       {
         name   = "name"
-        values = ["search-opensearch-test-*"]
-      }
-    ]
-  },
-  search-batch-embed-test-01 = {
-    ami_type                    = "custom"
-    instance_type               = "t3.large"
-    subnet_type                 = "public"
-    availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
-    disable_api_termination     = true
-    instance_name               = "search-batch-embed-test-01"
-    security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
-    env                         = "stg"
-    script_file_name            = ""
-    iam_instance_profile        = ""
-    key_pair_name               = "search-embed-key"
-    private_ip                  = "172.21.10.230"
-
-    root_block_device = {
-      volume_type           = "gp3"
-      volume_size           = 20
-      delete_on_termination = true
-      encrypted             = false
-    }
-
-    owners = "self"
-    filter = [
+        values = ["al2023-ami-*-x86_64"]
+      },
       {
         name   = "virtualization-type"
         values = ["hvm"]
@@ -877,13 +843,85 @@ ec2_instance = {
       {
         name   = "architecture"
         values = ["x86_64"]
-      },
-      {
-        name   = "name"
-        values = ["*-embedding-server-*"]
       }
     ]
-  },
+  }
+  # search-opensearch-test-sn01 = { // single node
+  #   ami_type                    = "custom"
+  #   instance_type               = "t4g.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-opensearch-test-sn01"
+  #   security_group_name         = "search-opensearch-sg"
+  #   env                         = "stg"
+  #   script_file_name            = "install_os_sn01.sh"
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-opensearch-key"
+  #   private_ip                  = "172.21.10.220"
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 30
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["arm64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["search-opensearch-test-*"]
+  #     }
+  #   ]
+  # },
+  # search-embed-test-01 = {
+  #   ami_type                    = "custom"
+  #   instance_type               = "t3.large"
+  #   subnet_type                 = "public"
+  #   availability_zones          = "ap-northeast-2a"
+  #   associate_public_ip_address = true
+  #   disable_api_termination     = true
+  #   instance_name               = "search-embed-test-01"
+  #   security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
+  #   env                         = "stg"
+  #   script_file_name            = ""
+  #   iam_instance_profile        = ""
+  #   key_pair_name               = "search-embed-key"
+  #   private_ip                  = "172.21.10.230"
+
+  #   root_block_device = {
+  #     volume_type           = "gp3"
+  #     volume_size           = 20
+  #     delete_on_termination = true
+  #     encrypted             = false
+  #   }
+
+  #   owners = "self"
+  #   filter = [
+  #     {
+  #       name   = "virtualization-type"
+  #       values = ["hvm"]
+  #     },
+  #     {
+  #       name   = "architecture"
+  #       values = ["x86_64"]
+  #     },
+  #     {
+  #       name   = "name"
+  #       values = ["*-embedding-server-*"]
+  #     }
+  #   ]
+  # },
   # search-opensearch-test-c01 = {
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
@@ -1151,54 +1189,24 @@ ec2_instance = {
   #       values = ["al2023-ami-*-x86_64"]
   #     }
   #   ]
-  # },
-  # search-jenkins-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-jenkins-test-01"
-  #   security_group_name         = "search-jenkins-sg"
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-jenkins-key"
-  #   private_ip                  = "172.21.10.240"
-
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
-
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "name"
-  #       values = ["search-jenkins-test-01-*"]
-  #     }
-  #   ]
   # }
 }
 
 # EC2 보안그룹 생성
 ec2_security_group = {
-  search-opensearch-sg = {
-    security_group_name = "search-opensearch-sg"
-    description         = "search-recommand vector opensearch ec2"
+  search-jenkins-sg = {
+    security_group_name = "search-jenkins-sg"
+    description         = "search-recommand vector jenkins ec2"
     env                 = "stg"
   },
-  search-embed-sg = {
-    security_group_name = "search-embed-sg"
-    description         = "search-recommand elasticsearch ec2"
-    env                 = "stg"
-  },
-  # search-jenkins-sg = {
-  #   security_group_name = "search-jenkins-sg"
-  #   description         = "search-recommand vector jenkins ec2"
+  # search-opensearch-sg = {
+  #   security_group_name = "search-opensearch-sg"
+  #   description         = "search-recommand vector opensearch ec2"
+  #   env                 = "stg"
+  # },
+  # search-embed-sg = {
+  #   security_group_name = "search-embed-sg"
+  #   description         = "search-recommand elasticsearch ec2"
   #   env                 = "stg"
   # },
   # search-atlantis-sg = {
@@ -1212,16 +1220,16 @@ ec2_security_group_id = {}
 
 # EC2 key pair
 ec2_key_pair = {
-  search-opensearch-key = {
-    name = "search-opensearch-key"
+  search-jenkins-test = {
+    name = "search-jenkins-test"
     env  = "stg"
   },
-  search-embed-key = {
-    name = "search-embed-key"
-    env  = "stg"
-  },
-  # search-jenkins-key = {
-  #   name = "search-jenkins-key"
+  # search-opensearch-key = {
+  #   name = "search-opensearch-key"
+  #   env  = "stg"
+  # },
+  # search-embed-key = {
+  #   name = "search-embed-key"
   #   env  = "stg"
   # },
   # search-atlantis-key = {
