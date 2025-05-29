@@ -818,7 +818,7 @@ ec2_instance = {
     instance_name               = "search-jenkins-test-01"
     security_group_name         = "search-jenkins-sg"
     env                         = "stg"
-    script_file_name            = "install_jenkins.sh"
+    script_file_name            = ""
     iam_instance_profile        = ""
     key_pair_name               = "search-jenkins-test"
     private_ip                  = "172.21.10.240"
@@ -830,12 +830,8 @@ ec2_instance = {
       encrypted             = false
     }
 
-    owners = "amazon"
+    owners = "self"
     filter = [
-      {
-        name   = "name"
-        values = ["al2023-ami-*-x86_64"]
-      },
       {
         name   = "virtualization-type"
         values = ["hvm"]
@@ -843,6 +839,10 @@ ec2_instance = {
       {
         name   = "architecture"
         values = ["x86_64"]
+      },
+      {
+        name   = "name"
+        values = ["search-jenkins-test-01-stg-*"]
       }
     ]
   }
@@ -856,7 +856,7 @@ ec2_instance = {
   #   instance_name               = "search-opensearch-test-sn01"
   #   security_group_name         = "search-opensearch-sg"
   #   env                         = "stg"
-  #   script_file_name            = "install_os_sn01.sh"
+  #   script_file_name            = ""
   #   iam_instance_profile        = ""
   #   key_pair_name               = "search-opensearch-key"
   #   private_ip                  = "172.21.10.220"
@@ -868,21 +868,21 @@ ec2_instance = {
   #     encrypted             = false
   #   }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["arm64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["search-opensearch-test-*"]
-  #     }
-  #   ]
+  # owners = "self"
+  # filter = [
+  #   {
+  #     name   = "virtualization-type"
+  #     values = ["hvm"]
+  #   },
+  #   {
+  #     name   = "architecture"
+  #     values = ["arm64"]
+  #   },
+  #   {
+  #     name   = "name"
+  #     values = ["search-opensearch-test-*"]
+  #   }
+  # ]
   # },
   # search-embed-test-01 = {
   #   ami_type                    = "custom"
