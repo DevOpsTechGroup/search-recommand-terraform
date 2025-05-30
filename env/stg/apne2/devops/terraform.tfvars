@@ -809,6 +809,7 @@ ecs_security_group_id = {}
 ########################################
 ec2_instance = {
   search-jenkins-test-01 = {
+    create_yn                   = true
     ami_type                    = "offer"
     instance_type               = "t3.medium"
     subnet_type                 = "public"
@@ -846,83 +847,86 @@ ec2_instance = {
       }
     ]
   }
-  # search-opensearch-test-sn01 = { // single node
-  #   ami_type                    = "custom"
-  #   instance_type               = "t4g.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-opensearch-test-sn01"
-  #   security_group_name         = "search-opensearch-sg"
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-opensearch-key"
-  #   private_ip                  = "172.21.10.220"
+  search-opensearch-test-sn01 = { // single node
+    create_yn                   = true
+    ami_type                    = "custom"
+    instance_type               = "t4g.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-opensearch-test-sn01"
+    security_group_name         = "search-opensearch-sg"
+    env                         = "stg"
+    script_file_name            = ""
+    iam_instance_profile        = ""
+    key_pair_name               = "search-opensearch-key"
+    private_ip                  = "172.21.10.220"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 30
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 30
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  # owners = "self"
-  # filter = [
-  #   {
-  #     name   = "virtualization-type"
-  #     values = ["hvm"]
-  #   },
-  #   {
-  #     name   = "architecture"
-  #     values = ["arm64"]
-  #   },
-  #   {
-  #     name   = "name"
-  #     values = ["search-opensearch-test-*"]
-  #   }
-  # ]
-  # },
-  # search-embed-test-01 = {
-  #   ami_type                    = "custom"
-  #   instance_type               = "t3.large"
-  #   subnet_type                 = "public"
-  #   availability_zones          = "ap-northeast-2a"
-  #   associate_public_ip_address = true
-  #   disable_api_termination     = true
-  #   instance_name               = "search-embed-test-01"
-  #   security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
-  #   env                         = "stg"
-  #   script_file_name            = ""
-  #   iam_instance_profile        = ""
-  #   key_pair_name               = "search-embed-key"
-  #   private_ip                  = "172.21.10.230"
+    owners = "self"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["arm64"]
+      },
+      {
+        name   = "name"
+        values = ["search-opensearch-test-*"]
+      }
+    ]
+  },
+  search-embed-test-01 = {
+    create_yn                   = true
+    ami_type                    = "custom"
+    instance_type               = "t3.large"
+    subnet_type                 = "public"
+    availability_zones          = "ap-northeast-2a"
+    associate_public_ip_address = true
+    disable_api_termination     = true
+    instance_name               = "search-embed-test-01"
+    security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
+    env                         = "stg"
+    script_file_name            = ""
+    iam_instance_profile        = ""
+    key_pair_name               = "search-embed-key"
+    private_ip                  = "172.21.10.230"
 
-  #   root_block_device = {
-  #     volume_type           = "gp3"
-  #     volume_size           = 20
-  #     delete_on_termination = true
-  #     encrypted             = false
-  #   }
+    root_block_device = {
+      volume_type           = "gp3"
+      volume_size           = 20
+      delete_on_termination = true
+      encrypted             = false
+    }
 
-  #   owners = "self"
-  #   filter = [
-  #     {
-  #       name   = "virtualization-type"
-  #       values = ["hvm"]
-  #     },
-  #     {
-  #       name   = "architecture"
-  #       values = ["x86_64"]
-  #     },
-  #     {
-  #       name   = "name"
-  #       values = ["*-embedding-server-*"]
-  #     }
-  #   ]
-  # },
+    owners = "self"
+    filter = [
+      {
+        name   = "virtualization-type"
+        values = ["hvm"]
+      },
+      {
+        name   = "architecture"
+        values = ["x86_64"]
+      },
+      {
+        name   = "name"
+        values = ["*-embedding-server-*"]
+      }
+    ]
+  },
   # search-opensearch-test-c01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -961,6 +965,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-c02 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -999,6 +1004,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-c03 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -1037,6 +1043,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1075,6 +1082,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d02 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1113,6 +1121,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d03 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1151,6 +1160,7 @@ ec2_instance = {
   #   ]
   # },
   # search-atlantis-01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t2.micro" #TODO: Volume size가 너무 작아서 올리다가 뻑남 + shell script 수정 필요 + atlantis 테스트 필요
   #   subnet_type                 = "public"
@@ -1199,16 +1209,16 @@ ec2_security_group = {
     description         = "search-recommand vector jenkins ec2"
     env                 = "stg"
   },
-  # search-opensearch-sg = {
-  #   security_group_name = "search-opensearch-sg"
-  #   description         = "search-recommand vector opensearch ec2"
-  #   env                 = "stg"
-  # },
-  # search-embed-sg = {
-  #   security_group_name = "search-embed-sg"
-  #   description         = "search-recommand elasticsearch ec2"
-  #   env                 = "stg"
-  # },
+  search-opensearch-sg = {
+    security_group_name = "search-opensearch-sg"
+    description         = "search-recommand vector opensearch ec2"
+    env                 = "stg"
+  },
+  search-embed-sg = {
+    security_group_name = "search-embed-sg"
+    description         = "search-recommand elasticsearch ec2"
+    env                 = "stg"
+  },
   # search-atlantis-sg = {
   #   security_group_name = "search-atlantis-sg"
   #   description         = "search-recommand atlantis ec2"
@@ -1224,14 +1234,14 @@ ec2_key_pair = {
     name = "search-jenkins-test"
     env  = "stg"
   },
-  # search-opensearch-key = {
-  #   name = "search-opensearch-key"
-  #   env  = "stg"
-  # },
-  # search-embed-key = {
-  #   name = "search-embed-key"
-  #   env  = "stg"
-  # },
+  search-opensearch-key = {
+    name = "search-opensearch-key"
+    env  = "stg"
+  },
+  search-embed-key = {
+    name = "search-embed-key"
+    env  = "stg"
+  },
   # search-atlantis-key = {
   #   name = "search-atlantis-key"
   #   env  = "stg"
