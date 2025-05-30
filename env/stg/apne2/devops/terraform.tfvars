@@ -809,6 +809,7 @@ ecs_security_group_id = {}
 ########################################
 ec2_instance = {
   search-jenkins-test-01 = {
+    create_yn                   = true
     ami_type                    = "offer"
     instance_type               = "t3.medium"
     subnet_type                 = "public"
@@ -818,7 +819,7 @@ ec2_instance = {
     instance_name               = "search-jenkins-test-01"
     security_group_name         = "search-jenkins-sg"
     env                         = "stg"
-    script_file_name            = "install_jenkins.sh"
+    script_file_name            = ""
     iam_instance_profile        = ""
     key_pair_name               = "search-jenkins-test"
     private_ip                  = "172.21.10.240"
@@ -830,12 +831,8 @@ ec2_instance = {
       encrypted             = false
     }
 
-    owners = "amazon"
+    owners = "self"
     filter = [
-      {
-        name   = "name"
-        values = ["al2023-ami-*-x86_64"]
-      },
       {
         name   = "virtualization-type"
         values = ["hvm"]
@@ -843,10 +840,15 @@ ec2_instance = {
       {
         name   = "architecture"
         values = ["x86_64"]
+      },
+      {
+        name   = "name"
+        values = ["search-jenkins-test-01-stg-*"]
       }
     ]
   }
   search-opensearch-test-sn01 = { // single node
+    create_yn                   = true
     ami_type                    = "custom"
     instance_type               = "t4g.large"
     subnet_type                 = "public"
@@ -856,7 +858,7 @@ ec2_instance = {
     instance_name               = "search-opensearch-test-sn01"
     security_group_name         = "search-opensearch-sg"
     env                         = "stg"
-    script_file_name            = "install_os_sn01.sh"
+    script_file_name            = ""
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
     private_ip                  = "172.21.10.220"
@@ -885,6 +887,7 @@ ec2_instance = {
     ]
   },
   search-embed-test-01 = {
+    create_yn                   = true
     ami_type                    = "custom"
     instance_type               = "t3.large"
     subnet_type                 = "public"
@@ -923,6 +926,7 @@ ec2_instance = {
     ]
   },
   # search-opensearch-test-c01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -961,6 +965,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-c02 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -999,6 +1004,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-c03 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.medium"
   #   subnet_type                 = "public"
@@ -1037,6 +1043,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1075,6 +1082,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d02 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1113,6 +1121,7 @@ ec2_instance = {
   #   ]
   # },
   # search-opensearch-test-d03 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t4g.large"
   #   subnet_type                 = "public"
@@ -1151,6 +1160,7 @@ ec2_instance = {
   #   ]
   # },
   # search-atlantis-01 = {
+  #   create_yn                   = true
   #   ami_type                    = "custom"
   #   instance_type               = "t2.micro" #TODO: Volume size가 너무 작아서 올리다가 뻑남 + shell script 수정 필요 + atlantis 테스트 필요
   #   subnet_type                 = "public"

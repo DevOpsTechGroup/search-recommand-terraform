@@ -445,6 +445,7 @@ variable "ecs_security_group_id" {
 variable "ec2_instance" {
   description = "EC2 생성 정보 입력"
   type = map(object({
+    create_yn                   = string
     ami_type                    = string # 기존 AMI or 신규 생성 EC2 여부 지정
     instance_type               = string
     subnet_type                 = string
