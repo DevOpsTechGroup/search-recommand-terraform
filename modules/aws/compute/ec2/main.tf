@@ -28,7 +28,9 @@ data "aws_key_pair" "key_pair" {
 
 # EC2 instance
 resource "aws_instance" "ec2" {
-  for_each = var.ec2_instance
+  for_each = {
+    for key, value in var.ec2_instance : key => value if value.create_yn
+  }
 
   ami                  = data.aws_ami.amazon_ami[each.key].id # AMI 지정(offer: 기존 AWS 제공, custom: 생성한 AMI)
   instance_type        = each.value.instance_type             # EC2 인스턴스 타입 지정
