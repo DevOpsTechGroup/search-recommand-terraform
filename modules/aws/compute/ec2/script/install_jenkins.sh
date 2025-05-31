@@ -36,6 +36,7 @@ sudo dnf install curl -y
 sudo systemctl start docker # Docker 데몬 수동으로 시작
 sudo systemctl enable docker # 시스템 부팅 시 Docker 데몬 자동 시작
 sudo usermod -aG docker ec2-user # ec2-user가 Docker 명령어를 sudo 없이 실행할 수 있도록 권한 부여
+sudo usermod -aG docker jenkins
 sudo yum install java-17-amazon-corretto -y
 java -version
 echo
