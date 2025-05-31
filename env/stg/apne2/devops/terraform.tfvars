@@ -297,6 +297,13 @@ ecr_repository = {
     ecr_image_tag_mutability = "IMMUTABLE"          # image 버전 고유하게 관리할지 여부
     ecr_scan_on_push         = false                # PUSH Scan 여부
     ecr_force_delete         = false
+  },
+  search-jenkins-pipeline = {
+    ecr_repository_name      = "search-jenkins-pipeline" # 리포지토리명
+    env                      = "stg"                     # ECR 개발환경
+    ecr_image_tag_mutability = "IMMUTABLE"               # image 버전 고유하게 관리할지 여부
+    ecr_scan_on_push         = false                     # PUSH Scan 여부
+    ecr_force_delete         = false
   }
 }
 
@@ -335,6 +342,36 @@ iam_custom_role = {
     }
     env = "stg"
   },
+  # Atlantis EC2 Service Role
+  search-atlantis-deploy-role = {
+    name    = "search-atlantis-deploy-role"
+    version = "2012-10-17"
+    arn     = ""
+    statement = {
+      Sid    = "EC2AtlantisRole"
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }
+    env = "stg"
+  },
+  # Jenkins Deploy Role
+  search-jenkins-deploy-role = {
+    name    = "search-jenkins-deploy-role"
+    version = "2012-10-17"
+    arn     = ""
+    statement = {
+      Sid    = "JenkinsDeployRole"
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }
+    env = "stg"
+  },
   # ECS Auto Scaling Role
   search-ecs-auto-scaling-role = {
     name    = "search-ecs-auto-scaling-role"
@@ -365,21 +402,6 @@ iam_custom_role = {
     }
     env = "stg"
   },
-  # Atlantis EC2 Service Role
-  search-ec2-atlantis-role = {
-    name    = "search-ec2-atlantis-role"
-    version = "2012-10-17"
-    arn     = ""
-    statement = {
-      Sid    = "EC2AtlantisRole"
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Principal = {
-        Service = "ec2.amazonaws.com"
-      }
-    }
-    env = "stg"
-  }
 }
 
 # 사용자가 생성하는 정책(Policy)
@@ -429,13 +451,13 @@ iam_custom_policy = {
     }
     env = "stg"
   },
-  # Atlantis Main Policy
-  search-atlantis-main-policy = {
-    name        = "search-atlantis-main-policy"
-    description = "Policy for ec2 atlantis role"
+  # Atlantis Policy
+  search-atlantis-deploy-policy = {
+    name        = "search-atlantis-deploy-policy"
+    description = "Policy for atlantis role"
     version     = "2012-10-17"
     statement = {
-      Sid = "EC2AtlantisMainPolicy"
+      Sid = "AtlantisMainPolicy"
       Action = [
         "ec2:*",
         "iam:*",
@@ -461,24 +483,31 @@ iam_custom_policy = {
     }
     env = "stg"
   },
-  # Atlantis SSM KMS Policy
-  search-atlantis-ssm-kms-policy = {
-    name        = "search-atlantis-ssm-kms-policy"
-    description = "Policy for ec2 atlantis role"
+  # Jenkins ECS Policy - Jenkins를 통해 ECS Service 생성 등등의 작업 수행
+  search-jenkins-deploy-policy = {
+    name        = "search-jenkins-deploy-policy"
+    description = "Policy for Jenkins to deploy ECS and ECR"
     version     = "2012-10-17"
     statement = {
-      Sid = "EC2AtlantisSSMKMSPolicy"
+      Sid = "JenkinsDeployMainPolicy"
       Action = [
-        "ssm:GetParameter",
-        "ssm:GetParameters",
-        "ssm:GetParametersByPath",
-        "kms:Decrypt"
+        "ecs:UpdateService",
+        "ecs:Describe*",
+        "ecs:List*",
+        "ecr:GetAuthorizationToken",
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:PutImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:DescribeRepositories",
+        "ecr:ListImages",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "iam:PassRole"
       ]
-      Effect = "Allow"
-      Resource = [
-        "arn:aws:ssm:ap-northeast-2:842675972665:parameter/search-recommand/stg/*",
-        "arn:aws:kms:ap-northeast-2:842675972665:key/*"
-      ]
+      Effect   = "Allow"
+      Resource = ["*"] # 추후 범위 좁히기
     }
     env = "stg"
   }
@@ -511,6 +540,14 @@ iam_policy_attachment = {
     role_name   = "search-ecs-task-exec-role"
     policy_name = "search-ecs-task-exec-policy"
   },
+  search-atlantis-deploy-role = {
+    role_name   = "search-atlantis-deploy-role"
+    policy_name = "search-atlantis-deploy-policy"
+  },
+  search-jenkins-deploy-role = {
+    role_name   = "search-jenkins-deploy-role"
+    policy_name = "search-jenkins-deploy-policy"
+  },
   search-ecs-auto-scaling-role = {
     role_name   = "search-ecs-auto-scaling-role"
     policy_name = "search-ecs-auto-scaling-policy" # iam_managed_policy 변수의 KEY로 지정
@@ -519,17 +556,17 @@ iam_policy_attachment = {
     role_name   = "search-codedeploy-service-role"
     policy_name = "search-codedeploy-service-role" # iam_managed_policy 변수의 KEY로 지정
   },
-  search-atlantis-role = {
-    role_name   = "search-ec2-atlantis-role"
-    policy_name = "search-atlantis-main-policy"
-  }
 }
 
 # IAM 인스턴스 프로파일(instance profile)
 iam_instance_profile = {
   search-atlantis-instance-profile = {
-    name      = "search-ec2-atlantis-instance-profile"
-    role_name = "search-ec2-atlantis-role"
+    name      = "search-atlantis-instance-profile"
+    role_name = "search-atlantis-deploy-role"
+  },
+  search-jenkins-instance-profile = {
+    name      = "search-jenkins-instance-profile"
+    role_name = "search-jenkins-deploy-role"
   }
 }
 
@@ -820,7 +857,7 @@ ec2_instance = {
     security_group_name         = "search-jenkins-sg"
     env                         = "stg"
     script_file_name            = ""
-    iam_instance_profile        = ""
+    iam_instance_profile        = "search-jenkins-instance-profile"
     key_pair_name               = "search-jenkins-test"
     private_ip                  = "172.21.10.240"
 
@@ -843,7 +880,7 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["search-jenkins-test-01-stg-*"]
+        values = ["search-jenkins-test-01-*"]
       }
     ]
   }
