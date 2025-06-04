@@ -297,13 +297,6 @@ ecr_repository = {
     ecr_image_tag_mutability = "IMMUTABLE"          # image 버전 고유하게 관리할지 여부
     ecr_scan_on_push         = false                # PUSH Scan 여부
     ecr_force_delete         = false
-  },
-  search-jenkins-pipeline = {
-    ecr_repository_name      = "search-jenkins-pipeline" # 리포지토리명
-    env                      = "stg"                     # ECR 개발환경
-    ecr_image_tag_mutability = "IMMUTABLE"               # image 버전 고유하게 관리할지 여부
-    ecr_scan_on_push         = false                     # PUSH Scan 여부
-    ecr_force_delete         = false
   }
 }
 
