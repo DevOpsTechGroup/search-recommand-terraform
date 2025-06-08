@@ -112,7 +112,7 @@ locals {
       {
         security_group_name = "search-opensearch-api-sg"
         type                = "ingress"
-        description         = "opensearch api security group ingress rule"
+        description         = "opensearch api service port"
         from_port           = 8443
         to_port             = 8443
         protocol            = "tcp"
@@ -129,7 +129,7 @@ locals {
       {
         security_group_name = "search-opensearch-api-sg"
         type                = "ingress"
-        description         = "opensearch api security group ingress rule"
+        description         = "opensearch api vpc endpoint port"
         from_port           = 443
         to_port             = 443
         protocol            = "tcp"
@@ -146,7 +146,7 @@ locals {
       {
         type                = "ingress"
         security_group_name = "search-embed-api-sg"
-        description         = "embed api security group ingress rule"
+        description         = "embed api service port"
         from_port           = 8000
         to_port             = 8000
         protocol            = "tcp"
@@ -163,7 +163,7 @@ locals {
       {
         security_group_name = "search-embed-api-sg"
         type                = "ingress"
-        description         = "embed api security group ingress rule"
+        description         = "embed api vpc endpoint port"
         from_port           = 443
         to_port             = 443
         protocol            = "tcp"
@@ -215,14 +215,29 @@ locals {
       {
         security_group_name = "search-opensearch-api-sg"
         type                = "egress"
-        description         = "opensearch api security group egress rule"
+        description         = "opensearch api vpc endpoint port"
         from_port           = 9200
         to_port             = 9200
         protocol            = "tcp"
         cidr_ipv4 = [
-          "172.21.10.0/24",
-          "172.21.20.0/24",
-          "172.21.30.0/24"
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24"
+        ]
+        security_groups = null
+        env             = "stg"
+      },
+      {
+        security_group_name = "search-opensearch-api-sg"
+        type                = "egress"
+        description         = "opensearch api vpc endpoint port"
+        from_port           = 443
+        to_port             = 443
+        protocol            = "tcp"
+        cidr_ipv4 = [
+          "172.21.50.0/24",
+          "172.21.60.0/24",
+          "172.21.70.0/24"
         ]
         security_groups = null
         env             = "stg"
@@ -232,7 +247,7 @@ locals {
       {
         security_group_name = "search-embed-api-sg"
         type                = "egress"
-        description         = "embed api security group egress rule"
+        description         = "embed api vpc endpoint port"
         from_port           = 0
         to_port             = 0
         protocol            = "-1"
@@ -281,7 +296,8 @@ locals {
           "192.30.252.0/22",
           "185.199.108.0/22",
           "140.82.112.0/20",
-          "143.55.64.0/20"
+          "143.55.64.0/20",
+          "211.234.181.0/24"
         ]
         security_groups = null
         env             = "stg"
@@ -296,7 +312,9 @@ locals {
         cidr_ipv4 = [
           "172.21.0.0/16",
           "220.75.180.0/24",
-          "39.118.148.0/24"
+          "39.118.148.0/24",
+          "211.234.197.0/24",
+          "211.234.181.0/24"
         ]
         security_groups = null
         env             = "stg"
