@@ -487,6 +487,7 @@ iam_custom_policy = {
         "ecs:UpdateService",
         "ecs:Describe*",
         "ecs:List*",
+        "ecs:RegisterTaskDefinition",
         "ecr:GetAuthorizationToken",
         "ecr:BatchCheckLayerAvailability",
         "ecr:PutImage",
