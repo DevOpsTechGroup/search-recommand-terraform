@@ -879,7 +879,7 @@ ec2_instance = {
     ]
   }
   search-opensearch-test-sn01 = { // single node
-    create_yn                   = false
+    create_yn                   = true
     ami_type                    = "custom"
     instance_type               = "t4g.large"
     subnet_type                 = "public"
@@ -918,7 +918,7 @@ ec2_instance = {
     ]
   },
   search-embed-test-01 = {
-    create_yn                   = false
+    create_yn                   = true
     ami_type                    = "custom"
     instance_type               = "t3.large"
     subnet_type                 = "public"
