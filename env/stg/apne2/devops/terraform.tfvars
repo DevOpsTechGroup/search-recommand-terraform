@@ -840,7 +840,7 @@ ecs_security_group_id = {}
 ########################################
 ec2_instance = {
   search-jenkins-test-01 = {
-    create_yn                   = true
+    create_yn                   = false
     ami_type                    = "offer"
     instance_type               = "t3.medium"
     subnet_type                 = "public"
