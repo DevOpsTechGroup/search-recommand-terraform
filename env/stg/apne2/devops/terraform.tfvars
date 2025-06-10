@@ -952,7 +952,7 @@ ec2_instance = {
       },
       {
         name   = "name"
-        values = ["*-embedding-server-*"]
+        values = ["search-embed-test-*"]
       }
     ]
   },
