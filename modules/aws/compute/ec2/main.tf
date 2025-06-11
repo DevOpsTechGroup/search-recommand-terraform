@@ -38,6 +38,8 @@ resource "aws_instance" "ec2" {
   iam_instance_profile = try(var.iam_instance_profile[each.value.iam_instance_profile].name, null)
 
   # EC2가 위치할 VPC Subnet 영역 지정(az-2a, az-2b)
+  # element: 
+  # index: A라는 list에서, B가 몇번째에 위치한 list인지?
   subnet_id = lookup(
     {
       "public"  = try(element(var.public_subnet_ids, index(var.availability_zones, each.value.availability_zones)), var.public_subnet_ids[0]),
@@ -74,8 +76,7 @@ resource "aws_instance" "ec2" {
   }
 
   lifecycle {
-    create_before_destroy = true
-    ignore_changes        = all # Terraform EC2 생성 후 전부 무시
+    ignore_changes = all
   }
 
   tags = merge(var.tags, {

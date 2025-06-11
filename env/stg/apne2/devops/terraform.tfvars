@@ -882,9 +882,9 @@ ec2_instance = {
     create_yn                   = true
     ami_type                    = "custom"
     instance_type               = "t4g.large"
-    subnet_type                 = "public"
+    subnet_type                 = "private"
     availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     disable_api_termination     = true
     instance_name               = "search-opensearch-test-sn01"
     security_group_name         = "search-opensearch-sg"
@@ -892,7 +892,7 @@ ec2_instance = {
     script_file_name            = ""
     iam_instance_profile        = ""
     key_pair_name               = "search-opensearch-key"
-    private_ip                  = "172.21.10.220"
+    private_ip                  = "172.21.50.220"
 
     root_block_device = {
       volume_type           = "gp3"
@@ -918,12 +918,12 @@ ec2_instance = {
     ]
   },
   search-embed-test-01 = {
-    create_yn                   = true
+    create_yn                   = false
     ami_type                    = "custom"
     instance_type               = "t3.large"
-    subnet_type                 = "public"
+    subnet_type                 = "private"
     availability_zones          = "ap-northeast-2a"
-    associate_public_ip_address = true
+    associate_public_ip_address = false
     disable_api_termination     = true
     instance_name               = "search-embed-test-01"
     security_group_name         = "search-embed-sg" # TODO: EC2 -> ECS로 전환 필요
